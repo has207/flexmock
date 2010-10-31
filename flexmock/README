@@ -1,0 +1,9 @@
+Current Status: Not Ready For Use
+
+FlexMock provides a mock/stub library for Python.
+It is inspired by Ruby's FlexMock, however I'm not going for
+feature parity with the Ruby version and instead focusing on
+core functionality.
+
+Why another mock library for Python? Because the ones out there now
+make me cringe after having used Ruby and its nice testing tools.
