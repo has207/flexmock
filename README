@@ -1,4 +1,4 @@
-Current Status: NOT READY FOR USE
+Current Status: ~Alpha~
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however I'm not going for
@@ -7,3 +7,37 @@ core functionality.
 
 Why another mock library for Python? Because the ones out there now
 make me cringe after having used Ruby and its nice testing tools.
+
+Currently supports some of the basic FlexMock expectations and super-rough
+unittest.TestCase integration.
+
+The code is currently really rough all over, but it should improve as I
+do some refactoring. This was my first time developing something using
+TDD, so the code isn't pretty (yet) but everything here is tested (yay!).
+
+Simple Usage:
+
+from flexmock import FlexMock
+
+# Make a stub
+
+mock = FlexMock('temp')
+mock.should_receive('method_foo').and_return('value_bar')
+
+# Now make that stub into a mock by adding an required expectation
+
+mock.times(1)
+
+# Make a partial stub or mock for all instances of a class
+
+class User: pass
+FlexMock(User)
+User.should_receive('method_foo').and_return('value_bar')
+user = User()
+user.method_foo()
+
+# Make a partial mock based on class instance
+
+class Group: pass
+group = Group()
+FlexMock(group).should_receive('get_name').and_return('group_name')
