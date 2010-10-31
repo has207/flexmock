@@ -5,6 +5,10 @@ class TestFlexMock(unittest.TestCase):
   def setUp(self):
     self.mock = FlexMock('temp')
 
+  def tearDown(self):
+    self._flexmock_expectations = []
+    unittest.TestCase.tearDown(self)
+
   def test_flexmock_should_create_mock_object_from_string(self):
     mock = FlexMock('temp')
     self.assertEqual(FlexMock, mock.__class__)
@@ -64,7 +68,7 @@ class TestFlexMock(unittest.TestCase):
   
   def test_flexmock_should_set_expectation_call_numbers(self):
     self.mock.should_receive('method_foo').times(1)
-    self.assertFalse(self.mock.verify_expectations())
+    self.assertRaises(MethodNotCalled, self.mock.verify_expectations)
     self.mock.method_foo()
     self.assertTrue(self.mock.verify_expectations())
   
@@ -101,10 +105,12 @@ class TestFlexMock(unittest.TestCase):
     user = User()
     self.assertEqual('mike', user.get_name())
 
-  def test_flexmock_should_match_expectations_against_classes(self):
+  def test_flexmock_should_match_expectations_against_builtin_classes(self):
     self.mock.should_receive('method_foo').with_args(str).and_return('got a string')
+    self.mock.should_receive('method_foo').with_args(int).and_return('got an int')
     self.assertEqual('got a string', self.mock.method_foo('string!'))
-    self.assertRaises(InvalidMethodSignature, self.mock.method_foo, 1)
+    self.assertEqual('got an int', self.mock.method_foo(23))
+    self.assertRaises(InvalidMethodSignature, self.mock.method_foo, 2.0)
 
   def test_flexmock_should_match_expectations_against_user_defined_classes(self):
     class Foo:
@@ -112,6 +118,20 @@ class TestFlexMock(unittest.TestCase):
     self.mock.should_receive('method_foo').with_args(Foo).and_return('got a Foo')
     self.assertEqual('got a Foo', self.mock.method_foo(Foo()))
     self.assertRaises(InvalidMethodSignature, self.mock.method_foo, 1)
+
+  def test_flexmock_configures_global_expectations(self):
+    self.assertFalse(self._flexmock_expectations)
+    self.mock.should_receive('method_foo')
+    self.assertTrue(self._flexmock_expectations)
+
+  def test_flexmock_teardown_verifies_mocks(self):
+    saved_teardown = self.tearDown
+    def tearDown(self):
+      unittest.TestCase.tearDown(self)
+    self.tearDown = tearDown
+    self.mock.should_receive('verify_expectations').times(1)
+    self.assertRaises(MethodNotCalled, self.tearDown, self)
+    self.tearDown = saved_teardown
 
 
 if __name__ == '__main__':

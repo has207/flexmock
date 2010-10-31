@@ -1,6 +1,12 @@
 import new
+import unittest
+
 
 class InvalidMethodSignature(Exception):
+  pass
+
+
+class MethodNotCalled(Exception):
   pass
 
 
@@ -33,9 +39,15 @@ class Expectation(object):
     self.exception = exception
     return self
 
+  def verify(self):
+    if self.times_called == self.expected_calls:
+      return True
+    else:
+      raise MethodNotCalled(self.method)
 
 class FlexMock(object):
   def __init__(self, object_class_or_name):
+
     if isinstance(object_class_or_name, str):
       self.name = object_class_or_name
       self.mock = self
@@ -47,6 +59,13 @@ class FlexMock(object):
       object_class_or_name._expectations = []
       self.mock = object_class_or_name
     self._expectations = []
+    unittest.TestCase._flexmock_expectations = self._expectations
+    saved_teardown = unittest.TestCase.tearDown
+    def unittest_teardown(self):
+      for expectation in self._flexmock_expectations: 
+        expectation.verify()
+      saved_teardown(self)
+    unittest.TestCase.tearDown = unittest_teardown
 
   def should_receive(self, method, args=None, return_value=None):
     def mock_method(self, *kargs, **kwargs):
@@ -107,5 +126,5 @@ class FlexMock(object):
   def verify_expectations(self):
     all_good = True
     for expectation in self._expectations:
-      all_good = expectation.times_called == expectation.expected_calls
+      all_good = expectation.verify()
     return all_good
