@@ -13,6 +13,7 @@ class MethodNotCalled(Exception):
 class Expectation(object):
   def __init__(self, name, mock, args=None, return_value=None):
     self.method = name
+    self.original_method = None
     self.args = args
     self.return_value = return_value
     self.times_called = 0
@@ -35,27 +36,42 @@ class Expectation(object):
     self.expected_calls = number
     return self
 
+  def once(self):
+    return self.times(1)
+
+  def twice(self):
+    return self.times(2)
+
+  def never(self):
+    return self.times(0)
+
   def and_raise(self, exception):
     self.exception = exception
     return self
 
   def verify(self):
+    if not self.expected_calls:
+      return True
     if self.times_called == self.expected_calls:
       return True
     else:
       raise MethodNotCalled(self.method)
 
+  def reset(self):
+    if self.original_method:
+      setattr(self.mock, self.method, self.original_method)
+    else:
+      del(self.mock.__dict__[self.method])
+
+
 class FlexMock(object):
   def __init__(self, object_class_or_name):
-
     if isinstance(object_class_or_name, str):
       self.name = object_class_or_name
       self.mock = self
     else:
       object_class_or_name.should_receive = self.should_receive
       object_class_or_name.expectations = self.expectations
-      object_class_or_name.times_called = self.times_called
-      object_class_or_name.verify_expectations = self.verify_expectations
       object_class_or_name._expectations = []
       self.mock = object_class_or_name
     self._expectations = []
@@ -64,6 +80,8 @@ class FlexMock(object):
     def unittest_teardown(self):
       for expectation in self._flexmock_expectations: 
         expectation.verify()
+        expectation.reset()
+      self._flexmock_expectations = []
       saved_teardown(self)
     unittest.TestCase.tearDown = unittest_teardown
 
@@ -89,6 +107,8 @@ class FlexMock(object):
       expectation = Expectation(method, self.mock, args, return_value)
     self._expectations.append(expectation)
     method_instance = mock_method
+    if hasattr(self.mock, method):
+      expectation.original_method = getattr(self.mock, method)
     setattr(self.mock, method, new.instancemethod(
         method_instance, self.mock, self.__class__))
     return expectation
@@ -122,9 +142,3 @@ class FlexMock(object):
       return expectation.times_called
     else:
       return None
-
-  def verify_expectations(self):
-    all_good = True
-    for expectation in self._expectations:
-      all_good = expectation.verify()
-    return all_good

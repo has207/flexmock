@@ -30,12 +30,12 @@ class TestFlexMock(unittest.TestCase):
   
   def test_flexmock_should_keep_track_of_method_calls(self):
     self.mock.should_receive('method_foo').and_return('value_bar')
-    self.assertEqual(None, self.mock.times_called('nonexistent_method'))
-    self.assertEqual(0, self.mock.times_called('method_foo'))
+    expectation = self.mock.expectations('method_foo')
+    self.assertEqual(0, expectation.times_called)
     self.mock.method_foo()
-    self.assertEqual(1, self.mock.times_called('method_foo'))
+    self.assertEqual(1, expectation.times_called)
     self.mock.method_foo()
-    self.assertEqual(2, self.mock.times_called('method_foo'))
+    self.assertEqual(2, expectation.times_called)
   
   def test_flexmock_expectations_returns_all(self):
     self.assertEqual([], self.mock.expectations())
@@ -68,9 +68,10 @@ class TestFlexMock(unittest.TestCase):
   
   def test_flexmock_should_set_expectation_call_numbers(self):
     self.mock.should_receive('method_foo').times(1)
-    self.assertRaises(MethodNotCalled, self.mock.verify_expectations)
+    expectation = self.mock.expectations('method_foo')
+    self.assertRaises(MethodNotCalled, expectation.verify)
     self.mock.method_foo()
-    self.assertTrue(self.mock.verify_expectations())
+    self.assertTrue(expectation.verify())
   
   def test_flexmock_should_check_raised_exceptions(self):
     class FakeException(Exception):
@@ -125,13 +126,67 @@ class TestFlexMock(unittest.TestCase):
     self.assertTrue(self._flexmock_expectations)
 
   def test_flexmock_teardown_verifies_mocks(self):
-    saved_teardown = self.tearDown
-    def tearDown(self):
-      unittest.TestCase.tearDown(self)
-    self.tearDown = tearDown
     self.mock.should_receive('verify_expectations').times(1)
-    self.assertRaises(MethodNotCalled, self.tearDown, self)
-    self.tearDown = saved_teardown
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
+  def test_flexmock_teardown_does_not_verify_stubs(self):
+    self.mock.should_receive('verify_expectations')
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_preserves_stubbed_object_methods_between_tests(self):
+    class User:
+      def get_name(self):
+        return 'mike'
+    user = User()
+    FlexMock(user).should_receive('get_name').and_return('john')
+    self.assertEqual('john', user.get_name())
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('mike', user.get_name())
+
+  def test_flexmock_preserves_stubbed_class_methods_between_tests(self):
+    class User:
+      def get_name(self):
+        return 'mike'
+    user = User()
+    FlexMock(User).should_receive('get_name').and_return('john')
+    self.assertEqual('john', user.get_name())
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('mike', user.get_name())
+
+  def test_flexmock_removes_new_stubs_from_objects_after_tests(self):
+    class User: pass
+    user = User()
+    FlexMock(user).should_receive('get_name').and_return('john')
+    self.assertEqual('john', user.get_name())
+    unittest.TestCase.tearDown(self)
+    self.assertFalse(hasattr(user, 'get_name'))
+
+  def test_flexmock_removes_new_stubs_from_classes_after_tests(self):
+    class User: pass
+    user = User()
+    FlexMock(User).should_receive('get_name').and_return('john')
+    self.assertEqual('john', user.get_name())
+    unittest.TestCase.tearDown(self)
+    self.assertFalse(hasattr(user, 'get_name'))
+
+  def test_flexmock_treats_once_as_times_one(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').once()
+    expectation = self.mock.expectations('method_foo')
+    self.assertEqual(1, expectation.expected_calls)
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
+  def test_flexmock_treats_twice_as_times_two(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').twice()
+    expectation = self.mock.expectations('method_foo')
+    self.assertEqual(2, expectation.expected_calls)
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
+  def test_flexmock_works_with_never(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').never()
+    expectation = self.mock.expectations('method_foo')
+    self.assertEqual(1, expectation.expected_calls)
+    self.assertEqual(True, expectation.expected_calls)
+    unittest.TestCase.tearDown(self)
 
 
 if __name__ == '__main__':
