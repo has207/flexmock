@@ -184,8 +184,7 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_works_with_never(self):
     self.mock.should_receive('method_foo').and_return('value_bar').never()
     expectation = self.mock.expectations('method_foo')
-    self.assertEqual(1, expectation.expected_calls)
-    self.assertEqual(True, expectation.expected_calls)
+    self.assertEqual(0, expectation.expected_calls)
     unittest.TestCase.tearDown(self)
 
 
