@@ -15,7 +15,8 @@ class TestFlexMock(unittest.TestCase):
   
   def test_flexmock_should_add_expectations(self):
     self.mock.should_receive('method_foo')
-    self.assertTrue('method_foo' in [x.method for x in self.mock.expectations()])
+    self.assertTrue('method_foo' in
+        [x.method for x in self.mock._flexmock_expectations_])
   
   def test_flexmock_should_return_value(self):
     self.mock.should_receive('method_foo').and_return('value_bar')
@@ -30,7 +31,7 @@ class TestFlexMock(unittest.TestCase):
   
   def test_flexmock_should_keep_track_of_method_calls(self):
     self.mock.should_receive('method_foo').and_return('value_bar')
-    expectation = self.mock.expectations('method_foo')
+    expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(0, expectation.times_called)
     self.mock.method_foo()
     self.assertEqual(1, expectation.times_called)
@@ -38,16 +39,19 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual(2, expectation.times_called)
   
   def test_flexmock_expectations_returns_all(self):
-    self.assertEqual([], self.mock.expectations())
+    self.assertEqual([], self.mock._flexmock_expectations_)
     self.mock.should_receive('method_foo')
-    self.assertEqual(1, len(self.mock.expectations()))
+    self.assertEqual(1, len(self.mock._flexmock_expectations_))
   
   def test_flexmock_expectations_returns_named_expectation(self):
     self.mock.should_receive('method_foo')
-    self.assertEqual('method_foo', self.mock.expectations('method_foo').method)
+    self.assertEqual(
+        'method_foo',
+        self.mock._get_flexmock_expectations('method_foo').method)
   
   def test_flexmock_expectations_returns_none_if_not_found(self):
-    self.assertEqual(None, self.mock.expectations('method_foo'))
+    self.assertEqual(
+        None, self.mock._get_flexmock_expectations('method_foo'))
   
   def test_flexmock_should_check_parameters(self):
     self.mock.should_receive('method_foo').with_args('bar').and_return(1)
@@ -62,13 +66,16 @@ class TestFlexMock(unittest.TestCase):
     self.mock.method_foo('bar')
     self.mock.method_foo('bar')
     self.mock.method_foo('baz')
-    self.assertEqual(0, self.mock.times_called('method_foo', 'foo'))
-    self.assertEqual(2, self.mock.times_called('method_foo', 'bar'))
-    self.assertEqual(1, self.mock.times_called('method_foo', 'baz'))
+    expectation = self.mock._get_flexmock_expectations('method_foo', ('foo',))
+    self.assertEqual(0, expectation.times_called)
+    expectation = self.mock._get_flexmock_expectations('method_foo', ('bar',))
+    self.assertEqual(2, expectation.times_called)
+    expectation = self.mock._get_flexmock_expectations('method_foo', ('baz',))
+    self.assertEqual(1, expectation.times_called)
   
   def test_flexmock_should_set_expectation_call_numbers(self):
     self.mock.should_receive('method_foo').times(1)
-    expectation = self.mock.expectations('method_foo')
+    expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertRaises(MethodNotCalled, expectation.verify)
     self.mock.method_foo()
     self.assertTrue(expectation.verify())
@@ -78,7 +85,8 @@ class TestFlexMock(unittest.TestCase):
       pass
     self.mock.should_receive('method_foo').and_raise(FakeException)
     self.assertRaises(FakeException, self.mock.method_foo)
-    self.assertEqual(1, self.mock.expectations('method_foo').times_called)
+    self.assertEqual(1, self.mock._get_flexmock_expectations(
+        'method_foo').times_called)
 
   def test_expectation_should_return_mock(self):
     self.assertEqual(self.mock, self.mock.should_receive('method_foo').mock)
@@ -171,21 +179,30 @@ class TestFlexMock(unittest.TestCase):
 
   def test_flexmock_treats_once_as_times_one(self):
     self.mock.should_receive('method_foo').and_return('value_bar').once()
-    expectation = self.mock.expectations('method_foo')
+    expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(1, expectation.expected_calls)
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
   def test_flexmock_treats_twice_as_times_two(self):
     self.mock.should_receive('method_foo').and_return('value_bar').twice()
-    expectation = self.mock.expectations('method_foo')
+    expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(2, expectation.expected_calls)
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
   def test_flexmock_works_with_never(self):
     self.mock.should_receive('method_foo').and_return('value_bar').never()
-    expectation = self.mock.expectations('method_foo')
+    expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(0, expectation.expected_calls)
     unittest.TestCase.tearDown(self)
+
+  def test_flexmock_get_flexmock_expectations_should_work_with_method(self):
+    self.mock.should_receive('method_foo').with_args('value_bar')
+    self.assertTrue(self.mock._get_flexmock_expectations('method_foo'))
+    
+  def test_flexmock_get_flexmock_expectations_should_work_with_args(self):
+    self.mock.should_receive('method_foo').with_args('value_bar')
+    self.assertTrue(
+        self.mock._get_flexmock_expectations('method_foo', ('value_bar',)))
 
 
 if __name__ == '__main__':

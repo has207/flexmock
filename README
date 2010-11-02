@@ -26,11 +26,7 @@ doesn't support, or implement some things in a different way.
 Why another mock library for Python? Because the ones out there now
 make me cringe after having used Ruby and its nice testing tools.
 
-The code is currently really rough all over, but it should improve as I
-do some refactoring. This was my first time developing something using
-TDD, so the code isn't pretty (yet) but everything here is tested (yay!).
-
-Simple Usage:
+Sample Usage:
 
 from flexmock import FlexMock
 
