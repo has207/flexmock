@@ -147,6 +147,22 @@ class FlexMock(object):
     except:
       pass
 
+  @staticmethod
+  def _convert_to_new_style(cls):
+    class NewClass(cls, object): pass
+    NewClass._flexmock_old_class_ = cls
+    if '__new__' not in dir(cls):
+      return NewClass 
+    else:
+      return cls
+
+  @staticmethod
+  def _restore_class(cls):
+    if '_flexmock_old_class_' in dir(cls):
+      return cls._flexmock_old_class_
+    else:
+      return cls
+
   def __create_mock_method(self, method):
     def mock_method(self, *kargs, **kwargs):
       arguments = kargs

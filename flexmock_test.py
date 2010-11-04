@@ -204,6 +204,33 @@ class TestFlexMock(unittest.TestCase):
     self.assertTrue(
         self.mock._get_flexmock_expectations('method_foo', ('value_bar',)))
 
+  def test_flexmock_should_convert_old_style_class_to_new_style(self):
+    class User: pass
+    self.assertFalse('__new__' in dir(User))
+    User = FlexMock._convert_to_new_style(User)
+    self.assertTrue('__new__' in dir(User))
+
+  def test_flexmock_should_not_convert_new_style_class(self):
+    class User(object): pass
+    self.assertTrue('__new__' in dir(User))
+    saved_user = User
+    User = FlexMock._convert_to_new_style(User)
+    self.assertTrue(User is saved_user)
+
+  def test_flexmock_should_revert_class_to_original(self):
+    class User: pass
+    saved_user = User
+    User = FlexMock._convert_to_new_style(User)
+    self.assertFalse(User is saved_user)
+    User = FlexMock._restore_class(User)
+    self.assertTrue(User is saved_user)
+
+  def test_flexmock_should_not_revert_new_style_class(self):
+    class User(object): pass
+    saved_user = User
+    User = FlexMock._restore_class(User)
+    self.assertTrue(User is saved_user)
+
 
 if __name__ == '__main__':
     unittest.main()
