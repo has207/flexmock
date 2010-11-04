@@ -22,7 +22,7 @@ class Expectation(object):
     self.mock = mock
 
   def __str__(self):
-    return '%s(%s) -> %s' % (self.method, self.args, self.return_value)
+    return '%s%s -> %s' % (self.method, self.args, self.return_value)
 
   def with_args(self, args):
     self.args = (args,)
@@ -84,6 +84,9 @@ class FlexMock(object):
     self._flexmock_expectations_.append(expectation)
     self._add_expectation_to_object(expectation, method)
     return expectation
+
+  def new_instances(self, **kwargs):
+    pass  #TODO(herman): implement
 
   def mock(self, obj):
     obj.should_receive = self.should_receive
@@ -154,5 +157,5 @@ class FlexMock(object):
           raise expectation.exception
         return expectation.return_value
       else:
-        raise InvalidMethodSignature(str(arguments))
+        raise InvalidMethodSignature('%s%s' % (method, str(arguments)))
     return mock_method
