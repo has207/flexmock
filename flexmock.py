@@ -64,13 +64,20 @@ class Expectation(object):
           (self.method, self.expected_calls, self.times_called))
 
   def reset(self):
+    if isinstance(self.mock, FlexMock):
+      return  # no need to worry about mock objects
     if self.original_method:
       setattr(self.mock, self.method, self.original_method)
     elif self.method in self.mock.__dict__:
       delattr(self.mock, self.method)
+    for attr in FlexMock.UPDATED_ATTRS:
+      if hasattr(self.mock, attr):
+        delattr(self.mock, attr)
 
 
 class FlexMock(object):
+  UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectations',
+                   '_flexmock_expectations', '_mock', 'new_instances']
   def __init__(self, object_class_or_name, force=False):
     if isinstance(object_class_or_name, str):
       self.name = object_class_or_name
@@ -95,16 +102,17 @@ class FlexMock(object):
     expectation = self._retrieve_or_create_expectation(
         method, None, return_value)
     self._flexmock_expectations_.append(expectation)
-    expectation.original_method = getattr(self._mock, method)
+    if not hasattr(expectation, 'original_method'):
+      expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
     return expectation
 
   def mock(self, obj, force=False):
-    for attr in ['should_receive', '_get_flexmock_expectations',
-                 '_flexmock_expectations', '_mock']:
+    for attr in self.UPDATED_ATTRS:
       if (hasattr(obj, attr)) and not force:
         raise AlreadyMocked
     obj.should_receive = self.should_receive
+    obj.new_instances = self.new_instances
     obj._get_flexmock_expectations = self._get_flexmock_expectations
     obj._flexmock_expectations_ = []
     self._mock = obj
