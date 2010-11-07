@@ -1,30 +1,34 @@
-Current Status: ~Alpha~
+Current Status: ~Beta~
 
 SUPPORTED:
-- unittest integration
-- should_receive
-- with_args ('with' is reserved in python)
-- times (as well as once, twice and never aliases)
-- and_return
-- and_raise
-- should_receive
-- new_instances
+- unittest.TestCase integration
+- automatic expectation checking on tearDown
+- should_receive()
+- with_args() ['with' is reserved in python]
+- times() [as well as once, twice and never aliases]
+- and_return()
+- and_raise()
+- new_instances()
 
 TODO:
+- pydoc
 - at_least, at_most
 - ordered
-- proxying?
-- other test runner integration
+- proxying/spying
+- parameter shortcuts for with_args/and_return
+- other test runner integration (nose?)
+- custom exception checks missing in unittest.TestCase
+
+TESTED WITH:
+- python 2.5 on OSX
+- python 3.1.2 on OSX
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however full feature parity with
 the Ruby version is not a goal. I'm leaving out things in the Ruby
 version that I think are less useful, like the zero_or_more_times()
-expectation for example. I may also add things that Ruby's FlexMock
-doesn't support, or implement some things in a different way.
-
-Why another mock library for Python? Because the ones out there now
-make me cringe after having used Ruby and its nice testing tools.
+expectation for example. I also plan on adding things that Ruby's FlexMock
+doesn't support, and implement certain things in a different way.
 
 Sample Usage:
 
