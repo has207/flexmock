@@ -1,4 +1,4 @@
-import new
+import types
 import unittest
 
 
@@ -7,6 +7,10 @@ class InvalidMethodSignature(Exception):
 
 
 class MethodNotCalled(Exception):
+  pass
+
+
+class AlreadyMocked(Exception):
   pass
 
 
@@ -63,16 +67,16 @@ class Expectation(object):
     if self.original_method:
       setattr(self.mock, self.method, self.original_method)
     elif self.method in self.mock.__dict__:
-      del(self.mock.__dict__[self.method])
+      delattr(self.mock, self.method)
 
 
 class FlexMock(object):
-  def __init__(self, object_class_or_name):
+  def __init__(self, object_class_or_name, force=False):
     if isinstance(object_class_or_name, str):
       self.name = object_class_or_name
       self._mock = self
     else:
-      self.mock(object_class_or_name)
+      self.mock(object_class_or_name, force=force)
     self._flexmock_expectations_ = []
     self._update_unittest_teardown()
 
@@ -86,9 +90,20 @@ class FlexMock(object):
     return expectation
 
   def new_instances(self, **kwargs):
-    pass  #TODO(herman): implement
+    method = '__new__'
+    return_value = kwargs.get('returns', None) 
+    expectation = self._retrieve_or_create_expectation(
+        method, None, return_value)
+    self._flexmock_expectations_.append(expectation)
+    expectation.original_method = getattr(self._mock, method)
+    self._mock.__new__ = self.__create_new_method(return_value)
+    return expectation
 
-  def mock(self, obj):
+  def mock(self, obj, force=False):
+    for attr in ['should_receive', '_get_flexmock_expectations',
+                 '_flexmock_expectations', '_mock']:
+      if (hasattr(obj, attr)) and not force:
+        raise AlreadyMocked
     obj.should_receive = self.should_receive
     obj._get_flexmock_expectations = self._get_flexmock_expectations
     obj._flexmock_expectations_ = []
@@ -121,8 +136,8 @@ class FlexMock(object):
     method_instance = self.__create_mock_method(method)
     if hasattr(self._mock, method):
       expectation.original_method = getattr(self._mock, method)
-    setattr(self._mock, method, new.instancemethod(
-        method_instance, self._mock, self.__class__))
+    setattr(self._mock, method, types.MethodType(
+        method_instance, self._mock))
 
   def _get_flexmock_expectations(self, name=None, args=None):
     if name:
@@ -175,3 +190,9 @@ class FlexMock(object):
       else:
         raise InvalidMethodSignature('%s%s' % (method, str(arguments)))
     return mock_method
+
+  def __create_new_method(self, return_value):
+    @staticmethod
+    def new(cls):
+      return return_value
+    return new

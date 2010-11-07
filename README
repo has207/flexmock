@@ -8,12 +8,12 @@ SUPPORTED:
 - and_return
 - and_raise
 - should_receive
+- new_instances
 
 TODO:
 - at_least, at_most
 - ordered
 - proxying?
-- module level mocking?
 - other test runner integration
 
 FlexMock provides a mock/stub library for Python.
@@ -30,14 +30,20 @@ Sample Usage:
 
 from flexmock import FlexMock
 
-# Make a stub
+# Make a mock object
 
 mock = FlexMock('temp')
 mock.should_receive('method_foo').and_return('value_foo')
 
-# Make a mock by adding a required expectation
+# Add some automatically checked expectations
 
-mock.should_receive('method_bar').and_return('value_bar').once()
+mock.should_receive('method_bar').and_return('bar').once()
+
+# Stub out a method on an existing object
+
+class User: pass
+user = User()
+FlexMock(user).should_receive('get_name').and_return('name')
 
 # Make a partial stub or mock for all instances of a class
 
@@ -52,3 +58,8 @@ user.method_foo()
 class Group: pass
 group = Group()
 FlexMock(group).should_receive('get_name').and_return('group_name')
+
+# Override __new__ method on a class and return fake instances
+
+class Group: pass
+FlexMock(Group).new_instances(returns='foo')
