@@ -20,7 +20,9 @@ TODO:
 - custom exception checks missing in unittest.TestCase
 
 TESTED WITH:
+- python 2.4.4 on OSX
 - python 2.5 on OSX
+- python 2.6 on OSX
 - python 3.1.2 on OSX
 
 FlexMock provides a mock/stub library for Python.
