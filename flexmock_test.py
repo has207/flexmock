@@ -75,6 +75,12 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual(1, self.mock._get_flexmock_expectations(
         'method_foo').times_called)
 
+  def test_flexmock_should_match_any_args_by_default(self):
+    self.mock.should_receive('method_foo').and_return('bar')
+    self.assertEqual('bar', self.mock.method_foo())
+    self.assertEqual('bar', self.mock.method_foo(1))
+    self.assertEqual('bar', self.mock.method_foo('foo', 'bar'))
+
   def test_expectation_dot_mock_should_return_mock(self):
     self.assertEqual(self.mock, self.mock.should_receive('method_foo').mock)
 

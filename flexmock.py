@@ -152,10 +152,9 @@ class FlexMock(object):
       expectation = None
       for e in self._flexmock_expectations_:
         if e.method == name:
-          if args:
-            if self._match_args(args, e.args):
-              expectation = e
-          else:
+          if e.args == (None,) or not args:
+            expectation = e
+          elif self._match_args(args, e.args):
             expectation = e
       return expectation
     else:

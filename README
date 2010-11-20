@@ -61,7 +61,9 @@ user.method_foo()
 
 class Group: pass
 group = Group()
-FlexMock(group).should_receive('get_name').and_return('group_name')
+FlexMock(group)
+group.should_receive('get_name').and_return('group_name')
+group.should_receive('get_member').and_return([]).once()
 
 # Override __new__ method on a class and return fake instances
 
