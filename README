@@ -9,13 +9,14 @@ SUPPORTED:
 - and_return()
 - and_raise()
 - new_instances()
+- parameter shortcuts for with_args/and_return
 
 TODO:
-- pydoc
+- new_instances support for old style classes
+- ignoring specific args while matching others
 - at_least, at_most
 - ordered
 - proxying/spying
-- parameter shortcuts for with_args/and_return
 - other test runner integration (nose?)
 - custom exception checks missing in unittest.TestCase
 
@@ -32,7 +33,55 @@ version that I think are less useful, like the zero_or_more_times()
 expectation for example. I also plan on adding things that Ruby's FlexMock
 doesn't support, and implement certain things in a different way.
 
-Sample Usage:
+DEFINITIONS:
+
+Stub -- fake object that returns a canned value
+Mock -- fake object that returns a canned value and has an expectation, i.e.
+        includes a built-in assertion
+
+EXPECTATION MATCHING:
+
+Creating an expectation with no arguments will by default match all arguments,
+including no arguments.
+
+-- that is --
+
+FlexMock(foo).should_receive('method_bar').and_return('bar')
+
+-- will be matched by --
+
+foo.method_bar()
+>> 'bar'
+foo.method_bar('foo')
+>> 'bar'
+foo.method_bar('foo', 'bar')
+>> 'bar'
+
+You can also override the default match with another expectation for the same method.
+
+-- that is --
+
+FlexMock(foo).should_receive('method_bar').and_return('bar')
+FlexMock(foo).should_receive('method_bar').with_args('foo').and_return('foo')
+
+-- so now --
+
+foo.method_bar()
+>> 'bar'
+foo.method_bar('foo', 'bar')
+>> 'bar'
+
+-- but --
+
+foo.method_bar('foo')
+>> 'foo'
+
+The order of the expectations being defined is significant, with later
+expectations having higher precedene than previous ones. Which means that if
+you reversed the order of the example expectations above the more specific
+expectation would never be matched.
+
+SAMPLE USAGE:
 
 from flexmock import FlexMock
 
@@ -51,21 +100,22 @@ class User: pass
 user = User()
 FlexMock(user).should_receive('get_name').and_return('name')
 
-# Make a partial stub or mock for all instances of a class
+# Stub out a method for all instances of a class
 
 class User: pass
 FlexMock(User)
 User.should_receive('method_foo').and_return('value_bar')
 user = User()
 user.method_foo()
+>> 'value_bar'
 
 # Make a partial mock based on class instance
 
 class Group: pass
 group = Group()
 FlexMock(group)
-group.should_receive('get_name').and_return('group_name')
-group.should_receive('get_member').and_return([]).once()
+group.should_receive('get_name').and_return('group_name')  # stub
+group.should_receive('get_member').and_return([]).once()  # mock
 
 # Override __new__ method on a class and return fake instances
 

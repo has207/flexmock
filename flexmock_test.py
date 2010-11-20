@@ -12,6 +12,14 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_should_create_mock_object_from_string(self):
     mock = FlexMock('temp')
     self.assertEqual(FlexMock, mock.__class__)
+    self.assertEqual('temp', mock.name)
+  
+  def test_flexmock_should_create_mock_object_from_dict(self):
+    mock = FlexMock('temp', foo='foo', bar='bar')
+    self.assertEqual(FlexMock, mock.__class__)
+    self.assertEqual('temp', mock.name)
+    self.assertEqual('foo', mock.foo)
+    self.assertEqual('bar', mock.bar)
   
   def test_flexmock_should_add_expectations(self):
     self.mock.should_receive('method_foo')
@@ -23,6 +31,13 @@ class TestFlexMock(unittest.TestCase):
     self.mock.should_receive('method_bar').and_return('value_baz')
     self.assertEqual('value_bar', self.mock.method_foo())
     self.assertEqual('value_baz', self.mock.method_bar())
+
+  def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
+    class Foo: pass
+    foo = Foo()
+    FlexMock(foo, method1='returning 1', method2='returning 2')
+    self.assertEqual('returning 1', foo.method1())
+    self.assertEqual('returning 2', foo.method2())
   
   def test_flexmock_expectations_returns_all(self):
     self.assertEqual([], self.mock._flexmock_expectations_)
@@ -77,7 +92,7 @@ class TestFlexMock(unittest.TestCase):
 
   def test_flexmock_should_match_any_args_by_default(self):
     self.mock.should_receive('method_foo').and_return('bar')
-    self.mock.should_receive('method_foo').with_args('baz').and_return('baz')
+    self.mock.should_receive('method_foo', args=('baz',), return_value='baz')
     self.assertEqual('bar', self.mock.method_foo())
     self.assertEqual('bar', self.mock.method_foo(1))
     self.assertEqual('bar', self.mock.method_foo('foo', 'bar'))
@@ -216,7 +231,7 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_get_flexmock_expectations_should_work_with_args(self):
     self.mock.should_receive('method_foo').with_args('value_bar')
     self.assertTrue(
-        self.mock._get_flexmock_expectations('method_foo', ('value_bar',)))
+        self.mock._get_flexmock_expectations('method_foo', 'value_bar'))
 
   def test_flexmock_should_convert_old_style_class_to_new_style(self):
     class User: pass
@@ -255,6 +270,13 @@ class TestFlexMock(unittest.TestCase):
     user = User()
     FlexMock(user)
     FlexMock(user, force=True)
+
+  #def test_flexmock_should_mock_new_instances_of_old_style_classes(self):
+  #  class User(): pass
+  #  class Group(): pass
+  #  user = User()
+  #  FlexMock(Group).new_instances(returns=user)
+  #  self.assertTrue(user is Group())
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
