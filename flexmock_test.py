@@ -77,9 +77,11 @@ class TestFlexMock(unittest.TestCase):
 
   def test_flexmock_should_match_any_args_by_default(self):
     self.mock.should_receive('method_foo').and_return('bar')
+    self.mock.should_receive('method_foo').with_args('baz').and_return('baz')
     self.assertEqual('bar', self.mock.method_foo())
     self.assertEqual('bar', self.mock.method_foo(1))
     self.assertEqual('bar', self.mock.method_foo('foo', 'bar'))
+    self.assertEqual('baz', self.mock.method_foo('baz'))
 
   def test_expectation_dot_mock_should_return_mock(self):
     self.assertEqual(self.mock, self.mock.should_receive('method_foo').mock)
@@ -211,10 +213,6 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual(0, expectation.expected_calls)
     unittest.TestCase.tearDown(self)
 
-  def test_flexmock_get_flexmock_expectations_should_work_with_method(self):
-    self.mock.should_receive('method_foo').with_args('value_bar')
-    self.assertTrue(self.mock._get_flexmock_expectations('method_foo'))
-    
   def test_flexmock_get_flexmock_expectations_should_work_with_args(self):
     self.mock.should_receive('method_foo').with_args('value_bar')
     self.assertTrue(

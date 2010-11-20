@@ -148,20 +148,18 @@ class FlexMock(object):
         method_instance, self._mock))
 
   def _get_flexmock_expectations(self, name=None, args=None):
+    if args == None:
+      args = ()
     if name:
-      expectation = None
-      for e in self._flexmock_expectations_:
+      for e in reversed(self._flexmock_expectations_):
         if e.method == name:
-          if e.args == (None,) or not args:
-            expectation = e
-          elif self._match_args(args, e.args):
-            expectation = e
-      return expectation
+          if self._match_args(args, e.args):
+            return e
     else:
       return self._flexmock_expectations_
 
   def _match_args(self, given_args, expected_args):
-    if given_args == expected_args:
+    if given_args == expected_args or expected_args == (None,):
       return True
     try:
       if len(given_args) == 1 and isinstance(given_args[0], expected_args[0]):
