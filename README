@@ -11,15 +11,6 @@ SUPPORTED:
 - new_instances()
 - parameter shortcuts for with_args/and_return
 
-TODO:
-- new_instances support for old style classes
-- ignoring specific args while matching others
-- at_least, at_most
-- ordered
-- proxying/spying
-- other test runner integration (nose?)
-- custom exception checks missing in unittest.TestCase
-
 TESTED WITH:
 - python 2.4.4 on OSX
 - python 2.5 on OSX
