@@ -33,91 +33,10 @@ version that I think are less useful, like the zero_or_more_times()
 expectation for example. I also plan on adding things that Ruby's FlexMock
 doesn't support, and implement certain things in a different way.
 
-DEFINITIONS:
+DOCUMENTATION:
 
-Stub -- fake object that returns a canned value
-Mock -- fake object that returns a canned value and has an expectation, i.e.
-        includes a built-in assertion
+Usage documentation is available on the github wiki:
 
-EXPECTATION MATCHING:
+https://github.com/has207/flexmock/wiki/Documentation
 
-Creating an expectation with no arguments will by default match all arguments,
-including no arguments.
-
--- that is --
-
-FlexMock(foo).should_receive('method_bar').and_return('bar')
-
--- will be matched by --
-
-foo.method_bar()
->> 'bar'
-foo.method_bar('foo')
->> 'bar'
-foo.method_bar('foo', 'bar')
->> 'bar'
-
-You can also override the default match with another expectation for the same method.
-
--- that is --
-
-FlexMock(foo).should_receive('method_bar').and_return('bar')
-FlexMock(foo).should_receive('method_bar').with_args('foo').and_return('foo')
-
--- so now --
-
-foo.method_bar()
->> 'bar'
-foo.method_bar('foo', 'bar')
->> 'bar'
-
--- but --
-
-foo.method_bar('foo')
->> 'foo'
-
-The order of the expectations being defined is significant, with later
-expectations having higher precedene than previous ones. Which means that if
-you reversed the order of the example expectations above the more specific
-expectation would never be matched.
-
-SAMPLE USAGE:
-
-from flexmock import FlexMock
-
-# Make a mock object
-
-mock = FlexMock('temp')
-mock.should_receive('method_foo').and_return('value_foo')
-
-# Add some automatically checked expectations
-
-mock.should_receive('method_bar').and_return('bar').once()
-
-# Stub out a method on an existing object
-
-class User: pass
-user = User()
-FlexMock(user).should_receive('get_name').and_return('name')
-
-# Stub out a method for all instances of a class
-
-class User: pass
-FlexMock(User)
-User.should_receive('method_foo').and_return('value_bar')
-user = User()
-user.method_foo()
->> 'value_bar'
-
-# Make a partial mock based on class instance
-
-class Group: pass
-group = Group()
-FlexMock(group)
-group.should_receive('get_name').and_return('group_name')  # stub
-group.should_receive('get_member').and_return([]).once()  # mock
-
-# Override __new__ method on a class and return fake instances
-
-class Group: pass
-FlexMock(Group).new_instances(returns='foo')
+Pydoc is available in docs/index.html
