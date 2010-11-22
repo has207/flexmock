@@ -133,8 +133,7 @@ class FlexMock(object):
 
   You can also do the same thing for all instances of a class by giving the
   FlexMock constructor a class instead of an instance. It's even possible to
-  override new instances created by the class constructor using the
-  new_instances() method.
+  override new instances created by the class constructor.
 
   Various shortcuts are supported, so:
 
@@ -148,7 +147,7 @@ class FlexMock(object):
   """
 
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectations',
-                   '_flexmock_expectations', '_mock', 'new_instances']
+                   '_flexmock_expectations', '_mock']
 
   def __init__(self, object_class_or_name, force=False, **kwargs):
     """FlexMock constructor.
@@ -184,25 +183,21 @@ class FlexMock(object):
     self._add_expectation_to_object(expectation, method)
     return expectation
 
-  def new_instances(self, returns=None):
+  def _new_instances(self, return_value):
     """Overrides creation of new instances of the mocked class.
 
     Args:
-      returns: the object that should be created instead of the default
-
-    Returns:
-      expectation: Expectation object
+      return_value: the object that should be created instead of the default
     """
     if inspect.isclass(self):
       self = self._convert_to_new_style(self)
     method = '__new__'
     expectation = self._retrieve_or_create_expectation(
-        method, None, returns)
+        method, None, return_value)
     self._flexmock_expectations_.append(expectation)
     if not hasattr(expectation, 'original_method'):
       expectation.original_method = getattr(self._mock, method)
-    self._mock.__new__ = self.__create_new_method(returns)
-    return expectation
+    self._mock.__new__ = self.__create_new_method(return_value)
 
   def mock(self, obj, force=False, **kwargs):
     """Puts the provided object or class under mock.
@@ -226,12 +221,15 @@ class FlexMock(object):
       if (hasattr(obj, attr)) and not force:
         raise AlreadyMocked
     obj.should_receive = self.should_receive
-    obj.new_instances = self.new_instances
     obj._get_flexmock_expectations = self._get_flexmock_expectations
     obj._flexmock_expectations_ = []
     self._mock = obj
     for method, return_value in kwargs.items():
       obj.should_receive(method, return_value=return_value)
+    if inspect.isclass(obj) and 'new_instances' in kwargs:
+      self._new_instances(kwargs['new_instances'])
+    expectation = self._retrieve_or_create_expectation(None, (), None)
+    self._flexmock_expectations_.append(expectation)
 
   def _update_unittest_teardown(self):
     unittest.TestCase._flexmock_expectations = self._flexmock_expectations_

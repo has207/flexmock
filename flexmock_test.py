@@ -272,53 +272,35 @@ class TestFlexMock(unittest.TestCase):
     FlexMock(user, force=True)
 
   #def test_flexmock_should_mock_new_instances_of_old_style_classes(self):
-  #  class User(): pass
-  #  class Group(): pass
-  #  user = User()
-  #  FlexMock(Group).new_instances(returns=user)
-  #  self.assertTrue(user is Group())
+    #class User(): pass
+    #class Group(): pass
+    #user = User()
+    #FlexMock(Group, new_instances=user)
+    #self.assertTrue(user is Group())
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
     class Group(object): pass
     user = User()
-    FlexMock(Group).new_instances(returns=user)
+    FlexMock(Group, new_instances=user)
     self.assertTrue(user is Group())
-
-  def test_flexmock_mock_new_instances_should_stub_by_default(self):
-    class User(object): pass
-    class Group(object): pass
-    user = User()
-    FlexMock(Group).new_instances()
-    self.assertTrue(None is Group())
 
   def test_flexmock_should_revert_new_instances_on_teardown(self):
     class User(object): pass
     class Group(object): pass
     user = User()
     group = Group()
-    FlexMock(Group).new_instances(returns=user)
+    FlexMock(Group, new_instances=user)
     self.assertTrue(user is Group())
     unittest.TestCase.tearDown(self)
     self.assertEqual(group.__class__, Group().__class__)
     
-  def test_flexmock_should_revert_new_instances_when_called_twice(self):
-    class User(object): pass
-    class Group(object): pass
-    user = User()
-    group = Group()
-    FlexMock(Group).new_instances(returns=user)
-    self.assertTrue(user is Group())
-    Group.new_instances()
-    unittest.TestCase.tearDown(self)
-    self.assertEqual(group.__class__, Group().__class__)
-
   def test_flexmock_should_cleanup_added_methods_and_attributes(self):
     class Group(object): pass
-    FlexMock(Group).new_instances()
+    FlexMock(Group)
     unittest.TestCase.tearDown(self)
     for method in FlexMock.UPDATED_ATTRS:
-      self.assertFalse(method in dir(Group))
+      self.assertFalse(method in dir(Group), '%s is still in Group' % method)
 
 
 if __name__ == '__main__':
