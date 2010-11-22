@@ -1,4 +1,4 @@
-Current Status: ~Beta~
+Current Status: v0.1
 
 SUPPORTED:
 - unittest.TestCase integration
@@ -8,7 +8,7 @@ SUPPORTED:
 - times() [as well as once, twice and never aliases]
 - and_return()
 - and_raise()
-- new_instances()
+- overriding new instances (on new-style objects)
 - parameter shortcuts for with_args/and_return
 
 TESTED WITH:
