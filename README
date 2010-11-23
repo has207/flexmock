@@ -1,4 +1,4 @@
-Current Status: v0.1
+Current Status: v0.2
 
 SUPPORTED:
 - unittest.TestCase integration
@@ -10,12 +10,6 @@ SUPPORTED:
 - and_raise()
 - overriding new instances (on new-style objects)
 - parameter shortcuts for with_args/and_return
-
-TESTED WITH:
-- python 2.4.4 on OSX
-- python 2.5 on OSX
-- python 2.6 on OSX
-- python 3.1.2 on OSX
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however full feature parity with
@@ -29,3 +23,9 @@ DOCUMENTATION:
 Usage documentation is available on the github wiki:
 
 https://github.com/has207/flexmock/wiki/Documentation
+
+TESTED WITH:
+- python 2.4.4 on OSX
+- python 2.5 on OSX
+- python 2.6 on OSX
+- python 3.1.2 on OSX

@@ -95,8 +95,6 @@ class Expectation(object):
     """Returns the methods overriden by this expectation to their originals."""
     if isinstance(self.mock, FlexMock):
       return  # no need to worry about mock objects
-    if inspect.isclass(self.mock):
-      self.mock = FlexMock._restore_class(self.mock)
     if self.original_method:
       setattr(self.mock, self.method, self.original_method)
     elif self.method in self.mock.__dict__:
@@ -149,21 +147,21 @@ class FlexMock(object):
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectations',
                    '_flexmock_expectations', '_mock']
 
-  def __init__(self, object_class_or_name, force=False, **kwargs):
+  def __init__(self, object_or_class=None, force=False, **kwargs):
     """FlexMock constructor.
     
     Args:
+      object_or_class: object or class to mock
       force: Boolean, see mock() method for explanation
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._flexmock_expectations_ = []
-    if isinstance(object_class_or_name, str):
-      self.name = object_class_or_name
+    if object_or_class is None:
       for attr, value in kwargs.items():
         setattr(self, attr, value)
       self._mock = self
     else:
-      self.mock(object_class_or_name, force=force, **kwargs)
+      self.mock(object_or_class, force=force, **kwargs)
     self._update_unittest_teardown()
 
   def should_receive(self, method, args=None, return_value=None):
@@ -189,8 +187,6 @@ class FlexMock(object):
     Args:
       return_value: the object that should be created instead of the default
     """
-    if inspect.isclass(self):
-      self = self._convert_to_new_style(self)
     method = '__new__'
     expectation = self._retrieve_or_create_expectation(
         method, None, return_value)
@@ -287,20 +283,39 @@ class FlexMock(object):
       pass
 
   @staticmethod
-  def _convert_to_new_style(cls):
-    class NewClass(cls, object): pass
-    NewClass._flexmock_old_class_ = cls
-    if '__new__' not in dir(cls):
+  def convert_to_new_style(klass):
+    """Converts old-style class to new-style.
+
+    This is necessary in order to override new instance creation of old style
+    classes.
+
+    Args:
+      klass: class to convert
+
+    Returns:
+      klass: new style class that inherits from the provided class
+    """
+    class NewClass(klass, object): pass
+    NewClass._flexmock_old_class_ = klass
+    if '__new__' not in dir(klass):
       return NewClass 
     else:
-      return cls
+      return klass
 
   @staticmethod
-  def _restore_class(cls):
-    if '_flexmock_old_class_' in dir(cls):
-      return cls._flexmock_old_class_
+  def restore_class(klass):
+    """Reverts previously converted class to old-style.
+
+    Args:
+      klass: class to revert
+
+    Returns:
+      klass: original class before the conversion
+    """
+    if '_flexmock_old_class_' in dir(klass):
+      return klass._flexmock_old_class_
     else:
-      return cls
+      return klass
 
   def __create_mock_method(self, method):
     def mock_method(self, *kargs, **kwargs):
