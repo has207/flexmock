@@ -199,11 +199,9 @@ class FlexMock(object):
     """
     self._flexmock_expectations_ = []
     if object_or_class is None:
-      for attr, value in kwargs.items():
-        def method(self, *kargs, **kwargs):
-          return value
-        setattr(self, attr, method)
       self._mock = self
+      for attr, value in kwargs.items():
+        self.should_receive(attr, return_value=value)
     else:
       self.mock(object_or_class, force=force, **kwargs)
     self._update_unittest_teardown()

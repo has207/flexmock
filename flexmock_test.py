@@ -16,8 +16,8 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = FlexMock(foo='foo', bar='bar')
     self.assertEqual(FlexMock, mock.__class__)
-    self.assertEqual('foo', mock.foo)
-    self.assertEqual('bar', mock.bar)
+    self.assertEqual('foo', mock.foo())
+    self.assertEqual('bar', mock.bar())
   
   def test_flexmock_should_add_expectations(self):
     self.mock.should_receive('method_foo')
@@ -30,6 +30,11 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual('value_bar', self.mock.method_foo())
     self.assertEqual('value_baz', self.mock.method_bar())
 
+  def test_flexmock_should_accept_shortcuts_for_creating_mock_object(self):
+    mock = FlexMock(method1='returning 1', method2='returning 2')
+    self.assertEqual('returning 1', mock.method1())
+    self.assertEqual('returning 2', mock.method2())
+  
   def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
     class Foo: pass
     foo = Foo()
@@ -38,10 +43,10 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual('returning 2', foo.method2())
   
   def test_flexmock_expectations_returns_all(self):
-    self.assertEqual([], self.mock._flexmock_expectations_)
+    self.assertEqual(1, len(self.mock._flexmock_expectations_))
     self.mock.should_receive('method_foo')
     self.mock.should_receive('method_bar')
-    self.assertEqual(2, len(self.mock._flexmock_expectations_))
+    self.assertEqual(3, len(self.mock._flexmock_expectations_))
   
   def test_flexmock_expectations_returns_named_expectation(self):
     self.mock.should_receive('method_foo')
@@ -160,9 +165,9 @@ class TestFlexMock(unittest.TestCase):
     self.assertRaises(InvalidMethodSignature, self.mock.method_foo, 1)
 
   def test_flexmock_configures_global_expectations_list(self):
-    self.assertFalse(self._flexmock_expectations)
+    self.assertEqual(1, len(self._flexmock_expectations))
     self.mock.should_receive('method_foo')
-    self.assertTrue(self._flexmock_expectations)
+    self.assertEqual(2, len(self._flexmock_expectations))
 
   def test_flexmock_teardown_verifies_mocks(self):
     self.mock.should_receive('verify_expectations').times(1)
