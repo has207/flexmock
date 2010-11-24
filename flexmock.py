@@ -324,41 +324,6 @@ class FlexMock(object):
     except:
       pass
 
-  @staticmethod
-  def convert_to_new_style(klass):
-    """Converts old-style class to new-style.
-
-    This is necessary in order to override new instance creation of old style
-    classes.
-
-    Args:
-      klass: class to convert
-
-    Returns:
-      klass: new style class that inherits from the provided class
-    """
-    class NewClass(klass, object): pass
-    NewClass._flexmock_old_class_ = klass
-    if '__new__' not in dir(klass):
-      return NewClass 
-    else:
-      return klass
-
-  @staticmethod
-  def restore_class(klass):
-    """Reverts previously converted class to old-style.
-
-    Args:
-      klass: class to revert
-
-    Returns:
-      klass: original class before the conversion
-    """
-    if '_flexmock_old_class_' in dir(klass):
-      return klass._flexmock_old_class_
-    else:
-      return klass
-
   def __create_mock_method(self, method):
     def mock_method(self, *kargs, **kwargs):
       arguments = kargs

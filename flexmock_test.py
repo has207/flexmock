@@ -275,32 +275,6 @@ class TestFlexMock(unittest.TestCase):
     self.assertTrue(
         self.mock._get_flexmock_expectations('method_foo', 'value_bar'))
 
-  def test_flexmock_should_convert_old_style_class_to_new_style(self):
-    class User: pass
-    User = FlexMock.convert_to_new_style(User)
-    self.assertTrue('__new__' in dir(User))
-
-  def test_flexmock_should_not_convert_new_style_class(self):
-    class User(object): pass
-    saved_user = User
-    User = FlexMock.convert_to_new_style(User)
-    self.assertTrue(User is saved_user)
-
-  def test_flexmock_should_revert_class_to_original(self):
-    class User: pass
-    saved_user = User
-    User = FlexMock.convert_to_new_style(User)
-    if '__new__' not in dir(User):
-      self.assertFalse(User is saved_user)
-    User = FlexMock.restore_class(User)
-    self.assertTrue(User is saved_user)
-
-  def test_flexmock_should_not_revert_new_style_class(self):
-    class User(object): pass
-    saved_user = User
-    User = FlexMock.restore_class(User)
-    self.assertTrue(User is saved_user)
-
   def test_flexmock_should_not_mock_the_same_object_twice(self):
     class User(object): pass
     user = User()
@@ -312,14 +286,6 @@ class TestFlexMock(unittest.TestCase):
     user = User()
     FlexMock(user)
     FlexMock(user, force=True)
-
-  def test_flexmock_should_mock_new_instances_of_old_style_classes(self):
-    class User: pass
-    class Group: pass
-    user = User()
-    Group = FlexMock.convert_to_new_style(Group)
-    FlexMock(Group, new_instances=user)
-    self.assertTrue(user is Group())
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
