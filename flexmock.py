@@ -169,7 +169,7 @@ class FlexMock(object):
 
     -- which is equivalent to --
 
-    some_object.should_receive('some_method').once()
+    some_object.should_receive('some_method').once
 
   You can also do the same thing for all instances of a class by giving the
   FlexMock constructor a class instead of an instance. It's even possible to
@@ -177,7 +177,7 @@ class FlexMock(object):
 
   Various shortcuts are supported, so:
 
-    FlexMock(some_object, method1='foo', method='bar')
+    FlexMock(some_object, method1='foo', method2='bar')
 
     -- is the same as --
 
