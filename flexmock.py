@@ -187,7 +187,7 @@ class FlexMock(object):
   """
 
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectations',
-                   '_flexmock_expectations', '_mock']
+                   '_flexmock_expectations_']
 
   def __init__(self, object_or_class=None, force=False, **kwargs):
     """FlexMock constructor.
@@ -200,7 +200,9 @@ class FlexMock(object):
     self._flexmock_expectations_ = []
     if object_or_class is None:
       for attr, value in kwargs.items():
-        setattr(self, attr, value)
+        def method(self, *kargs, **kwargs):
+          return value
+        setattr(self, attr, method)
       self._mock = self
     else:
       self.mock(object_or_class, force=force, **kwargs)
