@@ -314,8 +314,8 @@ class TestFlexMock(unittest.TestCase):
     FlexMock(user, force=True)
 
   def test_flexmock_should_mock_new_instances_of_old_style_classes(self):
-    class User(): pass
-    class Group(): pass
+    class User: pass
+    class Group: pass
     user = User()
     Group = FlexMock.convert_to_new_style(Group)
     FlexMock(Group, new_instances=user)

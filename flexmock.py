@@ -38,11 +38,19 @@ class Expectation(object):
     self.times_called = 0
     self.expected_calls = None
     self.exception = None
-    self.mock = mock
+    self._mock = mock
     self.pass_thru = False
 
   def __str__(self):
     return '%s%s -> %s' % (self.method, self.args, self.return_value)
+
+  @property
+  def mock(self):
+    """Return the mock associated with this expectation.
+   
+    Since this method is a property it must be called without parentheses.
+    """
+    return self._mock
 
   def with_args(self, args):
     """Override the arguments used to match this expectation's method."""
