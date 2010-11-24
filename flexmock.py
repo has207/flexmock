@@ -22,8 +22,13 @@ class Expectation(object):
   its argument list, return values, and any exceptions that the method might
   raise.
   """
+
+  AT_LEAST = 'at least '
+  AT_MOST = 'at most '
+
   def __init__(self, name, mock, args=None, return_value=None):
     self.method = name
+    self.modifier = ''
     self.original_method = None
     if not isinstance(args, tuple):
       self.args = (args,)
@@ -34,6 +39,7 @@ class Expectation(object):
     self.expected_calls = None
     self.exception = None
     self.mock = mock
+    self.pass_thru = False
 
   def __str__(self):
     return '%s%s -> %s' % (self.method, self.args, self.return_value)
@@ -56,17 +62,35 @@ class Expectation(object):
     self.expected_calls = number
     return self
 
+  @property
   def once(self):
     """Alias for times(1)."""
     return self.times(1)
 
+  @property
   def twice(self):
     """Alias for times(2)."""
     return self.times(2)
 
+  @property
   def never(self):
     """Alias for times(0)."""
     return self.times(0)
+
+  @property
+  def at_least(self):
+    self.modifier = self.AT_LEAST
+    return self
+
+  @property
+  def at_most(self):
+    self.modifier = self.AT_MOST
+    return self
+
+  @property
+  def and_passthru(self):
+    self.pass_thru = True
+    return self
 
   def and_raise(self, exception):
     """Specifies the exception to be raised when this expectation is met."""
@@ -84,12 +108,22 @@ class Expectation(object):
     """
     if not self.expected_calls:
       return True
-    if self.times_called == self.expected_calls:
+    failed = False
+    if not self.modifier:
+      if self.times_called != self.expected_calls:
+        failed = True
+    elif self.modifier == self.AT_LEAST:
+      if self.times_called < self.expected_calls:
+        failed = True
+    elif self.modifier == self.AT_MOST:
+      if self.times_called > self.expected_calls:
+        failed = True
+    if not failed:
       return True
     else:
       raise MethodNotCalled(
-          '%s expected to be called %s times, called %s times' %
-          (self.method, self.expected_calls, self.times_called))
+          '%s expected to be called %s%s times, called %s times' %
+          (self.method, self.modifier, self.expected_calls, self.times_called))
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
@@ -323,7 +357,9 @@ class FlexMock(object):
       expectation = self._get_flexmock_expectations(method, arguments)
       if expectation:
         expectation.times_called += 1
-        if expectation.exception:
+        if expectation.pass_thru:
+          return expectation.original_method(*kargs, **kwargs)
+        elif expectation.exception:
           raise expectation.exception
         return expectation.return_value
       else:

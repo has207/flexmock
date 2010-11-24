@@ -208,20 +208,64 @@ class TestFlexMock(unittest.TestCase):
     unittest.TestCase.tearDown(self)
     self.assertFalse(hasattr(user, 'get_name'))
 
+  def test_flexmock_respects_at_least_when_called_less_than_requested(self):
+    self.mock.should_receive('method_foo').and_return('bar').at_least.twice
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_LEAST, expectation.modifier)
+    self.mock.method_foo()
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
+  def test_flexmock_respects_at_least_when_called_requested_number(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').at_least.once
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_LEAST, expectation.modifier)
+    self.mock.method_foo()
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_respects_at_least_when_called_more_than_requested(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').at_least.once
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_LEAST, expectation.modifier)
+    self.mock.method_foo()
+    self.mock.method_foo()
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_respects_at_most_when_called_less_than_requested(self):
+    self.mock.should_receive('method_foo').and_return('bar').at_most.twice
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_MOST, expectation.modifier)
+    self.mock.method_foo()
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_respects_at_most_when_called_requested_number(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').at_most.once
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_MOST, expectation.modifier)
+    self.mock.method_foo()
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_respects_at_most_when_called_more_than_requested(self):
+    self.mock.should_receive('method_foo').and_return('value_bar').at_most.once
+    expectation = self.mock._get_flexmock_expectations('method_foo')
+    self.assertEqual(Expectation.AT_MOST, expectation.modifier)
+    self.mock.method_foo()
+    self.mock.method_foo()
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
   def test_flexmock_treats_once_as_times_one(self):
-    self.mock.should_receive('method_foo').and_return('value_bar').once()
+    self.mock.should_receive('method_foo').and_return('value_bar').once
     expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(1, expectation.expected_calls)
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
   def test_flexmock_treats_twice_as_times_two(self):
-    self.mock.should_receive('method_foo').and_return('value_bar').twice()
+    self.mock.should_receive('method_foo').twice.and_return('value_bar')
     expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(2, expectation.expected_calls)
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
   def test_flexmock_works_with_never(self):
-    self.mock.should_receive('method_foo').and_return('value_bar').never()
+    self.mock.should_receive('method_foo').and_return('value_bar').never
     expectation = self.mock._get_flexmock_expectations('method_foo')
     self.assertEqual(0, expectation.expected_calls)
     unittest.TestCase.tearDown(self)
@@ -300,6 +344,33 @@ class TestFlexMock(unittest.TestCase):
     unittest.TestCase.tearDown(self)
     for method in FlexMock.UPDATED_ATTRS:
       self.assertFalse(method in dir(Group), '%s is still in Group' % method)
+
+  def test_flexmock_passthru_respects_matched_expectations(self):
+    class Group(object):
+      def method1(self, arg1, arg2='b'):
+        return '%s:%s' % (arg1, arg2)
+      def method2(self, arg):
+        return arg
+    group = Group()
+    FlexMock(group).should_receive('method1').twice.and_passthru
+    self.assertEqual('a:c', group.method1('a', arg2='c'))
+    self.assertEqual('a:b', group.method1('a'))
+    group.should_receive('method2').once.with_args('c').and_passthru
+    self.assertEqual('c', group.method2('c'))
+    unittest.TestCase.tearDown(self)
+
+  def test_flexmock_passthru_respects_unmatched_expectations(self):
+    class Group(object):
+      def method1(self, arg1, arg2='b'):
+        return '%s:%s' % (arg1, arg2)
+    group = Group()
+    FlexMock(group).should_receive('method1').at_least.once.and_passthru
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+    FlexMock(group)
+    group.should_receive('method2').with_args('a').once.and_passthru
+    group.should_receive('method2').with_args('not a')
+    group.method2('not a')
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
 
 if __name__ == '__main__':
