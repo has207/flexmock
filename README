@@ -1,17 +1,17 @@
 Current Version: 0.4
 
 SUPPORTED:
-- unittest.TestCase integration
-- automatic expectation checking on tearDown
-- should_receive()
-- with_args() ['with' is reserved in python]
-- times() [as well as once, twice and never aliases]
-- and_return()
-- and_raise()
+- unittest.TestCase integration, i.e. automatic expectation checking on tearDown
+- advanced argument matching, including matching types and user-defined classes
+- expectations on number of times called, including at_least/at_most
+- mocks returning custom values
+- mocks raising custom exceptions
+- simple syntax for generating new mock objects
 - overriding new instances (on new-style objects)
-- parameter shortcuts for with_args/and_return
-- at_least/at_most expectation modifiers
+- parameter shortcuts for even terser syntax
 - proxying/spying using the pass_thru expectation modifier
+- enforcing expectations ordering
+- generous use of "property" to eliminate maximum number of parentheses
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however full feature parity with
