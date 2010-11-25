@@ -384,7 +384,7 @@ class FlexMock(object):
       expectation = self._get_flexmock_expectations(method, arguments)
       if expectation:
         expectation.times_called += 1
-        if expectation._pass_thru:
+        if expectation._pass_thru and expectation.original_method:
           return expectation.original_method(*kargs, **kwargs)
         elif expectation.exception:
           raise expectation.exception
