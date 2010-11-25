@@ -11,6 +11,10 @@ class MethodNotCalled(Exception):
   pass
 
 
+class MethodCalledOutOfOrder(Exception):
+  pass
+
+
 class AlreadyMocked(Exception):
   pass
 
@@ -39,7 +43,8 @@ class Expectation(object):
     self.expected_calls = None
     self.exception = None
     self._mock = mock
-    self.pass_thru = False
+    self._pass_thru = False
+    self._ordered = False
 
   def __str__(self):
     return '%s%s -> %s' % (self.method, self.args, self.return_value)
@@ -97,7 +102,12 @@ class Expectation(object):
 
   @property
   def and_passthru(self):
-    self.pass_thru = True
+    self._pass_thru = True
+    return self
+
+  @property
+  def ordered(self):
+    self._ordered = True
     return self
 
   def and_raise(self, exception):
@@ -311,9 +321,20 @@ class FlexMock(object):
       for e in reversed(self._flexmock_expectations_):
         if e.method == name:
           if self._match_args(args, e.args):
+            if e._ordered:
+              self._verify_call_order(e, args, name)
             return e
-    else:
-      return self._flexmock_expectations_
+
+  def _verify_call_order(self, e, args, name):
+    for exp in self._flexmock_expectations_:
+      if (exp.method == name and
+          not self._match_args(args, exp.args) and
+          not exp.times_called):
+        raise MethodCalledOutOfOrder(
+            '%s%s called before %s%s' %
+            (e.method, e.args, exp.method, exp.args))
+      if exp.method == name and self._match_args(args, exp.args):
+        break
 
   def _match_args(self, given_args, expected_args):
     if given_args == expected_args or expected_args == (None,):
@@ -330,7 +351,7 @@ class FlexMock(object):
       expectation = self._get_flexmock_expectations(method, arguments)
       if expectation:
         expectation.times_called += 1
-        if expectation.pass_thru:
+        if expectation._pass_thru:
           return expectation.original_method(*kargs, **kwargs)
         elif expectation.exception:
           raise expectation.exception

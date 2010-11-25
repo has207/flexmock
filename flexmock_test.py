@@ -343,6 +343,33 @@ class TestFlexMock(unittest.TestCase):
     group.method2('not a')
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
 
+  def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
+    class Foo(object): pass
+    FlexMock(Foo)
+    Foo.should_receive('foo')
+    Foo.should_receive('method1', args=('a',)).ordered
+    Foo.should_receive('bar')
+    Foo.should_receive('method1', args=('b',)).ordered
+    Foo.should_receive('baz')
+    Foo.bar()
+    Foo.method1('a')
+    Foo.method1('b')
+    Foo.baz()
+    Foo.foo()
+
+  def test_flexmock_errors_on_improperly_ordered_expectations(self):
+    class Foo(object): pass
+    FlexMock(Foo)
+    Foo.should_receive('foo')
+    Foo.should_receive('method1', args=('a',)).ordered
+    Foo.should_receive('bar')
+    Foo.should_receive('method1', args=('b',)).ordered
+    Foo.should_receive('baz')
+    Foo.bar()
+    Foo.bar()
+    Foo.foo()
+    self.assertRaises(MethodCalledOutOfOrder, Foo.method1, 'b')
+
 
 if __name__ == '__main__':
     unittest.main()
