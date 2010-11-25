@@ -116,21 +116,30 @@ class Expectation(object):
 
   @property
   def at_least(self):
+    """Modifies the associated "times" expectation."""
     self.modifier = self.AT_LEAST
     return self
 
   @property
   def at_most(self):
+    """Modifies the associated "times" expectation."""
     self.modifier = self.AT_MOST
     return self
 
   @property
   def and_passthru(self):
+    """Creates a spy.
+
+    This means that the original method will be called rather than the fake
+    version. However, we can still keep track of how many times it's called and
+    with what arguments, and apply expectations accordingly.
+    """
     self._pass_thru = True
     return self
 
   @property
   def ordered(self):
+    """Makes the expectation respect the order of should_receive statements."""
     self._ordered = True
     return self
 
