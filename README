@@ -1,4 +1,4 @@
-Current Version: 0.4
+Current Version: 0.5
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however full feature parity with
