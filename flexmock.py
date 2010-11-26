@@ -76,7 +76,7 @@ class Expectation(object):
   @property
   def mock(self):
     """Return the mock associated with this expectation.
-   
+
     Since this method is a property it must be called without parentheses.
     """
     return self._mock
@@ -158,7 +158,7 @@ class Expectation(object):
       MethodNotCalled Exception
     """
     if not self.expected_calls:
-      return True
+      return
     failed = False
     if not self.modifier:
       if self.times_called != self.expected_calls:
@@ -170,7 +170,7 @@ class Expectation(object):
       if self.times_called > self.expected_calls:
         failed = True
     if not failed:
-      return True
+      return
     else:
       raise MethodNotCalled(
           '%s expected to be called %s%s times, called %s times' %
@@ -178,20 +178,22 @@ class Expectation(object):
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
-    if isinstance(self.mock, FlexMock):
+    if isinstance(self._mock, FlexMock):
+      del self
       return  # no need to worry about mock objects
     if self.original_method:
-      setattr(self.mock, self.method, self.original_method)
-    elif self.method in self.mock.__dict__:
-      delattr(self.mock, self.method)
+      setattr(self._mock, self.method, self.original_method)
+    elif self.method in dir(self._mock):
+      delattr(self._mock, self.method)
     for attr in FlexMock.UPDATED_ATTRS:
-      if hasattr(self.mock, attr):
-        delattr(self.mock, attr)
+      if hasattr(self._mock, attr):
+        delattr(self._mock, attr)
+    del self
 
 
 class FlexMock(object):
   """Creates mock objects or puts existing objects or classes under mock.
-  
+
   To create a new mock object with some attributes:
     FlexMock('some_name', attr1=value1, attr2=value2, ...)
 
@@ -234,7 +236,7 @@ class FlexMock(object):
 
   def __init__(self, object_or_class=None, force=False, **kwargs):
     """FlexMock constructor.
-    
+
     Args:
       object_or_class: object or class to mock
       force: Boolean, see mock() method for explanation
@@ -285,7 +287,7 @@ class FlexMock(object):
 
     This method is left public, but you probably just want to use the FlexMock
     constructor to do this rather than calling it directly.
-    
+
     Args:
       obj: object or class to mock
       force: Boolean, override the default sanity checks and clobber existing
@@ -298,9 +300,7 @@ class FlexMock(object):
     Raises:
       AlreadyMocked
     """
-    for attr in self.UPDATED_ATTRS:
-      if (hasattr(obj, attr)) and not force:
-        raise AlreadyMocked('%s already defines %s' % (obj, attr))
+    self._ensure_not_already_mocked(obj, force)
     obj.should_receive = self.should_receive
     obj._get_flexmock_expectation = self._get_flexmock_expectation
     obj._flexmock_expectations = []
@@ -312,18 +312,23 @@ class FlexMock(object):
     expectation = self._retrieve_or_create_expectation(None, (), None)
     self._flexmock_expectations.append(expectation)
 
+  def _ensure_not_already_mocked(self, obj, force):
+    for attr in self.UPDATED_ATTRS:
+      if (hasattr(obj, attr)) and not force:
+        raise AlreadyMocked('%s already defines %s' % (obj, attr))
+
   def _update_unittest_teardown(self):
     if not hasattr(unittest.TestCase, '_flexmock_objects'):
-      unittest.TestCase._flexmock_objects = {}
+      unittest.TestCase._flexmock_objects = {
+          self: self._flexmock_expectations}
       saved_teardown = unittest.TestCase.tearDown
       def unittest_teardown(self):
         if hasattr(self, '_flexmock_objects'):
-          print [[str(e) for e in o] for o in self._flexmock_objects.values()]
-          for mock_object in self._flexmock_objects.values(): 
-            for expectation in mock_object: 
+          for mock_object, expectations in self._flexmock_objects.items():
+            del self._flexmock_objects[mock_object]
+            for expectation in expectations:
               expectation.verify()
               expectation.reset()
-          self._flexmock_objects = {}
         saved_teardown(self)
       unittest.TestCase.tearDown = unittest_teardown
     else:
