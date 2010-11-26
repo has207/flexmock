@@ -229,8 +229,8 @@ class FlexMock(object):
     some_object.should_receive('method2').and_return('bar')
   """
 
-  UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectations',
-                   '_flexmock_expectations_']
+  UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectation',
+                   '_flexmock_expectations']
 
   def __init__(self, object_or_class=None, force=False, **kwargs):
     """FlexMock constructor.
@@ -240,7 +240,7 @@ class FlexMock(object):
       force: Boolean, see mock() method for explanation
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
-    self._flexmock_expectations_ = []
+    self._flexmock_expectations = []
     if object_or_class is None:
       self._mock = self
       for attr, value in kwargs.items():
@@ -262,7 +262,7 @@ class FlexMock(object):
     """
     expectation = self._retrieve_or_create_expectation(method, args,
                                                        return_value)
-    self._flexmock_expectations_.append(expectation)
+    self._flexmock_expectations.append(expectation)
     self._add_expectation_to_object(expectation, method)
     return expectation
 
@@ -275,7 +275,7 @@ class FlexMock(object):
     method = '__new__'
     expectation = self._retrieve_or_create_expectation(
         method, None, return_value)
-    self._flexmock_expectations_.append(expectation)
+    self._flexmock_expectations.append(expectation)
     if not hasattr(expectation, 'original_method'):
       expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
@@ -300,32 +300,38 @@ class FlexMock(object):
     """
     for attr in self.UPDATED_ATTRS:
       if (hasattr(obj, attr)) and not force:
-        raise AlreadyMocked
+        raise AlreadyMocked('%s already defines %s' % (obj, attr))
     obj.should_receive = self.should_receive
-    obj._get_flexmock_expectations = self._get_flexmock_expectations
-    obj._flexmock_expectations_ = []
+    obj._get_flexmock_expectation = self._get_flexmock_expectation
+    obj._flexmock_expectations = []
     self._mock = obj
     for method, return_value in kwargs.items():
       obj.should_receive(method, return_value=return_value)
     if inspect.isclass(obj) and 'new_instances' in kwargs:
       self._new_instances(kwargs['new_instances'])
     expectation = self._retrieve_or_create_expectation(None, (), None)
-    self._flexmock_expectations_.append(expectation)
+    self._flexmock_expectations.append(expectation)
 
   def _update_unittest_teardown(self):
-    unittest.TestCase._flexmock_expectations = self._flexmock_expectations_
-    saved_teardown = unittest.TestCase.tearDown
-    def unittest_teardown(self):
-      for expectation in self._flexmock_expectations: 
-        expectation.verify()
-        expectation.reset()
-      self._flexmock_expectations = []
-      saved_teardown(self)
-    unittest.TestCase.tearDown = unittest_teardown
+    if not hasattr(unittest.TestCase, '_flexmock_objects'):
+      unittest.TestCase._flexmock_objects = {}
+      saved_teardown = unittest.TestCase.tearDown
+      def unittest_teardown(self):
+        if hasattr(self, '_flexmock_objects'):
+          print [[str(e) for e in o] for o in self._flexmock_objects.values()]
+          for mock_object in self._flexmock_objects.values(): 
+            for expectation in mock_object: 
+              expectation.verify()
+              expectation.reset()
+          self._flexmock_objects = {}
+        saved_teardown(self)
+      unittest.TestCase.tearDown = unittest_teardown
+    else:
+      unittest.TestCase._flexmock_objects[self] = self._flexmock_expectations
 
   def _retrieve_or_create_expectation(self, method, args, return_value):
-    if method in [x.method for x in self._flexmock_expectations_]:
-      expectation = [x for x in self._flexmock_expectations_
+    if method in [x.method for x in self._flexmock_expectations]:
+      expectation = [x for x in self._flexmock_expectations
                      if x.method == method][0]
       if expectation.args is None:
         if isinstance(args, tuple):
@@ -345,13 +351,13 @@ class FlexMock(object):
     setattr(self._mock, method, types.MethodType(
         method_instance, self._mock))
 
-  def _get_flexmock_expectations(self, name=None, args=None):
+  def _get_flexmock_expectation(self, name=None, args=None):
     if args == None:
       args = ()
     if not isinstance(args, tuple):
       args = (args,)
     if name:
-      for e in reversed(self._flexmock_expectations_):
+      for e in reversed(self._flexmock_expectations):
         if e.method == name:
           if self._match_args(args, e.args):
             if e._ordered:
@@ -359,7 +365,7 @@ class FlexMock(object):
             return e
 
   def _verify_call_order(self, e, args, name):
-    for exp in self._flexmock_expectations_:
+    for exp in self._flexmock_expectations:
       if (exp.method == name and
           not self._match_args(args, exp.args) and
           not exp.times_called):
@@ -381,7 +387,7 @@ class FlexMock(object):
   def __create_mock_method(self, method):
     def mock_method(self, *kargs, **kwargs):
       arguments = kargs
-      expectation = self._get_flexmock_expectations(method, arguments)
+      expectation = self._get_flexmock_expectation(method, arguments)
       if expectation:
         expectation.times_called += 1
         if expectation._pass_thru and expectation.original_method:
