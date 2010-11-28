@@ -24,6 +24,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import inspect
 import types
+import unittest
 
 
 class InvalidMethodSignature(Exception):
@@ -320,9 +321,18 @@ class FlexMock(object):
       if (hasattr(obj, attr)) and not force:
         raise AlreadyMocked('%s already defines %s' % (obj, attr))
 
-  def update_teardown(self):
-    """To be implemented by classes inheriting from FlexMock."""
-    pass 
+  def update_teardown(self, test_runner=unittest.TestCase,
+                      teardown_method='tearDown'):
+    """Should be implemented by classes inheriting from FlexMock."""
+    if not hasattr(test_runner, '_flexmock_objects'):
+      setattr(test_runner,
+          '_flexmock_objects', {self: self._flexmock_expectations})
+      saved_teardown = getattr(test_runner, teardown_method)
+      setattr(test_runner, teardown_method,
+          self._flexmock_teardown(saved_teardown))
+    else:
+      getattr(test_runner,
+              '_flexmock_objects')[self] = self._flexmock_expectations
 
   def _flexmock_teardown(self, saved_teardown):
     def teardown(self):
@@ -424,17 +434,8 @@ class FlexMock(object):
 
 
 def flexmock_unittest(*kargs, **kwargs):
-  import unittest
-
   class UnittestFlexMock(FlexMock):
-
-    def update_teardown(self):
-      if not hasattr(unittest.TestCase, '_flexmock_objects'):
-        unittest.TestCase._flexmock_objects = {
-            self: self._flexmock_expectations}
-        saved_teardown = unittest.TestCase.tearDown
-        unittest.TestCase.tearDown = self._flexmock_teardown(saved_teardown)
-      else:
-        unittest.TestCase._flexmock_objects[self] = self._flexmock_expectations
-
+    def update_teardown(self, test_runner=unittest.TestCase,
+        teardown_method='tearDown'):
+      FlexMock.update_teardown(self, test_runner, teardown_method)
   return UnittestFlexMock(*kargs, **kwargs)
