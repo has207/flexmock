@@ -1,6 +1,6 @@
 from distutils.core import setup
 
 setup(name='flexmock',
-      version='0.5',
+      version='0.6',
       py_modules=['flexmock'],
 )
