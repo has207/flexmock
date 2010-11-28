@@ -12,7 +12,7 @@ SUPPORTS:
 - unittest.TestCase integration, i.e. automatic expectation checking on tearDown
 - advanced argument matching, including matching types and user-defined classes
 - expectations on number of times called, including at_least/at_most
-- mocks returning custom values
+- mocks returning custom values, including different values on successive invokations
 - mocks raising custom exceptions
 - simple syntax for generating new mock objects
 - overriding new instances (on new-style objects)

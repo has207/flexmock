@@ -42,6 +42,12 @@ class AlreadyMocked(Exception):
   pass
 
 
+class ReturnValue(object):
+  def __init__(self, value=None, raises=None):
+    self.value = value
+    self.raises = raises
+
+
 class Expectation(object):
   """Holds expectations about methods.
 
@@ -63,18 +69,18 @@ class Expectation(object):
       self.args = args
     if kwargs is None:
       self.kwargs = {}
-    self.return_value = []
+    value = ReturnValue(return_value)
+    self.return_values = []
     if return_value is not None:
-      self.return_value.append(return_value)
+      self.return_values.append(value)
     self.times_called = 0
     self.expected_calls = None
-    self.exception = None
     self._mock = mock
     self._pass_thru = False
     self._ordered = False
 
   def __str__(self):
-    return '%s%s -> %s' % (self.method, self.args, self.return_value)
+    return '%s%s -> %s' % (self.method, self.args, self.return_values)
 
   @property
   def mock(self):
@@ -86,9 +92,6 @@ class Expectation(object):
 
   def with_args(self, *kargs, **kwargs):
     """Override the arguments used to match this expectation's method."""
-    #if not isinstance(args, tuple):
-      #self.args = (args,)
-    #else:
     self.args = kargs
     self.kwargs = kwargs
     return self
@@ -101,12 +104,13 @@ class Expectation(object):
     than a single list to be returned each time.
     """
     if not multiple:
-      self.return_value.append(value)
+      value = ReturnValue(value)
+      self.return_values.append(value)
     else:
       try:
-        self.return_value.extend(value)
+        self.return_values.extend([ReturnValue(v) for v in value])
       except TypeError:
-        self.return_value.append(value)
+        self.return_values.append(ReturnValue(v))
     return self
 
   def times(self, number):
@@ -160,7 +164,7 @@ class Expectation(object):
 
   def and_raise(self, exception):
     """Specifies the exception to be raised when this expectation is met."""
-    self.exception = exception
+    self.return_values.append(ReturnValue(raises=exception))
     return self
 
   def verify(self):
@@ -398,15 +402,16 @@ class FlexMock(object):
         expectation.times_called += 1
         if expectation._pass_thru and expectation.original_method:
           return expectation.original_method(*kargs, **kwargs)
-        elif expectation.exception:
-          raise expectation.exception
-        if expectation.return_value:
-          return_value = expectation.return_value[0]
-          expectation.return_value.remove(return_value)
+        if expectation.return_values:
+          return_value = expectation.return_values[0]
+          expectation.return_values = expectation.return_values[1:]
+          expectation.return_values.append(return_value)
         else:
-          return_value = None
-        expectation.return_value.append(return_value)
-        return return_value
+          return_value = ReturnValue()
+        if return_value.raises:
+          raise return_value.raises
+        else:
+          return return_value.value
       else:
         raise InvalidMethodSignature('%s%s' % (method, str(arguments)))
     return mock_method

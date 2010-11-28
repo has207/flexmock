@@ -422,6 +422,15 @@ class Testflexmock(unittest.TestCase):
     self.assertEqual(1, foo.method1())
     self.assertEqual(2, foo.method1())
 
+  def test_flexmock_should_mix_multiple_return_values_with_exceptions(self):
+    class Foo: pass
+    foo = Foo()
+    flexmock(foo).should_receive('method1').and_return(1).and_raise(Exception)
+    self.assertEqual(1, foo.method1())
+    self.assertRaises(Exception, foo.method1)
+    self.assertEqual(1, foo.method1())
+    self.assertRaises(Exception, foo.method1)
+
   def test_flexmock_should_match_types_on_multiple_arguments(self):
     class Foo: pass
     foo = Foo()
