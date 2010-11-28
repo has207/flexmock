@@ -24,7 +24,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import inspect
 import types
-import unittest
 
 
 class InvalidMethodSignature(Exception):
@@ -249,7 +248,7 @@ class FlexMock(object):
         self.should_receive(attr, return_value=value)
     else:
       self.mock(object_or_class, force=force, **kwargs)
-    self._update_unittest_teardown()
+    self.update_teardown()
 
   def should_receive(self, method, args=None, return_value=None):
     """Adds a method Expectation to the provided class or instance.
@@ -317,22 +316,20 @@ class FlexMock(object):
       if (hasattr(obj, attr)) and not force:
         raise AlreadyMocked('%s already defines %s' % (obj, attr))
 
-  def _update_unittest_teardown(self):
-    if not hasattr(unittest.TestCase, '_flexmock_objects'):
-      unittest.TestCase._flexmock_objects = {
-          self: self._flexmock_expectations}
-      saved_teardown = unittest.TestCase.tearDown
-      def unittest_teardown(self):
-        if hasattr(self, '_flexmock_objects'):
-          for mock_object, expectations in self._flexmock_objects.items():
-            del self._flexmock_objects[mock_object]
-            for expectation in expectations:
-              expectation.verify()
-              expectation.reset()
-        saved_teardown(self)
-      unittest.TestCase.tearDown = unittest_teardown
-    else:
-      unittest.TestCase._flexmock_objects[self] = self._flexmock_expectations
+  def update_teardown(self):
+    """To be implemented by classes inheriting from FlexMock."""
+    pass 
+
+  def _flexmock_teardown(self, saved_teardown):
+    def teardown(self):
+      if hasattr(self, '_flexmock_objects'):
+        for mock_object, expectations in self._flexmock_objects.items():
+          del self._flexmock_objects[mock_object]
+          for expectation in expectations:
+            expectation.verify()
+            expectation.reset()
+      saved_teardown(self)
+    return teardown
 
   def _retrieve_or_create_expectation(self, method, args, return_value):
     if method in [x.method for x in self._flexmock_expectations]:
@@ -409,3 +406,20 @@ class FlexMock(object):
     def new(cls):
       return return_value
     return new
+
+
+def flexmock_unittest(*kargs, **kwargs):
+  import unittest
+
+  class UnittestFlexMock(FlexMock):
+
+    def update_teardown(self):
+      if not hasattr(unittest.TestCase, '_flexmock_objects'):
+        unittest.TestCase._flexmock_objects = {
+            self: self._flexmock_expectations}
+        saved_teardown = unittest.TestCase.tearDown
+        unittest.TestCase.tearDown = self._flexmock_teardown(saved_teardown)
+      else:
+        unittest.TestCase._flexmock_objects[self] = self._flexmock_expectations
+
+  return UnittestFlexMock(*kargs, **kwargs)

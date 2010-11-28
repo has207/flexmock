@@ -1,17 +1,23 @@
-from flexmock import *
+from flexmock import FlexMock
+from flexmock import Expectation
+from flexmock import InvalidMethodSignature
+from flexmock import MethodNotCalled
+from flexmock import MethodCalledOutOfOrder
+from flexmock import AlreadyMocked
+from flexmock import flexmock_unittest as flexmock
 import unittest
 
-class TestFlexMock(unittest.TestCase):
+class Testflexmock(unittest.TestCase):
   def setUp(self):
-    self.mock = FlexMock(name='temp')
+    self.mock = flexmock(name='temp')
 
   def test_flexmock_should_create_mock_object(self):
-    mock = FlexMock()
-    self.assertEqual(FlexMock, mock.__class__)
+    mock = flexmock()
+    self.assertTrue(FlexMock, type(mock))
   
   def test_flexmock_should_create_mock_object_from_dict(self):
-    mock = FlexMock(foo='foo', bar='bar')
-    self.assertEqual(FlexMock, mock.__class__)
+    mock = flexmock(foo='foo', bar='bar')
+    self.assertTrue(FlexMock, type(mock))
     self.assertEqual('foo', mock.foo())
     self.assertEqual('bar', mock.bar())
   
@@ -27,14 +33,14 @@ class TestFlexMock(unittest.TestCase):
     self.assertEqual('value_baz', self.mock.method_bar())
 
   def test_flexmock_should_accept_shortcuts_for_creating_mock_object(self):
-    mock = FlexMock(method1='returning 1', method2='returning 2')
+    mock = flexmock(method1='returning 1', method2='returning 2')
     self.assertEqual('returning 1', mock.method1())
     self.assertEqual('returning 2', mock.method2())
   
   def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
     class Foo: pass
     foo = Foo()
-    FlexMock(foo, method1='returning 1', method2='returning 2')
+    flexmock(foo, method1='returning 1', method2='returning 2')
     self.assertEqual('returning 1', foo.method1())
     self.assertEqual('returning 2', foo.method2())
   
@@ -109,7 +115,7 @@ class TestFlexMock(unittest.TestCase):
       def set_name(self, name):
         self.name = name
     user = User()
-    FlexMock(user)
+    flexmock(user)
     user.should_receive('get_name').and_return('john')
     user.set_name('mike')
     self.assertEqual('john', user.get_name())
@@ -123,7 +129,7 @@ class TestFlexMock(unittest.TestCase):
       def set_name(self, name):
         self.name = name
     user = User()
-    FlexMock(user)
+    flexmock(user)
     user.should_receive('get_name').and_return('john')
     user.set_name('mike')
     self.assertEqual('john', user.get_name())
@@ -132,7 +138,7 @@ class TestFlexMock(unittest.TestCase):
     class User(object):
       def __init__(self):
         pass
-    FlexMock(User)
+    flexmock(User)
     User.should_receive('get_name').and_return('mike')
     user = User()
     self.assertEqual('mike', user.get_name())
@@ -141,7 +147,7 @@ class TestFlexMock(unittest.TestCase):
     class User:
       def __init__(self):
         pass
-    FlexMock(User)
+    flexmock(User)
     User.should_receive('get_name').and_return('mike')
     user = User()
     self.assertEqual('mike', user.get_name())
@@ -181,7 +187,7 @@ class TestFlexMock(unittest.TestCase):
       def get_name(self):
         return 'mike'
     user = User()
-    FlexMock(user).should_receive('get_name').and_return('john')
+    flexmock(user).should_receive('get_name').and_return('john')
     self.assertEqual('john', user.get_name())
     unittest.TestCase.tearDown(self)
     self.assertEqual('mike', user.get_name())
@@ -191,7 +197,7 @@ class TestFlexMock(unittest.TestCase):
       def get_name(self):
         return 'mike'
     user = User()
-    FlexMock(User).should_receive('get_name').and_return('john')
+    flexmock(User).should_receive('get_name').and_return('john')
     self.assertEqual('john', user.get_name())
     unittest.TestCase.tearDown(self)
     self.assertEqual('mike', user.get_name())
@@ -199,7 +205,7 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_removes_new_stubs_from_objects_after_tests(self):
     class User: pass
     user = User()
-    FlexMock(user).should_receive('get_name').and_return('john')
+    flexmock(user).should_receive('get_name').and_return('john')
     self.assertEqual('john', user.get_name())
     unittest.TestCase.tearDown(self)
     self.assertFalse(hasattr(user, 'get_name'))
@@ -207,7 +213,7 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_removes_new_stubs_from_classes_after_tests(self):
     class User: pass
     user = User()
-    FlexMock(User).should_receive('get_name').and_return('john')
+    flexmock(User).should_receive('get_name').and_return('john')
     self.assertEqual('john', user.get_name())
     unittest.TestCase.tearDown(self)
     self.assertFalse(hasattr(user, 'get_name'))
@@ -217,28 +223,28 @@ class TestFlexMock(unittest.TestCase):
     class Group: pass
     user = User()
     group = User()
-    FlexMock(user).should_receive('get_name').and_return('john').once
-    FlexMock(group).should_receive('get_name').and_return('john').once
+    flexmock(user).should_receive('get_name').and_return('john').once
+    flexmock(group).should_receive('get_name').and_return('john').once
     self.assertEqual('john', user.get_name())
     self.assertEqual('john', group.get_name())
     unittest.TestCase.tearDown(self)
     self.assertFalse(hasattr(user, 'get_name'))
     self.assertFalse(hasattr(group, 'get_name'))
-    FlexMock(user)
+    flexmock(user)
 
   def test_flexmock_removes_stubs_from_multiple_classes_on_teardown(self):
     class User: pass
     class Group: pass
     user = User()
     group = User()
-    FlexMock(User).should_receive('get_name').and_return('john')
-    FlexMock(Group).should_receive('get_name').and_return('john')
+    flexmock(User).should_receive('get_name').and_return('john')
+    flexmock(Group).should_receive('get_name').and_return('john')
     self.assertEqual('john', user.get_name())
     self.assertEqual('john', group.get_name())
     unittest.TestCase.tearDown(self)
     self.assertFalse(hasattr(user, 'get_name'))
     self.assertFalse(hasattr(group, 'get_name'))
-    FlexMock(User)
+    flexmock(User)
 
   def test_flexmock_respects_at_least_when_called_less_than_requested(self):
     self.mock.should_receive('method_foo').and_return('bar').at_least.twice
@@ -310,20 +316,20 @@ class TestFlexMock(unittest.TestCase):
   def test_flexmock_should_not_mock_the_same_object_twice(self):
     class User(object): pass
     user = User()
-    FlexMock(user)
-    self.assertRaises(AlreadyMocked, FlexMock, user)
+    flexmock(user)
+    self.assertRaises(AlreadyMocked, flexmock, user)
 
   def test_flexmock_should_force_mock_the_same_object(self):
     class User(object): pass
     user = User()
-    FlexMock(user)
-    FlexMock(user, force=True)
+    flexmock(user)
+    flexmock(user, force=True)
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
     class Group(object): pass
     user = User()
-    FlexMock(Group, new_instances=user)
+    flexmock(Group, new_instances=user)
     self.assertTrue(user is Group())
 
   def test_flexmock_should_revert_new_instances_on_teardown(self):
@@ -331,14 +337,14 @@ class TestFlexMock(unittest.TestCase):
     class Group(object): pass
     user = User()
     group = Group()
-    FlexMock(Group, new_instances=user)
+    flexmock(Group, new_instances=user)
     self.assertTrue(user is Group())
     unittest.TestCase.tearDown(self)
     self.assertEqual(group.__class__, Group().__class__)
     
   def test_flexmock_should_cleanup_added_methods_and_attributes(self):
     class Group(object): pass
-    FlexMock(Group)
+    flexmock(Group)
     unittest.TestCase.tearDown(self)
     for method in FlexMock.UPDATED_ATTRS:
       self.assertFalse(method in dir(Group), '%s is still in Group' % method)
@@ -350,7 +356,7 @@ class TestFlexMock(unittest.TestCase):
       def method2(self, arg):
         return arg
     group = Group()
-    FlexMock(group).should_receive('method1').twice.and_passthru
+    flexmock(group).should_receive('method1').twice.and_passthru
     self.assertEqual('a:c', group.method1('a', arg2='c'))
     self.assertEqual('a:b', group.method1('a'))
     group.should_receive('method2').once.with_args('c').and_passthru
@@ -362,9 +368,9 @@ class TestFlexMock(unittest.TestCase):
       def method1(self, arg1, arg2='b'):
         return '%s:%s' % (arg1, arg2)
     group = Group()
-    FlexMock(group).should_receive('method1').at_least.once.and_passthru
+    flexmock(group).should_receive('method1').at_least.once.and_passthru
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
-    FlexMock(group)
+    flexmock(group)
     group.should_receive('method2').with_args('a').once.and_passthru
     group.should_receive('method2').with_args('not a')
     group.method2('not a')
@@ -372,7 +378,7 @@ class TestFlexMock(unittest.TestCase):
 
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
     class Foo(object): pass
-    FlexMock(Foo)
+    flexmock(Foo)
     Foo.should_receive('foo')
     Foo.should_receive('method1', args=('a',)).ordered
     Foo.should_receive('bar')
@@ -386,7 +392,7 @@ class TestFlexMock(unittest.TestCase):
 
   def test_flexmock_errors_on_improperly_ordered_expectations(self):
     class Foo(object): pass
-    FlexMock(Foo)
+    flexmock(Foo)
     Foo.should_receive('foo')
     Foo.should_receive('method1', args=('a',)).ordered
     Foo.should_receive('bar')
