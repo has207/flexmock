@@ -43,6 +43,7 @@ class Testflexmock(unittest.TestCase):
     flexmock(foo, method1='returning 1', method2='returning 2')
     self.assertEqual('returning 1', foo.method1())
     self.assertEqual('returning 2', foo.method2())
+    self.assertEqual('returning 2', foo.method2())
   
   def test_flexmock_expectations_returns_all(self):
     self.assertEqual(1, len(self.mock._flexmock_expectations))
@@ -402,6 +403,54 @@ class Testflexmock(unittest.TestCase):
     Foo.bar()
     Foo.foo()
     self.assertRaises(MethodCalledOutOfOrder, Foo.method1, 'b')
+
+  def test_flexmock_should_accept_multiple_return_values(self):
+    class Foo: pass
+    foo = Foo()
+    flexmock(foo).should_receive('method1').and_return(1).and_return(2)
+    self.assertEqual(1, foo.method1())
+    self.assertEqual(2, foo.method1())
+    self.assertEqual(1, foo.method1())
+    self.assertEqual(2, foo.method1())
+
+  def test_flexmock_should_accept_multiple_return_values_with_shortcut(self):
+    class Foo: pass
+    foo = Foo()
+    flexmock(foo).should_receive('method1').and_return([1, 2], multiple=True)
+    self.assertEqual(1, foo.method1())
+    self.assertEqual(2, foo.method1())
+    self.assertEqual(1, foo.method1())
+    self.assertEqual(2, foo.method1())
+
+  def test_flexmock_should_match_types_on_multiple_arguments(self):
+    class Foo: pass
+    foo = Foo()
+    flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
+    self.assertEqual('ok', foo.method1('some string', 12))
+    self.assertRaises(InvalidMethodSignature, foo.method1, 12, 32)
+    self.assertRaises(InvalidMethodSignature, foo.method1, 12, 'some string')
+    self.assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 14)
+
+  def test_flexmock_should_match_types_on_multiple_arguments_generic(self):
+    class Foo: pass
+    foo = Foo()
+    flexmock(foo).should_receive('method1').with_args(
+        object, object).and_return('ok')
+    self.assertEqual('ok', foo.method1('some string', 12))
+    self.assertEqual('ok', foo.method1(12, 14))
+    self.assertEqual('ok', foo.method1('some string', 'another one'))
+    self.assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 14)
+
+  def test_flexmock_should_match_types_on_multiple_arguments_classes(self):
+    class Foo: pass
+    class Bar: pass
+    foo = Foo()
+    bar = Bar()
+    flexmock(foo).should_receive('method1').with_args(
+        object, Bar).and_return('ok')
+    self.assertEqual('ok', foo.method1('some string', bar))
+    self.assertRaises(InvalidMethodSignature, foo.method1, bar, 'some string')
+    self.assertRaises(InvalidMethodSignature, foo.method1, 12, 'some string')
 
 
 if __name__ == '__main__':

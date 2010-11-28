@@ -53,7 +53,7 @@ class Expectation(object):
   AT_LEAST = 'at least '
   AT_MOST = 'at most '
 
-  def __init__(self, name, mock, args=None, return_value=None):
+  def __init__(self, name, mock, args=None, return_value=None, kwargs=None):
     self.method = name
     self.modifier = ''
     self.original_method = None
@@ -61,7 +61,11 @@ class Expectation(object):
       self.args = (args,)
     else:
       self.args = args
-    self.return_value = return_value
+    if kwargs is None:
+      self.kwargs = {}
+    self.return_value = []
+    if return_value is not None:
+      self.return_value.append(return_value)
     self.times_called = 0
     self.expected_calls = None
     self.exception = None
@@ -80,17 +84,29 @@ class Expectation(object):
     """
     return self._mock
 
-  def with_args(self, args):
+  def with_args(self, *kargs, **kwargs):
     """Override the arguments used to match this expectation's method."""
-    if not isinstance(args, tuple):
-      self.args = (args,)
-    else:
-      self.args = args
+    #if not isinstance(args, tuple):
+      #self.args = (args,)
+    #else:
+    self.args = kargs
+    self.kwargs = kwargs
     return self
 
-  def and_return(self, value):
-    """Override the return value of this expectation's method."""
-    self.return_value = value
+  def and_return(self, value, multiple=False):
+    """Override the return value of this expectation's method.
+
+    When multiple is set to True, value is treated as a list of values to be
+    returned in the order specified by successive calls to this method rather
+    than a single list to be returned each time.
+    """
+    if not multiple:
+      self.return_value.append(value)
+    else:
+      try:
+        self.return_value.extend(value)
+      except TypeError:
+        self.return_value.append(value)
     return self
 
   def times(self, number):
@@ -247,7 +263,7 @@ class FlexMock(object):
       for attr, value in kwargs.items():
         self.should_receive(attr, return_value=value)
     else:
-      self.mock(object_or_class, force=force, **kwargs)
+      self._setup_mock(object_or_class, force=force, **kwargs)
     self.update_teardown()
 
   def should_receive(self, method, args=None, return_value=None):
@@ -281,24 +297,8 @@ class FlexMock(object):
       expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
 
-  def mock(self, obj, force=False, **kwargs):
-    """Puts the provided object or class under mock.
-
-    This method is left public, but you probably just want to use the FlexMock
-    constructor to do this rather than calling it directly.
-
-    Args:
-      obj: object or class to mock
-      force: Boolean, override the default sanity checks and clobber existing
-             methods by FlexMock methods. You probably don't want to do this.
-      kwargs: dict of method name/return value pairs to generate
-
-    Returns:
-      None
-
-    Raises:
-      AlreadyMocked
-    """
+  def _setup_mock(self, obj, force=False, **kwargs):
+    """Puts the provided object or class under mock."""
     self._ensure_not_already_mocked(obj, force)
     obj.should_receive = self.should_receive
     obj._get_flexmock_expectation = self._get_flexmock_expectation
@@ -380,9 +380,13 @@ class FlexMock(object):
   def _match_args(self, given_args, expected_args):
     if given_args == expected_args or expected_args == (None,):
       return True
+    if len(given_args) != len(expected_args):
+      return False
     try:
-      if len(given_args) == 1 and isinstance(given_args[0], expected_args[0]):
-        return True
+      for i, arg in enumerate(given_args):
+        if not isinstance(arg, expected_args[i]):
+          return False
+      return True
     except:
       pass
 
@@ -396,7 +400,13 @@ class FlexMock(object):
           return expectation.original_method(*kargs, **kwargs)
         elif expectation.exception:
           raise expectation.exception
-        return expectation.return_value
+        if expectation.return_value:
+          return_value = expectation.return_value[0]
+          expectation.return_value.remove(return_value)
+        else:
+          return_value = None
+        expectation.return_value.append(return_value)
+        return return_value
       else:
         raise InvalidMethodSignature('%s%s' % (method, str(arguments)))
     return mock_method
