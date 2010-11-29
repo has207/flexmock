@@ -266,7 +266,7 @@ class FlexMock(object):
     if object_or_class is None:
       self._mock = self
       for attr, value in kwargs.items():
-        self.should_receive(attr, return_value=value)
+        setattr(self, attr, value)
     else:
       self._setup_mock(object_or_class, force=force, **kwargs)
     self.update_teardown()

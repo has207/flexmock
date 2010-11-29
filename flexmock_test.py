@@ -18,8 +18,8 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = flexmock(foo='foo', bar='bar')
     self.assertTrue(FlexMock, type(mock))
-    self.assertEqual('foo', mock.foo())
-    self.assertEqual('bar', mock.bar())
+    self.assertEqual('foo', mock.foo)
+    self.assertEqual('bar', mock.bar)
   
   def test_flexmock_should_add_expectations(self):
     self.mock.should_receive('method_foo')
@@ -33,9 +33,9 @@ class Testflexmock(unittest.TestCase):
     self.assertEqual('value_baz', self.mock.method_bar())
 
   def test_flexmock_should_accept_shortcuts_for_creating_mock_object(self):
-    mock = flexmock(method1='returning 1', method2='returning 2')
-    self.assertEqual('returning 1', mock.method1())
-    self.assertEqual('returning 2', mock.method2())
+    mock = flexmock(attr1='value 1', attr2=lambda: 'returning 2')
+    self.assertEqual('value 1', mock.attr1)
+    self.assertEqual('returning 2', mock.attr2())
   
   def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
     class Foo: pass
@@ -46,10 +46,10 @@ class Testflexmock(unittest.TestCase):
     self.assertEqual('returning 2', foo.method2())
   
   def test_flexmock_expectations_returns_all(self):
-    self.assertEqual(1, len(self.mock._flexmock_expectations))
+    self.assertEqual(0, len(self.mock._flexmock_expectations))
     self.mock.should_receive('method_foo')
     self.mock.should_receive('method_bar')
-    self.assertEqual(3, len(self.mock._flexmock_expectations))
+    self.assertEqual(2, len(self.mock._flexmock_expectations))
   
   def test_flexmock_expectations_returns_named_expectation(self):
     self.mock.should_receive('method_foo')
@@ -170,10 +170,10 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_configures_global_mocks_dict(self):
     self.assertEqual(1, len(self._flexmock_objects))
     for expectations in self._flexmock_objects.values():
-      self.assertEqual(1, len(expectations))
+      self.assertEqual(0, len(expectations))
     self.mock.should_receive('method_foo')
     for expectations in self._flexmock_objects.values():
-      self.assertEqual(2, len(expectations))
+      self.assertEqual(1, len(expectations))
 
   def test_flexmock_teardown_verifies_mocks(self):
     self.mock.should_receive('verify_expectations').times(1)
@@ -444,11 +444,13 @@ class Testflexmock(unittest.TestCase):
     class Foo: pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(
-        object, object).and_return('ok')
-    self.assertEqual('ok', foo.method1('some string', 12))
-    self.assertEqual('ok', foo.method1(12, 14))
-    self.assertEqual('ok', foo.method1('some string', 'another one'))
-    self.assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 14)
+        object, object, object).and_return('ok')
+    self.assertEqual('ok', foo.method1('some string', None, 12))
+    self.assertEqual('ok', foo.method1((1,), None, 12))
+    self.assertEqual('ok', foo.method1(12, 14, []))
+    self.assertEqual('ok', foo.method1('some string', 'another one', False))
+    self.assertRaises(InvalidMethodSignature, foo.method1, 'string', 12)
+    self.assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 13, 14)
 
   def test_flexmock_should_match_types_on_multiple_arguments_classes(self):
     class Foo: pass
