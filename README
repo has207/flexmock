@@ -2,14 +2,15 @@ Current Version: 0.6
 
 FlexMock provides a mock/stub library for Python.
 It is inspired by Ruby's FlexMock, however full feature parity with
-the Ruby version is not a goal. It omits things in the Ruby
-version that I think are less useful, like the zero_or_more_times
-expectation for example. It also implements things that Ruby's FlexMock
-doesn't support, such as proxying/spying using pass_thru.
+the Ruby version is not a goal. It omits a number of things in the Ruby
+version, mainly various shortcuts for existing functionality,
+and implements a number of things that Ruby's FlexMock
+doesn't support, such as proxying/spying, returning different arguments
+on successive method calls, and matching argument types.
 
 SUPPORTS:
 
-- unittest.TestCase integration, i.e. automatic expectation checking on tearDown
+- test runner integration, i.e. automatic expectation checking on tearDown
 - advanced argument matching, including matching types and user-defined classes
 - expectations on number of times called, including at_least/at_most
 - mocks returning custom values, including different values on successive invokations
@@ -17,14 +18,22 @@ SUPPORTS:
 - simple syntax for generating new mock objects
 - overriding new instances (on new-style objects)
 - parameter shortcuts for even terser syntax
-- proxying/spying using the pass_thru expectation modifier
+- proxying/spying using the and_passthru expectation modifier
 - enforcing expectations ordering
+
+INSTALL:
+
+$ sudo python setup.py install
 
 DOCUMENTATION:
 
-Usage documentation is available on the github wiki:
+Usage documentation is available online:
 
 https://github.com/has207/flexmock/wiki/Documentation
+
+For API docs, generate the pydoc:
+
+$ pydoc -w flexmock
 
 TESTED WITH:
 
