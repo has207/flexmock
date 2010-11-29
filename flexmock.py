@@ -337,7 +337,10 @@ class FlexMock(object):
   def _flexmock_teardown(self, saved_teardown):
     def teardown(self):
       if hasattr(self, '_flexmock_objects'):
+        saved = {}
         for mock_object, expectations in self._flexmock_objects.items():
+          saved[mock_object] = expectations
+        for mock_object, expectations in saved.items():
           del self._flexmock_objects[mock_object]
           for expectation in expectations:
             expectation.verify()
