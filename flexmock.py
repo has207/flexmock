@@ -79,6 +79,7 @@ class Expectation(object):
     self._mock = mock
     self._pass_thru = False
     self._ordered = False
+    self._one_by_one = False
 
   def __str__(self):
     return '%s%s -> %s' % (self.method, self.args, self.return_values)
@@ -97,26 +98,51 @@ class Expectation(object):
     self.kwargs = kwargs
     return self
 
-  def and_return(self, value, multiple=False):
+  def and_return(self, *value):
     """Override the return value of this expectation's method.
 
-    When multiple is set to True, value is treated as a list of values to be
-    returned in the order specified by successive calls to this method rather
-    than a single list to be returned each time.
+    When and_return is given multiple times, each value provided is returned
+    on successive invokations of the method. It is also possible to mix
+    and_return with and_raise in the same manner to alternate between returning
+    a value and raising and exception on different method invokations.
+
+    When combined with the one_by_one property, value is treated as a list of
+    values to be returned in the order specified by successive calls to this
+    method rather than a single list to be returned each time.
     """
-    if not multiple:
+    if len(value) == 1:
+      value = value[0]
+    if not self._one_by_one:
       value = ReturnValue(value)
       self.return_values.append(value)
     else:
       try:
         self.return_values.extend([ReturnValue(v) for v in value])
       except TypeError:
-        self.return_values.append(ReturnValue(v))
+        self.return_values.append(ReturnValue(value))
     return self
 
   def times(self, number):
     """Number of times this expectation's method is expected to be called."""
     self.expected_calls = number
+    return self
+
+  @property
+  def one_by_one(self):
+    """Modifies the return value to be treated as a list of return values.
+
+    Each value in the list is returned on successive invokations of the method.
+    """
+    if not self._one_by_one:
+      self._one_by_one = True
+      saved_values = self.return_values[:]
+      self.return_values = []
+      for value in saved_values:
+        try:
+          for val in value.value:
+            self.return_values.append(ReturnValue(val))
+        except TypeError:
+          self.return_values.append(value)
     return self
 
   @property

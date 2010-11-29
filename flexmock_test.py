@@ -407,16 +407,16 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_should_accept_multiple_return_values(self):
     class Foo: pass
     foo = Foo()
-    flexmock(foo).should_receive('method1').and_return(1).and_return(2)
-    self.assertEqual(1, foo.method1())
+    flexmock(foo).should_receive('method1').and_return(1, 5).and_return(2)
+    self.assertEqual((1, 5), foo.method1())
     self.assertEqual(2, foo.method1())
-    self.assertEqual(1, foo.method1())
+    self.assertEqual((1, 5), foo.method1())
     self.assertEqual(2, foo.method1())
 
   def test_flexmock_should_accept_multiple_return_values_with_shortcut(self):
     class Foo: pass
     foo = Foo()
-    flexmock(foo).should_receive('method1').and_return([1, 2], multiple=True)
+    flexmock(foo).should_receive('method1').and_return(1, 2).one_by_one
     self.assertEqual(1, foo.method1())
     self.assertEqual(2, foo.method1())
     self.assertEqual(1, foo.method1())
