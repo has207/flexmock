@@ -1,0 +1,28 @@
+Release 0.6.2
+- Changing default mock behavior to create attributes instead of methods 
+- FIX teardown for python3 
+
+Release 0.6.1
+- Make it even easier to integrate with new test runners 
+- Adding support for mixing returns and raises in return values 
+
+Release 0.6 
+- Adding support for multiple arg type matches 
+- Pulling out the entry point code from constructor into its own method. 
+
+Release 0.5 
+- FIX: ensuring that mocks are cleaned up properly between tests 
+- BROKEN: part1 on ensuring mocking multiple objects works correctly 
+- Make sure pass_thru doesn't try to call a non-existent method 
+- Fixing up copyright notice 
+- Adding some missing pydocs 
+
+Release 0.4
+- Fixing tests and ensuring mock methods really get created properly 
+- Making sure shortcuts create methods rather than attributes 
+- Fixing doc strings 
+- Removing the new-style/old-style convert code, it's stupid 
+
+Release 0.3
+- Making Expectation.mock into a property so that it shows up in pydoc 
+- Adding proxying/spying and at_least/at_most expectation modifiers
