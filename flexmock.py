@@ -64,12 +64,14 @@ class Expectation(object):
     self.method = name
     self.modifier = ''
     self.original_method = None
+    self.args = {}
     if not isinstance(args, tuple):
-      self.args = (args,)
+      self.args['kargs'] = (args,)
     else:
-      self.args = args
+      self.args['kargs'] = args
     if kwargs is None:
-      self.kwargs = {}
+      kwargs = {}
+    self.args['kwargs'] = kwargs
     value = ReturnValue(return_value)
     self.return_values = []
     if return_value is not None:
@@ -94,8 +96,9 @@ class Expectation(object):
 
   def with_args(self, *kargs, **kwargs):
     """Override the arguments used to match this expectation's method."""
-    self.args = kargs
-    self.kwargs = kwargs
+    self.args = {}
+    self.args['kargs'] = kargs
+    self.args['kwargs'] = kwargs
     return self
 
   def and_return(self, *value):
@@ -220,7 +223,8 @@ class Expectation(object):
     else:
       raise MethodNotCalled(
           '%s expected to be called %s%s times, called %s times' %
-          (self.method, self.modifier, self.expected_calls, self.times_called))
+          (FlexMock._format_args(self.method, self.args), self.modifier,
+           self.expected_calls, self.times_called))
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
@@ -398,9 +402,11 @@ class FlexMock(object):
 
   def _get_flexmock_expectation(self, name=None, args=None):
     if args == None:
-      args = ()
-    if not isinstance(args, tuple):
-      args = (args,)
+      args = {'kargs': (), 'kwargs': {}}
+    if not isinstance(args, dict):
+      args = {'kargs': args, 'kwargs': {}}
+    if not isinstance(args['kargs'], tuple):
+      args['kargs'] = (args['kargs'],)
     if name:
       for e in reversed(self._flexmock_expectations):
         if e.method == name:
@@ -421,13 +427,14 @@ class FlexMock(object):
         break
 
   def _match_args(self, given_args, expected_args):
-    if given_args == expected_args or expected_args == (None,):
+    if (given_args == expected_args or
+        expected_args == {'kargs': (None,), 'kwargs': {}}):
       return True
-    if len(given_args) != len(expected_args):
+    if len(given_args['kargs']) != len(expected_args['kargs']): 
       return False
     try:
-      for i, arg in enumerate(given_args):
-        if not isinstance(arg, expected_args[i]):
+      for i, arg in enumerate(given_args['kargs']):
+        if not isinstance(arg, expected_args['kargs'][i]):
           return False
       return True
     except:
@@ -435,7 +442,9 @@ class FlexMock(object):
 
   def __create_mock_method(self, method):
     def mock_method(self, *kargs, **kwargs):
-      arguments = kargs
+      arguments = {}
+      arguments['kargs'] = kargs
+      arguments['kwargs'] = kwargs
       expectation = self._get_flexmock_expectation(method, arguments)
       if expectation:
         expectation.times_called += 1
@@ -452,8 +461,18 @@ class FlexMock(object):
         else:
           return return_value.value
       else:
-        raise InvalidMethodSignature('%s%s' % (method, str(arguments)))
+        raise InvalidMethodSignature(FlexMock._format_args(method, arguments))
     return mock_method
+
+  @staticmethod
+  def _format_args(method, arguments):
+    kargs = ', '.join(str(arg) for arg in arguments['kargs'])
+    kwargs = ', '.join('%s=%s' % (k, v) for k, v in arguments['kwargs'].items())
+    if kargs and kwargs:
+      args = '%s, %s' % (kargs, kwargs)
+    else:
+      args = '%s%s' % (kargs, kwargs)
+    return '%s(%s)' % (method, args)
 
   def __create_new_method(self, return_value):
     @staticmethod
