@@ -289,7 +289,7 @@ class FlexMock(object):
 
     Args:
       object_or_class: object or class to mock
-      force: Boolean, see mock() method for explanation
+      force: Boolean, see _setup_mock() method for explanation
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._flexmock_expectations = []
@@ -421,8 +421,9 @@ class FlexMock(object):
           not self._match_args(args, exp.args) and
           not exp.times_called):
         raise MethodCalledOutOfOrder(
-            '%s%s called before %s%s' %
-            (e.method, e.args, exp.method, exp.args))
+            '%s called before %s' %
+            (FlexMock._format_args(e.method, e.args),
+             FlexMock._format_args(exp.method, exp.args)))
       if exp.method == name and self._match_args(args, exp.args):
         break
 
@@ -466,8 +467,15 @@ class FlexMock(object):
 
   @staticmethod
   def _format_args(method, arguments):
-    kargs = ', '.join(str(arg) for arg in arguments['kargs'])
-    kwargs = ', '.join('%s=%s' % (k, v) for k, v in arguments['kwargs'].items())
+    def to_str(arg):
+      if isinstance(arg, str):
+        return '"%s"' % arg
+      else:
+        return str(arg)
+
+    kargs = ', '.join(to_str(arg) for arg in arguments['kargs'])
+    kwargs = ', '.join('%s=%s' % (k, to_str(v)) for k, v in
+                                  arguments['kwargs'].items())
     if kargs and kwargs:
       args = '%s, %s' % (kargs, kwargs)
     else:
@@ -487,3 +495,5 @@ def flexmock_unittest(*kargs, **kwargs):
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
   return UnittestFlexMock(*kargs, **kwargs)
+
+flexmock = flexmock_unittest
