@@ -1,3 +1,6 @@
+Release 0.6.3
+- Adding keyword argument expectation matching
+
 Release 0.6.2
 - Changing and_return(multiple=True) to one_to_one 
 - Making it possible to supply multiple args to and_return instead of a tuple
