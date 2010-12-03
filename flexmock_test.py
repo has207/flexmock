@@ -465,17 +465,15 @@ class Testflexmock(unittest.TestCase):
 
   def test_flexmock_should_match_keyword_arguments(self):
     class Foo: pass
-      #def method1(self, arg1, arg2=None, arg3=None):
-        #return '%s%s%s' % (arg1, arg2, arg3)
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice
     foo.method1(1, arg2=2, arg3=3)
     foo.method1(1, arg3=3, arg2=2)
     unittest.TestCase.tearDown(self)
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2)
+    self.assertRaises(InvalidMethodSignature, foo.method1, arg2=2, arg3=3)
     self.assertRaises(InvalidMethodSignature, foo.method1, 1, arg2=2, arg3=4)
     self.assertRaises(InvalidMethodSignature, foo.method1, 1)
-    self.assertRaises(InvalidMethodSignature, foo.method1, arg2=2, arg3=3)
 
   def test_flexmock_should_match_keyword_arguments_works_with_passthru(self):
     class Foo:

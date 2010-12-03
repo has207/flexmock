@@ -27,19 +27,23 @@ import types
 import unittest
 
 
-class InvalidMethodSignature(Exception):
+class FlexmockException(Exception):
   pass
 
 
-class MethodNotCalled(Exception):
+class InvalidMethodSignature(FlexmockException):
   pass
 
 
-class MethodCalledOutOfOrder(Exception):
+class MethodNotCalled(FlexmockException):
   pass
 
 
-class AlreadyMocked(Exception):
+class MethodCalledOutOfOrder(FlexmockException):
+  pass
+
+
+class AlreadyMocked(FlexmockException):
   pass
 
 
@@ -366,6 +370,7 @@ class FlexMock(object):
 
   def _flexmock_teardown(self, saved_teardown):
     def teardown(self):
+      exception = None
       if hasattr(self, '_flexmock_objects'):
         saved = {}
         for mock_object, expectations in self._flexmock_objects.items():
@@ -373,9 +378,15 @@ class FlexMock(object):
         for mock_object, expectations in saved.items():
           del self._flexmock_objects[mock_object]
           for expectation in expectations:
-            expectation.verify()
+            if not exception:
+              try:
+                expectation.verify()
+              except FlexmockException, e:
+                exception = e
             expectation.reset()
       saved_teardown(self)
+      if exception:
+        raise e
     return teardown
 
   def _retrieve_or_create_expectation(self, method, args, return_value):
@@ -431,11 +442,17 @@ class FlexMock(object):
     if (given_args == expected_args or
         expected_args == {'kargs': (None,), 'kwargs': {}}):
       return True
-    if len(given_args['kargs']) != len(expected_args['kargs']): 
+    if (len(given_args['kargs']) != len(expected_args['kargs']) or
+        len(given_args['kwargs']) != len(expected_args['kwargs'])):
       return False
     try:
       for i, arg in enumerate(given_args['kargs']):
-        if not isinstance(arg, expected_args['kargs'][i]):
+        if (arg != expected_args['kargs'][i] and
+            not isinstance(arg, expected_args['kargs'][i])):
+          return False
+      for k, v in given_args['kwargs']:
+        if (v != expected_args['kwargs'][k] and
+            not isinstance(v, expected_args['kwargs'][k])):
           return False
       return True
     except:
