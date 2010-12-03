@@ -422,11 +422,10 @@ class FlexMock(object):
       args['kargs'] = (args['kargs'],)
     if name:
       for e in reversed(self._flexmock_expectations):
-        if e.method == name:
-          if self._match_args(args, e.args):
-            if e._ordered:
-              self._verify_call_order(e, args, name)
-            return e
+        if e.method == name and self._match_args(args, e.args):
+          if e._ordered:
+            self._verify_call_order(e, args, name)
+          return e
 
   def _verify_call_order(self, e, args, name):
     for exp in self._flexmock_expectations:
@@ -520,5 +519,6 @@ def flexmock_unittest(*kargs, **kwargs):
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
   return UnittestFlexMock(*kargs, **kwargs)
+
 
 flexmock = flexmock_unittest
