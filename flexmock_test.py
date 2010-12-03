@@ -350,29 +350,29 @@ class Testflexmock(unittest.TestCase):
     for method in FlexMock.UPDATED_ATTRS:
       self.assertFalse(method in dir(Group), '%s is still in Group' % method)
 
-  def test_flexmock_passthru_respects_matched_expectations(self):
+  def test_flexmock_and_execute_respects_matched_expectations(self):
     class Group(object):
       def method1(self, arg1, arg2='b'):
         return '%s:%s' % (arg1, arg2)
       def method2(self, arg):
         return arg
     group = Group()
-    flexmock(group).should_receive('method1').twice.and_passthru
+    flexmock(group).should_receive('method1').twice.and_execute
     self.assertEqual('a:c', group.method1('a', arg2='c'))
     self.assertEqual('a:b', group.method1('a'))
-    group.should_receive('method2').once.with_args('c').and_passthru
+    group.should_receive('method2').once.with_args('c').and_execute
     self.assertEqual('c', group.method2('c'))
     unittest.TestCase.tearDown(self)
 
-  def test_flexmock_passthru_respects_unmatched_expectations(self):
+  def test_flexmock_and_execute_respects_unmatched_expectations(self):
     class Group(object):
       def method1(self, arg1, arg2='b'):
         return '%s:%s' % (arg1, arg2)
     group = Group()
-    flexmock(group).should_receive('method1').at_least.once.and_passthru
+    flexmock(group).should_receive('method1').at_least.once.and_execute
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
     flexmock(group)
-    group.should_receive('method2').with_args('a').once.and_passthru
+    group.should_receive('method2').with_args('a').once.and_execute
     group.should_receive('method2').with_args('not a')
     group.method2('not a')
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
@@ -475,13 +475,13 @@ class Testflexmock(unittest.TestCase):
     self.assertRaises(InvalidMethodSignature, foo.method1, 1, arg2=2, arg3=4)
     self.assertRaises(InvalidMethodSignature, foo.method1, 1)
 
-  def test_flexmock_should_match_keyword_arguments_works_with_passthru(self):
+  def test_flexmock_should_match_keyword_arguments_works_with_and_execute(self):
     class Foo:
       def method1(self, arg1, arg2=None, arg3=None):
         return '%s%s%s' % (arg1, arg2, arg3)
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(
-        1, arg3=3, arg2=2).and_passthru.once
+        1, arg3=3, arg2=2).and_execute.once
     self.assertEqual('123', foo.method1(1, arg2=2, arg3=3))
 
   def test_flexmock_should_mock_private_methods(self):
@@ -493,7 +493,14 @@ class Testflexmock(unittest.TestCase):
     foo = Foo()
     flexmock(foo).should_receive('__private_method').and_return('bar')
     self.assertEqual('bar', foo.public_method())
-      
+
+  def test_flexmock_should_mock_generators(self):
+    class Gen: pass
+    gen = Gen()
+    flexmock(gen).should_receive('foo').and_yield(xrange(1, 10))
+    for i in xrange(1, 10):
+      self.assertEqual(i, gen.foo())
+
 
 if __name__ == '__main__':
     unittest.main()

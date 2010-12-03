@@ -80,6 +80,7 @@ class Expectation(object):
     self.return_values = []
     if return_value is not None:
       self.return_values.append(value)
+    self.yield_values = []
     self.times_called = 0
     self.expected_calls = None
     self._mock = mock
@@ -180,7 +181,7 @@ class Expectation(object):
     return self
 
   @property
-  def and_passthru(self):
+  def and_execute(self):
     """Creates a spy.
 
     This means that the original method will be called rather than the fake
@@ -199,6 +200,12 @@ class Expectation(object):
   def and_raise(self, exception):
     """Specifies the exception to be raised when this expectation is met."""
     self.return_values.append(ReturnValue(raises=exception))
+    return self
+
+  def and_yield(self, some_iterable):
+    """Specifies the list of items to be yielded on successive method calls."""
+    for value in reversed(some_iterable):
+      self.yield_values.append(ReturnValue(value))
     return self
 
   def verify(self):
@@ -470,7 +477,9 @@ class FlexMock(object):
         expectation.times_called += 1
         if expectation._pass_thru and expectation.original_method:
           return expectation.original_method(*kargs, **kwargs)
-        if expectation.return_values:
+        if expectation.yield_values:
+          return_value = expectation.yield_values.pop()
+        elif expectation.return_values:
           return_value = expectation.return_values[0]
           expectation.return_values = expectation.return_values[1:]
           expectation.return_values.append(return_value)
