@@ -202,17 +202,14 @@ class Expectation(object):
     self.return_values.append(ReturnValue(raises=exception))
     return self
 
-  def and_yield(self, some_iterable):
+  def and_yield(self, *kargs):
     """Specifies the list of items to be yielded on successive method calls."""
-    for value in some_iterable:
+    for value in kargs:
       self.yield_values.append(ReturnValue(value))
     return self
 
   def verify(self):
     """Verify that this expectation has been met.
-
-    Returns:
-      Boolean
 
     Raises:
       MethodNotCalled Exception
@@ -352,10 +349,11 @@ class FlexMock(object):
     obj._get_flexmock_expectation = self._get_flexmock_expectation
     obj._flexmock_expectations = []
     self._mock = obj
-    for method, return_value in kwargs.items():
-      obj.should_receive(method, return_value=return_value)
-    if inspect.isclass(obj) and 'new_instances' in kwargs:
+    if 'new_instances' in kwargs and inspect.isclass(obj):
       self._new_instances(kwargs['new_instances'])
+    else:
+      for method, return_value in kwargs.items():
+        obj.should_receive(method, return_value=return_value)
     expectation = self._retrieve_or_create_expectation(None, (), None)
     self._flexmock_expectations.append(expectation)
 
@@ -379,23 +377,18 @@ class FlexMock(object):
 
   def _flexmock_teardown(self, saved_teardown):
     def teardown(self):
-      exception = None
+      saved_teardown(self)
       if hasattr(self, '_flexmock_objects'):
         saved = {}
         for mock_object, expectations in self._flexmock_objects.items():
-          saved[mock_object] = expectations
+          saved[mock_object] = expectations[:]
+          for expectation in expectations:
+            expectation.reset()
         for mock_object, expectations in saved.items():
           del self._flexmock_objects[mock_object]
+        for mock_object, expectations in saved.items():
           for expectation in expectations:
-            if not exception:
-              try:
-                expectation.verify()
-              except FlexmockException, e:
-                exception = e
-            expectation.reset()
-      saved_teardown(self)
-      if exception:
-        raise e
+            expectation.verify()
     return teardown
 
   def _retrieve_or_create_expectation(self, method, args, return_value):

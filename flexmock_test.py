@@ -350,6 +350,19 @@ class Testflexmock(unittest.TestCase):
     for method in FlexMock.UPDATED_ATTRS:
       self.assertFalse(method in dir(Group), '%s is still in Group' % method)
 
+  def test_flexmock_should_cleanup_after_exception(self):
+    class User: pass
+    class Group: pass
+    flexmock(Group)
+    flexmock(User)
+    Group.should_receive('method1').once
+    User.should_receive('method2').once
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+    for method in FlexMock.UPDATED_ATTRS:
+      self.assertFalse(method in dir(Group), '%s is still in Group' % method)
+    for method in FlexMock.UPDATED_ATTRS:
+      self.assertFalse(method in dir(User), '%s is still in User' % method)
+
   def test_flexmock_and_execute_respects_matched_expectations(self):
     class Group(object):
       def method1(self, arg1, arg2='b'):
@@ -497,9 +510,9 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_should_mock_generators(self):
     class Gen: pass
     gen = Gen()
-    flexmock(gen).should_receive('foo').and_yield(xrange(1, 10))
+    flexmock(gen).should_receive('foo').and_yield(*range(1, 10))
     output = [val for val in gen.foo()]
-    self.assertEqual([val for val in xrange(1, 10)], output)
+    self.assertEqual([val for val in range(1, 10)], output)
 
 
 if __name__ == '__main__':
