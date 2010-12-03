@@ -19,7 +19,8 @@ SUPPORTS:
 - simple syntax for generating new mock objects
 - overriding new instances (on new-style objects)
 - parameter shortcuts for even terser syntax
-- proxying/spying using the and_passthru expectation modifier
+- proxying/spying using the and_execute expectation modifier
+- mocking a generator using and_yield
 - enforcing expectations ordering
 
 INSTALL:
