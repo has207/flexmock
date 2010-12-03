@@ -484,6 +484,16 @@ class Testflexmock(unittest.TestCase):
         1, arg3=3, arg2=2).and_passthru.once
     self.assertEqual('123', foo.method1(1, arg2=2, arg3=3))
 
+  def test_flexmock_should_mock_private_methods(self):
+    class Foo:
+      def __private_method(self):
+        return 'foo'
+      def public_method(self):
+        return self.__private_method()
+    foo = Foo()
+    flexmock(foo).should_receive('__private_method').and_return('bar')
+    self.assertEqual('bar', foo.public_method())
+      
 
 if __name__ == '__main__':
     unittest.main()

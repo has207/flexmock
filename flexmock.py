@@ -316,6 +316,8 @@ class FlexMock(object):
     Returns:
       expectation: Expectation object
     """
+    if method.startswith('__'):
+      method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
     expectation = self._retrieve_or_create_expectation(method, args,
                                                        return_value)
     self._flexmock_expectations.append(expectation)
