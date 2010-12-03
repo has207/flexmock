@@ -320,6 +320,8 @@ class FlexMock(object):
     Returns:
       expectation: Expectation object
     """
+    if args is None:
+      args = ()
     if method.startswith('__'):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
     expectation = self._retrieve_or_create_expectation(method, args,
@@ -441,7 +443,7 @@ class FlexMock(object):
 
   def _match_args(self, given_args, expected_args):
     if (given_args == expected_args or
-        expected_args == {'kargs': (None,), 'kwargs': {}}):
+        expected_args == {'kargs': (), 'kwargs': {}}):
       return True
     if (len(given_args['kargs']) != len(expected_args['kargs']) or
         len(given_args['kwargs']) != len(expected_args['kwargs'])):
