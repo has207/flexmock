@@ -204,7 +204,7 @@ class Expectation(object):
 
   def and_yield(self, some_iterable):
     """Specifies the list of items to be yielded on successive method calls."""
-    for value in reversed(some_iterable):
+    for value in some_iterable:
       self.yield_values.append(ReturnValue(value))
     return self
 
@@ -468,6 +468,10 @@ class FlexMock(object):
       pass
 
   def __create_mock_method(self, method):
+    def generator_method(yield_values):
+      for value in yield_values:
+        yield value.value
+
     def mock_method(self, *kargs, **kwargs):
       arguments = {}
       arguments['kargs'] = kargs
@@ -478,7 +482,7 @@ class FlexMock(object):
         if expectation._pass_thru and expectation.original_method:
           return expectation.original_method(*kargs, **kwargs)
         if expectation.yield_values:
-          return_value = expectation.yield_values.pop()
+          return generator_method(expectation.yield_values)
         elif expectation.return_values:
           return_value = expectation.return_values[0]
           expectation.return_values = expectation.return_values[1:]

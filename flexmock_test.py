@@ -498,8 +498,8 @@ class Testflexmock(unittest.TestCase):
     class Gen: pass
     gen = Gen()
     flexmock(gen).should_receive('foo').and_yield(xrange(1, 10))
-    for i in xrange(1, 10):
-      self.assertEqual(i, gen.foo())
+    output = [val for val in gen.foo()]
+    self.assertEqual([val for val in xrange(1, 10)], output)
 
 
 if __name__ == '__main__':
