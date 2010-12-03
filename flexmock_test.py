@@ -4,7 +4,7 @@ from flexmock import InvalidMethodSignature
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import AlreadyMocked
-from flexmock import flexmock_unittest as flexmock
+from flexmock import flexmock
 import unittest
 
 class Testflexmock(unittest.TestCase):

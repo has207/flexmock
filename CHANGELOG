@@ -1,3 +1,10 @@
+Release 0.6.4
+- Fixing up teardown cleanup code after an exception is raised in tests
+- Fixing and_yield to return proper generator
+- Adding and_yield returning a predefined generator
+- Replacing and_passthru with and_execute 
+- Make it easier to mock private methods 
+
 Release 0.6.3
 - Adding keyword argument expectation matching
 
