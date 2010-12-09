@@ -3,6 +3,8 @@ from flexmock import Expectation
 from flexmock import InvalidMethodSignature
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
+from flexmock import AndExecuteInvalidMethod
+from flexmock import AndExecuteNotSupportedForClassMocks
 from flexmock import AlreadyMocked
 from flexmock import flexmock
 import unittest
@@ -314,17 +316,42 @@ class Testflexmock(unittest.TestCase):
     self.assertTrue(
         self.mock._get_flexmock_expectation('method_foo', 'value_bar'))
 
-  def test_flexmock_should_not_mock_the_same_object_twice(self):
+  def test_flexmock_constructor_should_not_mock_the_same_object_twice(self):
     class User(object): pass
     user = User()
     flexmock(user)
-    self.assertRaises(AlreadyMocked, flexmock, user)
+    self.assertRaises(AlreadyMocked, FlexMock, user)
 
-  def test_flexmock_should_force_mock_the_same_object(self):
+  def test_flexmock_function_should_return_previously_mocked_object(self):
     class User(object): pass
     user = User()
-    flexmock(user)
-    flexmock(user, force=True)
+    foo = flexmock(user)
+    self.assertEqual(foo._mock, flexmock(user))
+
+  def test_flexmock_should_not_return_class_object_if_mocking_instance(self):
+    class User: pass
+    user = User()
+    user2 = User()
+    class_mock = flexmock(User).should_receive(
+        'method').and_return('class').mock
+    user_mock = flexmock(user).should_receive(
+        'method').and_return('instance').mock
+    self.assertTrue(class_mock is not user_mock)
+    self.assertEquals('instance', user.method())
+    self.assertEquals('class', user2.method())
+
+  def test_flexmock_should_blow_up_on_and_execute_for_invalid_method(self):
+    class User: pass
+    user = User()
+    mock = flexmock(user).should_receive('foo').and_execute
+    self.assertRaises(AndExecuteInvalidMethod, user.foo)
+
+  def test_flexmock_should_blow_up_on_and_execute_for_class_mock(self):
+    class User:
+      def foo(self):
+        pass
+    mock = flexmock(User).should_receive('foo').and_execute
+    self.assertRaises(AndExecuteNotSupportedForClassMocks, User.foo)
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
@@ -392,12 +419,11 @@ class Testflexmock(unittest.TestCase):
 
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
     class Foo(object): pass
-    flexmock(Foo)
-    Foo.should_receive('foo')
-    Foo.should_receive('method1', args=('a',)).ordered
-    Foo.should_receive('bar')
-    Foo.should_receive('method1', args=('b',)).ordered
-    Foo.should_receive('baz')
+    flexmock(Foo).should_receive('foo')
+    flexmock(Foo).should_receive('method1', args=('a',)).ordered
+    flexmock(Foo).should_receive('bar')
+    flexmock(Foo).should_receive('method1', args=('b',)).ordered
+    flexmock(Foo).should_receive('baz')
     Foo.bar()
     Foo.method1('a')
     Foo.method1('b')

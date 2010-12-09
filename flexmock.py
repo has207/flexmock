@@ -47,6 +47,14 @@ class AlreadyMocked(FlexmockException):
   pass
 
 
+class AndExecuteInvalidMethod(FlexmockException):
+  pass
+
+
+class AndExecuteNotSupportedForClassMocks(FlexmockException):
+  pass
+
+
 class ReturnValue(object):
   def __init__(self, value=None, raises=None):
     self.value = value
@@ -245,7 +253,10 @@ class Expectation(object):
       delattr(self._mock, self.method)
     for attr in FlexMock.UPDATED_ATTRS:
       if hasattr(self._mock, attr):
-        delattr(self._mock, attr)
+        try:
+          delattr(self._mock, attr)
+        except AttributeError:
+          pass
     del self
 
 
@@ -292,12 +303,11 @@ class FlexMock(object):
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectation',
                    '_flexmock_expectations']
 
-  def __init__(self, object_or_class=None, force=False, **kwargs):
+  def __init__(self, object_or_class=None, **kwargs):
     """FlexMock constructor.
 
     Args:
       object_or_class: object or class to mock
-      force: Boolean, see _setup_mock() method for explanation
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._flexmock_expectations = []
@@ -306,7 +316,7 @@ class FlexMock(object):
       for attr, value in kwargs.items():
         setattr(self, attr, value)
     else:
-      self._setup_mock(object_or_class, force=force, **kwargs)
+      self._setup_mock(object_or_class, **kwargs)
     self.update_teardown()
 
   def should_receive(self, method, args=None, return_value=None):
@@ -344,24 +354,24 @@ class FlexMock(object):
       expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
 
-  def _setup_mock(self, obj, force=False, **kwargs):
+  def _setup_mock(self, obj_or_class, **kwargs):
     """Puts the provided object or class under mock."""
-    self._ensure_not_already_mocked(obj, force)
-    obj.should_receive = self.should_receive
-    obj._get_flexmock_expectation = self._get_flexmock_expectation
-    obj._flexmock_expectations = []
-    self._mock = obj
-    if 'new_instances' in kwargs and inspect.isclass(obj):
+    self._ensure_not_already_mocked(obj_or_class)
+    obj_or_class.should_receive = self.should_receive
+    obj_or_class._get_flexmock_expectation = self._get_flexmock_expectation
+    obj_or_class._flexmock_expectations = []
+    self._mock = obj_or_class
+    if 'new_instances' in kwargs and inspect.isclass(obj_or_class):
       self._new_instances(kwargs['new_instances'])
     else:
       for method, return_value in kwargs.items():
-        obj.should_receive(method, return_value=return_value)
+        obj_or_class.should_receive(method, return_value=return_value)
     expectation = self._retrieve_or_create_expectation(None, (), None)
     self._flexmock_expectations.append(expectation)
 
-  def _ensure_not_already_mocked(self, obj, force):
+  def _ensure_not_already_mocked(self, obj):
     for attr in self.UPDATED_ATTRS:
-      if (hasattr(obj, attr)) and not force:
+      if (hasattr(obj, attr) and not hasattr(obj.__class__, attr)):
         raise AlreadyMocked('%s already defines %s' % (obj, attr))
 
   def update_teardown(self, test_runner=unittest.TestCase,
@@ -473,7 +483,13 @@ class FlexMock(object):
       expectation = self._get_flexmock_expectation(method, arguments)
       if expectation:
         expectation.times_called += 1
-        if expectation._pass_thru and expectation.original_method:
+        if expectation._pass_thru:
+          if not expectation.original_method:
+            raise AndExecuteInvalidMethod(expectation.method)
+          if not inspect.isclass(self):
+            return expectation.original_method(*kargs, **kwargs)
+          else:
+            raise AndExecuteNotSupportedForClassMocks
           return expectation.original_method(*kargs, **kwargs)
         if expectation.yield_values:
           return generator_method(expectation.yield_values)
@@ -520,7 +536,11 @@ def flexmock_unittest(*kargs, **kwargs):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
-  return UnittestFlexMock(*kargs, **kwargs)
+  try:
+    mock = UnittestFlexMock(*kargs, **kwargs)
+  except AlreadyMocked:
+    mock = kargs[0]
+  return mock
 
 
 flexmock = flexmock_unittest
