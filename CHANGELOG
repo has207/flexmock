@@ -1,3 +1,8 @@
+Release 0.6.5
+- Adding support for multiple flexmock() calls on same object
+- Adding error detection on and_execute for missing or unbound methods
+- Make sure empty args don't include None
+
 Release 0.6.4
 - Fixing up teardown cleanup code after an exception is raised in tests
 - Fixing and_yield to return proper generator
