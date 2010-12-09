@@ -196,6 +196,8 @@ class Expectation(object):
     version. However, we can still keep track of how many times it's called and
     with what arguments, and apply expectations accordingly.
     """
+    if inspect.isclass(self._mock):
+      raise AndExecuteNotSupportedForClassMocks
     self._pass_thru = True
     return self
 
@@ -486,10 +488,6 @@ class FlexMock(object):
         if expectation._pass_thru:
           if not expectation.original_method:
             raise AndExecuteInvalidMethod(expectation.method)
-          if not inspect.isclass(self):
-            return expectation.original_method(*kargs, **kwargs)
-          else:
-            raise AndExecuteNotSupportedForClassMocks
           return expectation.original_method(*kargs, **kwargs)
         if expectation.yield_values:
           return generator_method(expectation.yield_values)

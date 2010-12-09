@@ -349,9 +349,13 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_should_blow_up_on_and_execute_for_class_mock(self):
     class User:
       def foo(self):
-        pass
-    mock = flexmock(User).should_receive('foo').and_execute
-    self.assertRaises(AndExecuteNotSupportedForClassMocks, User.foo)
+        return 'class'
+    user = User()
+    try:
+      flexmock(User).should_receive('foo').and_execute
+      raise Exception('and_execute should have raised an exception')
+    except AndExecuteNotSupportedForClassMocks:
+      pass
 
   def test_flexmock_should_mock_new_instances(self):
     class User(object): pass
