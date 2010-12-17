@@ -364,6 +364,15 @@ class Testflexmock(unittest.TestCase):
     flexmock(Group, new_instances=user)
     self.assertTrue(user is Group())
 
+  def test_flexmock_should_mock_new_instances_with_multiple_params(self):
+    class User(object): pass
+    class Group(object):
+      def __init__(self, arg, arg2):
+        pass
+    user = User()
+    flexmock(Group, new_instances=user)
+    self.assertTrue(user is Group(1, 2))
+
   def test_flexmock_should_revert_new_instances_on_teardown(self):
     class User(object): pass
     class Group(object): pass
