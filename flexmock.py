@@ -524,7 +524,7 @@ class FlexMock(object):
 
   def __create_new_method(self, return_value):
     @staticmethod
-    def new(cls):
+    def new(cls, *kargs, **kwargs):
       return return_value
     return new
 
