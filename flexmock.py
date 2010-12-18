@@ -263,44 +263,7 @@ class Expectation(object):
 
 
 class FlexMock(object):
-  """Creates mock objects or puts existing objects or classes under mock.
-
-  To create a new mock object with some attributes:
-    FlexMock('some_name', attr1=value1, attr2=value2, ...)
-
-  To put existing object under mock:
-    FlexMock(some_object)
-
-  Now you can add some expectations:
-
-    some_object.should_receive('some_method').and_return('some_value')
-
-    --or--
-
-    some_object.should_receive('some_method').and_raise(some_exception)
-
-  To generate some assertions add a times(x) expectation:
-
-    some_object.should_receive('some_method').times(1)
-
-    -- which is equivalent to --
-
-    some_object.should_receive('some_method').once
-
-  You can also do the same thing for all instances of a class by giving the
-  FlexMock constructor a class instead of an instance. It's even possible to
-  override new instances created by the class constructor.
-
-  Various shortcuts are supported, so:
-
-    FlexMock(some_object, method1='foo', method2='bar')
-
-    -- is the same as --
-
-    FlexMock(some_object)
-    some_object.should_receive('method1').and_return('foo')
-    some_object.should_receive('method2').and_return('bar')
-  """
+  """Creates mock objects or puts existing objects or classes under mock."""
 
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectation',
                    '_flexmock_expectations']
