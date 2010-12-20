@@ -322,9 +322,8 @@ class FlexMock(object):
   def _setup_mock(self, obj_or_class, **kwargs):
     """Puts the provided object or class under mock."""
     self._ensure_not_already_mocked(obj_or_class)
-    obj_or_class.should_receive = self.should_receive
-    obj_or_class._get_flexmock_expectation = self._get_flexmock_expectation
-    obj_or_class._flexmock_expectations = []
+    for attr in self.UPDATED_ATTRS:
+      setattr(obj_or_class, attr, getattr(self, attr))
     self._mock = obj_or_class
     if 'new_instances' in kwargs and inspect.isclass(obj_or_class):
       self._new_instances(kwargs['new_instances'])
