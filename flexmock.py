@@ -268,21 +268,35 @@ class FlexMock(object):
   UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectation',
                    '_flexmock_expectations']
 
-  def __init__(self, object_or_class=None, **kwargs):
+  def __init__(self, **kwargs):
     """FlexMock constructor.
+
+    Args:
+      kwargs: dict of attribute/value pairs used to initialize the mock object
+    """
+    self._flexmock_expectations = []
+    self._mock = self
+    for attr, value in kwargs.items():
+      setattr(self, attr, value)
+    self.update_teardown()
+
+  @staticmethod
+  def mock(object_or_class=None, **kwargs):
+    """
 
     Args:
       object_or_class: object or class to mock
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
-    self._flexmock_expectations = []
     if object_or_class is None:
-      self._mock = self
-      for attr, value in kwargs.items():
-        setattr(self, attr, value)
+      mock = FlexMock(**kwargs)
     else:
-      self._setup_mock(object_or_class, **kwargs)
-    self.update_teardown()
+      mock = FlexMock()
+      try:
+        mock._setup_mock(object_or_class, **kwargs)
+      except AlreadyMocked:
+        mock = object_or_class
+    return mock
 
   def should_receive(self, method, args=None, return_value=None):
     """Adds a method Expectation to the provided class or instance.
@@ -496,11 +510,7 @@ def flexmock_unittest(*kargs, **kwargs):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
-  try:
-    mock = UnittestFlexMock(*kargs, **kwargs)
-  except AlreadyMocked:
-    mock = kargs[0]
-  return mock
+  return UnittestFlexMock.mock(*kargs, **kwargs)
 
 
 flexmock = flexmock_unittest
