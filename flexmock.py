@@ -23,6 +23,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 import inspect
+import sys
 import types
 import unittest
 
@@ -109,9 +110,8 @@ class Expectation(object):
 
   def with_args(self, *kargs, **kwargs):
     """Override the arguments used to match this expectation's method."""
-    self.args = {}
-    self.args['kargs'] = kargs
-    self.args['kwargs'] = kwargs
+    args = {'kargs': kargs, 'kwargs': kwargs}
+    self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
   def and_return(self, *value):
@@ -209,6 +209,8 @@ class Expectation(object):
 
   def and_raise(self, exception):
     """Specifies the exception to be raised when this expectation is met."""
+    if not inspect.isclass(exception):
+      exception = exception.__class__
     self.return_values.append(ReturnValue(raises=exception))
     return self
 
@@ -298,23 +300,20 @@ class FlexMock(object):
         mock = object_or_class
     return mock
 
-  def should_receive(self, method, args=None, return_value=None):
+  def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 
     Args:
       method: string name of the method to add
-      args: tuple of multipe args or *single* arg of any type
-      return_value: whatever you want the method to return
 
     Returns:
       expectation: Expectation object
     """
-    if args is None:
-      args = ()
     if method.startswith('__'):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
-    expectation = self._retrieve_or_create_expectation(method, args,
-                                                       return_value)
+    expectation = self._retrieve_or_create_expectation(method, (), None)
+    if not expectation:
+      expectation = Expectation(method, self._mock)
     self._flexmock_expectations.append(expectation)
     self._add_expectation_to_object(expectation, method)
     return expectation
@@ -343,7 +342,7 @@ class FlexMock(object):
       self._new_instances(kwargs['new_instances'])
     else:
       for method, return_value in kwargs.items():
-        obj_or_class.should_receive(method, return_value=return_value)
+        obj_or_class.should_receive(method).and_return(return_value)
     expectation = self._retrieve_or_create_expectation(None, (), None)
     self._flexmock_expectations.append(expectation)
 
@@ -454,21 +453,36 @@ class FlexMock(object):
       for value in yield_values:
         yield value.value
 
+    def pass_thru(expectation, *kargs, **kwargs):
+      return_values = None
+      if not expectation.original_method:
+        raise AndExecuteInvalidMethod(expectation.method)
+      try:
+        return_values = expectation.original_method(*kargs, **kwargs)
+      except:
+        if expectation.return_values:
+          raised = sys.exc_info()[0]
+          if not expectation.return_values[0].raises:
+            raise
+          elif expectation.return_values[0].raises is not raised:
+            raise (InvalidMethodSignature('expected %s, raised %s' %
+                   (repr(expectation.return_values[0].raises), raised)))
+          else:
+            return
+        else:
+          return
+      if expectation.return_values:
+        if return_values != expectation.return_values[0].value:
+          raise InvalidMethodSignature
+      return expectation.original_method(*kargs, **kwargs)
+
     def mock_method(self, *kargs, **kwargs):
-      arguments = {}
-      arguments['kargs'] = kargs
-      arguments['kwargs'] = kwargs
+      arguments = {'kargs': kargs, 'kwargs': kwargs}
       expectation = self._get_flexmock_expectation(method, arguments)
       if expectation:
         expectation.times_called += 1
         if expectation._pass_thru:
-          if not expectation.original_method:
-            raise AndExecuteInvalidMethod(expectation.method)
-          return_values = expectation.original_method(*kargs, **kwargs)
-          if expectation.return_values:
-            if return_values != expectation.return_values[0].value:
-              raise InvalidMethodSignature
-          return expectation.original_method(*kargs, **kwargs)
+          return pass_thru(expectation, *kargs, **kwargs)
         if expectation.yield_values:
           return generator_method(expectation.yield_values)
         elif expectation.return_values:

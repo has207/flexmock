@@ -100,7 +100,7 @@ class Testflexmock(unittest.TestCase):
 
   def test_flexmock_should_match_any_args_by_default(self):
     self.mock.should_receive('method_foo').and_return('bar')
-    self.mock.should_receive('method_foo', args=('baz',), return_value='baz')
+    self.mock.should_receive('method_foo').with_args('baz').and_return('baz')
     self.assertEqual('bar', self.mock.method_foo())
     self.assertEqual('bar', self.mock.method_foo(1))
     self.assertEqual('bar', self.mock.method_foo('foo', 'bar'))
@@ -415,6 +415,7 @@ class Testflexmock(unittest.TestCase):
     class Group(object):
       def method1(self, arg1, arg2='b'):
         return '%s:%s' % (arg1, arg2)
+      def method2(self): pass
     group = Group()
     flexmock(group).should_receive('method1').at_least.once.and_execute
     self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
@@ -427,9 +428,9 @@ class Testflexmock(unittest.TestCase):
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
     class Foo(object): pass
     flexmock(Foo).should_receive('foo')
-    flexmock(Foo).should_receive('method1', args=('a',)).ordered
+    flexmock(Foo).should_receive('method1').with_args('a').ordered
     flexmock(Foo).should_receive('bar')
-    flexmock(Foo).should_receive('method1', args=('b',)).ordered
+    flexmock(Foo).should_receive('method1').with_args('b').ordered
     flexmock(Foo).should_receive('baz')
     Foo.bar()
     Foo.method1('a')
@@ -441,9 +442,9 @@ class Testflexmock(unittest.TestCase):
     class Foo(object): pass
     flexmock(Foo)
     Foo.should_receive('foo')
-    Foo.should_receive('method1', args=('a',)).ordered
+    Foo.should_receive('method1').with_args('a').ordered
     Foo.should_receive('bar')
-    Foo.should_receive('method1', args=('b',)).ordered
+    Foo.should_receive('method1').with_args('b').ordered
     Foo.should_receive('baz')
     Foo.bar()
     Foo.bar()
@@ -555,6 +556,22 @@ class Testflexmock(unittest.TestCase):
         'get_stuff').and_execute.and_return('real', 'stuff')
     self.assertEqual(('real', 'stuff'), user.get_stuff())
 
+  def test_flexmock_should_verify_correct_spy_raise_exceptions(self):
+    class User:
+      def get_stuff(self): raise AlreadyMocked
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_raise(AlreadyMocked)
+    user.get_stuff()
+
+  def test_flexmock_should_blow_up_on_wrong_exception_type(self):
+    class User:
+      def get_stuff(self): raise AlreadyMocked('foo')
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_raise(MethodNotCalled())
+    self.assertRaises(InvalidMethodSignature, user.get_stuff)
+
   def test_flexmock_should_blow_up_on_wrong_spy_return_values(self):
     class User:
       def get_stuff(self): return 'real', 'stuff'
@@ -573,7 +590,7 @@ class Testflexmock(unittest.TestCase):
     user = User()
     flexmock(user).should_receive('get_stuff').and_execute
     flexmock(user).should_receive('get_stuff').and_execute
-    user.get_stuff()
+    #user.get_stuff()
 
 
 if __name__ == '__main__':
