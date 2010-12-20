@@ -547,6 +547,34 @@ class Testflexmock(unittest.TestCase):
     output = [val for val in gen.foo()]
     self.assertEqual([val for val in range(1, 10)], output)
 
+  def test_flexmock_should_verify_correct_spy_return_values(self):
+    class User:
+      def get_stuff(self): return 'real', 'stuff'
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_return('real', 'stuff')
+    self.assertEqual(('real', 'stuff'), user.get_stuff())
+
+  def test_flexmock_should_blow_up_on_wrong_spy_return_values(self):
+    class User:
+      def get_stuff(self): return 'real', 'stuff'
+      def get_more_stuff(self): return 'other', 'stuff'
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_return('other', 'stuff')
+    self.assertRaises(InvalidMethodSignature, user.get_stuff)
+    flexmock(user).should_receive(
+        'get_more_stuff').and_execute.and_return()
+    self.assertRaises(InvalidMethodSignature, user.get_more_stuff)
+
+  def test_flexmock_and_execute_should_not_clobber_original_method(self):
+    class User:
+      def get_stuff(self): return 'real', 'stuff'
+    user = User()
+    flexmock(user).should_receive('get_stuff').and_execute
+    flexmock(user).should_receive('get_stuff').and_execute
+    user.get_stuff()
+
 
 if __name__ == '__main__':
     unittest.main()

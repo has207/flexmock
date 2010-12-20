@@ -329,7 +329,7 @@ class FlexMock(object):
     expectation = self._retrieve_or_create_expectation(
         method, None, return_value)
     self._flexmock_expectations.append(expectation)
-    if not hasattr(expectation, 'original_method'):
+    if not expectation.original_method:
       expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
 
@@ -398,7 +398,7 @@ class FlexMock(object):
 
   def _add_expectation_to_object(self, expectation, method):
     method_instance = self.__create_mock_method(method)
-    if hasattr(self._mock, method):
+    if hasattr(self._mock, method) and not expectation.original_method:
       expectation.original_method = getattr(self._mock, method)
     setattr(self._mock, method, types.MethodType(
         method_instance, self._mock))
@@ -464,6 +464,10 @@ class FlexMock(object):
         if expectation._pass_thru:
           if not expectation.original_method:
             raise AndExecuteInvalidMethod(expectation.method)
+          return_values = expectation.original_method(*kargs, **kwargs)
+          if expectation.return_values:
+            if return_values != expectation.return_values[0].value:
+              raise InvalidMethodSignature
           return expectation.original_method(*kargs, **kwargs)
         if expectation.yield_values:
           return generator_method(expectation.yield_values)
