@@ -1,3 +1,10 @@
+Release 0.6.6
+- Removing extra args from should_receieve
+- Making and_execute check return/raise value of original method
+- Refactoring FlexMock constructor into factory method
+- Fixing new_instances to accept multiple args instead of just none
+- Raising an exception when and_execute is set on class mock 
+
 Release 0.6.5
 - Adding support for multiple flexmock() calls on same object
 - Adding error detection on and_execute for missing or unbound methods
