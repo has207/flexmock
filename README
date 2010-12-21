@@ -4,8 +4,7 @@ It is inspired by Ruby's FlexMock, however full feature parity with
 the Ruby version is not a goal. Python FlexMock omits a number of things in the
 Ruby version, mainly various shortcuts for existing functionality,
 and implements a number of things that Ruby's FlexMock
-doesn't support, such as proxying/spying, returning different arguments
-on successive method calls, and matching arguments using their classes
+doesn't support, such as proxying/spying and matching arguments using their classes
 in addition to values.
 
 What makes FlexMock unique in the Python testing world is its automatic integration
