@@ -348,7 +348,8 @@ class FlexMock(object):
 
   def _ensure_not_already_mocked(self, obj):
     for attr in self.UPDATED_ATTRS:
-      if (hasattr(obj, attr) and not hasattr(obj.__class__, attr)):
+      if (hasattr(obj, attr) and
+          (hasattr(obj, '__class__') and not hasattr(obj.__class__, attr))):
         raise AlreadyMocked('%s already defines %s' % (obj, attr))
 
   def update_teardown(self, test_runner=unittest.TestCase,

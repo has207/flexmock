@@ -584,6 +584,11 @@ class Testflexmock(unittest.TestCase):
         'get_more_stuff').and_execute.and_return()
     self.assertRaises(InvalidMethodSignature, user.get_more_stuff)
 
+  def test_flexmock_should_mock_same_class_twice(self):
+    class Foo: pass
+    flexmock(Foo)
+    flexmock(Foo)
+
   def test_flexmock_and_execute_should_not_clobber_original_method(self):
     class User:
       def get_stuff(self): return 'real', 'stuff'
