@@ -1,5 +1,5 @@
 Release 0.6.6
-- Removing extra args from should_receieve
+- Removing extra args from should_receive
 - Making and_execute check return/raise value of original method
 - Refactoring FlexMock constructor into factory method
 - Fixing new_instances to accept multiple args instead of just none
