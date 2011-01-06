@@ -36,6 +36,14 @@ class InvalidMethodSignature(FlexmockException):
   pass
 
 
+class InvalidExceptionClass(FlexmockException):
+  pass
+
+
+class InvalidExceptionMessage(FlexmockException):
+  pass
+
+
 class MethodNotCalled(FlexmockException):
   pass
 
@@ -207,11 +215,16 @@ class Expectation(object):
     self._ordered = True
     return self
 
-  def and_raise(self, exception):
-    """Specifies the exception to be raised when this expectation is met."""
-    if not inspect.isclass(exception):
-      exception = exception.__class__
-    self.return_values.append(ReturnValue(raises=exception))
+  def and_raise(self, exception, *kargs, **kwargs):
+    """Specifies the exception to be raised when this expectation is met.
+
+    Args:
+      exception: class or instance of the exception
+      kargs: tuple of kargs to pass to the exception
+      kwargs: dict of kwargs to pass to the exception
+    """
+    args = {'kargs': kargs, 'kwargs': kwargs}
+    self.return_values.append(ReturnValue(raises=exception, value=args))
     return self
 
   def and_yield(self, *kargs):
@@ -454,6 +467,27 @@ class FlexMock(object):
       for value in yield_values:
         yield value.value
 
+    def _handle_exception_matching(expectation):
+      if expectation.return_values:
+        raised, instance = sys.exc_info()[:2]
+        message = str(instance)
+        expected = expectation.return_values[0].raises
+        if not expected:
+          raise
+        args = expectation.return_values[0].value
+        expected_instance = expected(*args['kargs'], **args['kwargs'])
+        expected_message = str(expected_instance)
+        if inspect.isclass(expected):
+          if expected is not raised and not isinstance(raised, expected):
+            raise (InvalidExceptionClass('expected %s, raised %s' %
+                   (expected, raised)))
+          elif expected_message != message:
+            raise (InvalidExceptionMessage('expected %s, raised %s' %
+                   (expected_message, message)))
+        elif expected is not raised:
+          raise (InvalidExceptionClass('expected %s, raised %s' %
+                 (expected, raised)))
+
     def pass_thru(expectation, *kargs, **kwargs):
       return_values = None
       if not expectation.original_method:
@@ -461,17 +495,7 @@ class FlexMock(object):
       try:
         return_values = expectation.original_method(*kargs, **kwargs)
       except:
-        if expectation.return_values:
-          raised = sys.exc_info()[0]
-          if not expectation.return_values[0].raises:
-            raise
-          elif expectation.return_values[0].raises is not raised:
-            raise (InvalidMethodSignature('expected %s, raised %s' %
-                   (repr(expectation.return_values[0].raises), raised)))
-          else:
-            return
-        else:
-          return
+        return _handle_exception_matching(expectation)
       if expectation.return_values:
         if return_values != expectation.return_values[0].value:
           raise InvalidMethodSignature
@@ -493,7 +517,11 @@ class FlexMock(object):
         else:
           return_value = ReturnValue()
         if return_value.raises:
-          raise return_value.raises
+          if inspect.isclass(return_value.raises):
+            raise return_value.raises(
+                *return_value.value['kargs'], **return_value.value['kwargs'])
+          else:
+            raise return_value.raises
         else:
           return return_value.value
       else:

@@ -1,13 +1,17 @@
 from flexmock import FlexMock
-from flexmock import Expectation
-from flexmock import InvalidMethodSignature
-from flexmock import MethodNotCalled
-from flexmock import MethodCalledOutOfOrder
+from flexmock import AlreadyMocked
 from flexmock import AndExecuteInvalidMethod
 from flexmock import AndExecuteNotSupportedForClassMocks
-from flexmock import AlreadyMocked
+from flexmock import Expectation
+from flexmock import FlexmockException
+from flexmock import InvalidMethodSignature
+from flexmock import InvalidExceptionClass
+from flexmock import InvalidExceptionMessage
+from flexmock import MethodNotCalled
+from flexmock import MethodCalledOutOfOrder
 from flexmock import flexmock
 import unittest
+
 
 class Testflexmock(unittest.TestCase):
   def setUp(self):
@@ -94,6 +98,24 @@ class Testflexmock(unittest.TestCase):
     class FakeException(Exception):
       pass
     self.mock.should_receive('method_foo').and_raise(FakeException)
+    self.assertRaises(FakeException, self.mock.method_foo)
+    self.assertEqual(1, self.mock._get_flexmock_expectation(
+        'method_foo').times_called)
+
+  def test_flexmock_should_check_raised_exceptions_instance_with_args(self):
+    class FakeException(Exception):
+      def __init__(self, arg, arg2):
+        pass
+    self.mock.should_receive('method_foo').and_raise(FakeException(1, arg2=2))
+    self.assertRaises(FakeException, self.mock.method_foo)
+    self.assertEqual(1, self.mock._get_flexmock_expectation(
+        'method_foo').times_called)
+
+  def test_flexmock_should_check_raised_exceptions_class_with_args(self):
+    class FakeException(Exception):
+      def __init__(self, arg, arg2):
+        pass
+    self.mock.should_receive('method_foo').and_raise(FakeException, 1, arg2=2)
     self.assertRaises(FakeException, self.mock.method_foo)
     self.assertEqual(1, self.mock._get_flexmock_expectation(
         'method_foo').times_called)
@@ -556,21 +578,40 @@ class Testflexmock(unittest.TestCase):
         'get_stuff').and_execute.and_return('real', 'stuff')
     self.assertEqual(('real', 'stuff'), user.get_stuff())
 
-  def test_flexmock_should_verify_correct_spy_raise_exceptions(self):
+  def test_flexmock_should_verify_spy_raises_correct_exception_class(self):
+    class FakeException(Exception):
+      def __init__(self, param, param2):
+        self.message = '%s, %s' % (param, param2)
+        Exception.__init__(self)
     class User:
-      def get_stuff(self): raise AlreadyMocked
+      def get_stuff(self): raise FakeException(1, 2)
     user = User()
     flexmock(user).should_receive(
-        'get_stuff').and_execute.and_raise(AlreadyMocked)
+        'get_stuff').and_execute.and_raise(FakeException, 1, 2)
     user.get_stuff()
+
+  def test_flexmock_should_verify_spy_matches_exception_message(self):
+    class FakeException(Exception):
+      def __init__(self, param, param2):
+        self.p1 = param
+        self.p2 = param2
+        Exception.__init__(self, param)
+      def __str__(self):
+        return '%s, %s' % (self.p1, self.p2)
+    class User:
+      def get_stuff(self): raise FakeException(1, 2)
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_raise(FakeException, 2, 1)
+    self.assertRaises(InvalidExceptionMessage, user.get_stuff)
 
   def test_flexmock_should_blow_up_on_wrong_exception_type(self):
     class User:
       def get_stuff(self): raise AlreadyMocked('foo')
     user = User()
     flexmock(user).should_receive(
-        'get_stuff').and_execute.and_raise(MethodNotCalled())
-    self.assertRaises(InvalidMethodSignature, user.get_stuff)
+        'get_stuff').and_execute.and_raise(MethodNotCalled)
+    self.assertRaises(InvalidExceptionClass, user.get_stuff)
 
   def test_flexmock_should_blow_up_on_wrong_spy_return_values(self):
     class User:
@@ -599,4 +640,4 @@ class Testflexmock(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+  unittest.main()
