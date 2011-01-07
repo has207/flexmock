@@ -23,7 +23,7 @@ class Testflexmock(unittest.TestCase):
 
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = flexmock(foo='foo', bar='bar')
-    self.assertTrue(FlexMock, type(mock))
+    self.assertEqual(FlexMock, type(mock))
     self.assertEqual('foo', mock.foo)
     self.assertEqual('bar', mock.bar)
 
