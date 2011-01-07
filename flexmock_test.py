@@ -192,7 +192,6 @@ class Testflexmock(unittest.TestCase):
     self.assertRaises(InvalidMethodSignature, self.mock.method_foo, 1)
 
   def test_flexmock_configures_global_mocks_dict(self):
-    self.assertEqual(1, len(self._flexmock_objects))
     for expectations in self._flexmock_objects.values():
       self.assertEqual(0, len(expectations))
     self.mock.should_receive('method_foo')
@@ -636,7 +635,7 @@ class Testflexmock(unittest.TestCase):
     user = User()
     flexmock(user).should_receive('get_stuff').and_execute
     flexmock(user).should_receive('get_stuff').and_execute
-    #user.get_stuff()
+    self.assertEqual(('real', 'stuff'), user.get_stuff())
 
 
 if __name__ == '__main__':

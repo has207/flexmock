@@ -69,6 +69,12 @@ class ReturnValue(object):
     self.value = value
     self.raises = raises
 
+  def __str__(self):
+    if self.raises:
+      return '%s(%s)' % (self.raises, self.value)
+    else:
+      return str(self.value)
+
 
 class Expectation(object):
   """Holds expectations about methods.
@@ -81,18 +87,21 @@ class Expectation(object):
   AT_LEAST = 'at least '
   AT_MOST = 'at most '
 
-  def __init__(self, name, mock, args=None, return_value=None, kwargs=None):
+  def __init__(self, name, mock, kargs=None, kwargs=None, return_value=None):
     self.method = name
     self.modifier = ''
     self.original_method = None
-    self.args = {}
-    if not isinstance(args, tuple):
-      self.args['kargs'] = (args,)
+    if kargs is None and kwargs is None:
+      self.args = None
     else:
-      self.args['kargs'] = args
-    if kwargs is None:
-      kwargs = {}
-    self.args['kwargs'] = kwargs
+      self.args = {'kargs': (), 'kwargs': {}}
+      if kargs is not None:
+        if isinstance(kargs, tuple):
+          self.args['kargs'] = kargs
+        else:
+          self.args['kargs'] = (kargs,)
+      if kwargs is not None:
+        self.args['kwargs'] = kwargs
     value = ReturnValue(return_value)
     self.return_values = []
     if return_value is not None:
@@ -106,7 +115,8 @@ class Expectation(object):
     self._one_by_one = False
 
   def __str__(self):
-    return '%s%s -> %s' % (self.method, self.args, self.return_values)
+    return '%s -> (%s)' % (FlexMock._format_args(self.method, self.args),
+                         ', '.join([str(x) for x in self.return_values]))
 
   @property
   def mock(self):
@@ -118,7 +128,6 @@ class Expectation(object):
 
   def with_args(self, *kargs, **kwargs):
     """Override the arguments used to match this expectation's method."""
-    args = {'kargs': kargs, 'kwargs': kwargs}
     self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
@@ -293,7 +302,6 @@ class FlexMock(object):
     self._mock = self
     for attr, value in kwargs.items():
       setattr(self, attr, value)
-    self.update_teardown()
 
   @staticmethod
   def mock(object_or_class=None, **kwargs):
@@ -324,11 +332,11 @@ class FlexMock(object):
     """
     if method.startswith('__'):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
-    expectation = self._retrieve_or_create_expectation(method, (), None)
-    if not expectation:
-      expectation = Expectation(method, self._mock)
-    self._flexmock_expectations.append(expectation)
-    self._add_expectation_to_object(expectation, method)
+    expectation = self._retrieve_or_create_expectation(method)
+    if expectation not in self._flexmock_expectations:
+      self._flexmock_expectations.append(expectation)
+      self._add_expectation_to_object(expectation, method)
+      self.update_teardown()
     return expectation
 
   def _new_instances(self, return_value):
@@ -339,11 +347,12 @@ class FlexMock(object):
     """
     method = '__new__'
     expectation = self._retrieve_or_create_expectation(
-        method, None, return_value)
+        method, return_value=return_value)
     self._flexmock_expectations.append(expectation)
     if not expectation.original_method:
       expectation.original_method = getattr(self._mock, method)
     self._mock.__new__ = self.__create_new_method(return_value)
+    self.update_teardown()
 
   def _setup_mock(self, obj_or_class, **kwargs):
     """Puts the provided object or class under mock."""
@@ -356,8 +365,9 @@ class FlexMock(object):
     else:
       for method, return_value in kwargs.items():
         obj_or_class.should_receive(method).and_return(return_value)
-    expectation = self._retrieve_or_create_expectation(None, (), None)
+    expectation = self._retrieve_or_create_expectation()
     self._flexmock_expectations.append(expectation)
+    self.update_teardown()
 
   def _ensure_not_already_mocked(self, obj):
     for attr in self.UPDATED_ATTRS:
@@ -394,19 +404,25 @@ class FlexMock(object):
             expectation.verify()
     return teardown
 
-  def _retrieve_or_create_expectation(self, method, args, return_value):
+  def _retrieve_or_create_expectation(self, method=None,
+                                      args=None, return_value=None):
     if method in [x.method for x in self._flexmock_expectations]:
       expectation = [x for x in self._flexmock_expectations
                      if x.method == method][0]
-      if expectation.args is None:
-        if isinstance(args, tuple):
-          expectation.args = args
-        else:
-          expectation.args = (args,)
+      if expectation.args is None and not expectation.return_values:
+        expectation.args = args
       else:
-        expectation = Expectation(method, self._mock, args, return_value)
+        expectation = self._create_expectation(method, args, return_value)
     else:
+      expectation = self._create_expectation(method, args, return_value)
+    return expectation
+
+  def _create_expectation(self, method, args, return_value):
+    if args is None:
       expectation = Expectation(method, self._mock, args, return_value)
+    else:
+      expectation = Expectation(
+          method, self._mock, args['kargs'], args['kwargs'], return_value)
     return expectation
 
   def _add_expectation_to_object(self, expectation, method):
@@ -417,6 +433,7 @@ class FlexMock(object):
         method_instance, self._mock))
 
   def _get_flexmock_expectation(self, name=None, args=None):
+    """Gets attached to the object under mock and is called in that context."""
     if args == None:
       args = {'kargs': (), 'kwargs': {}}
     if not isinstance(args, dict):
@@ -443,7 +460,7 @@ class FlexMock(object):
         break
 
   def _match_args(self, given_args, expected_args):
-    if (given_args == expected_args or
+    if (given_args == expected_args or expected_args is None or
         expected_args == {'kargs': (), 'kwargs': {}}):
       return True
     if (len(given_args['kargs']) != len(expected_args['kargs']) or
@@ -536,6 +553,8 @@ class FlexMock(object):
       else:
         return str(arg)
 
+    if arguments is None:
+      arguments = {'kargs': (), 'kwargs': {}}
     kargs = ', '.join(to_str(arg) for arg in arguments['kargs'])
     kwargs = ', '.join('%s=%s' % (k, to_str(v)) for k, v in
                                   arguments['kwargs'].items())
