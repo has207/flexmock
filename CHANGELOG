@@ -1,3 +1,9 @@
+Release 0.6.7
+- Fixing clobbering of original method by multiple flexmock calls
+- Making and_raise work properly with exception classes and args
+- Proper exception matching with and_execute
+- Fix mocking same class twice
+
 Release 0.6.6
 - Removing extra args from should_receive
 - Making and_execute check return/raise value of original method
