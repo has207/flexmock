@@ -438,8 +438,15 @@ class FlexMock(object):
         method_instance, self._mock))
 
   def _is_static(self, method):
+    method = getattr(self._mock, method)
+    # this version check is horrible, but necessary since python changes
+    # the signature of static methods to be same as any ol' class method
+    # after 3.0
+    if (sys.version_info < (3, 0) and
+        inspect.isfunction(method) and not inspect.ismethod(method)):
+      return True
     try:
-      lines = inspect.getsourcelines(getattr(self._mock, method))[0]
+      lines = inspect.getsourcelines(method)[0]
       for line in lines:
         if line.strip() == '@staticmethod':
           return True

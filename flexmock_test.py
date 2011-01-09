@@ -647,6 +647,16 @@ class Testflexmock(unittest.TestCase):
     unittest.TestCase.tearDown(self)
     self.assertEqual('ok!', User.get_stuff())
 
+  def test_flexmock_should_properly_restore_undecorated_static_methods(self):
+    class User:
+      def get_stuff(): return 'ok!'
+      get_stuff = staticmethod(get_stuff)
+    self.assertEqual('ok!', User.get_stuff())
+    flexmock(User).should_receive('get_stuff')
+    self.assertTrue(User.get_stuff() is None)
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('ok!', User.get_stuff())
+
   def test_flexmock_should_properly_restore_class_methods(self):
     class User:
       @classmethod
