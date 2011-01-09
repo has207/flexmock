@@ -91,6 +91,7 @@ class Expectation(object):
     self.method = name
     self.modifier = ''
     self.original_method = None
+    self.static = False
     if kargs is None and kwargs is None:
       self.args = None
     else:
@@ -274,7 +275,10 @@ class Expectation(object):
       del self
       return  # no need to worry about mock objects
     if self.original_method:
-      setattr(self._mock, self.method, self.original_method)
+      if self.static:
+        setattr(self._mock, self.method, staticmethod(self.original_method))
+      else:
+        setattr(self._mock, self.method, self.original_method)
     elif self.method in dir(self._mock):
       delattr(self._mock, self.method)
     for attr in FlexMock.UPDATED_ATTRS:
@@ -335,7 +339,7 @@ class FlexMock(object):
     expectation = self._retrieve_or_create_expectation(method)
     if expectation not in self._flexmock_expectations:
       self._flexmock_expectations.append(expectation)
-      self._add_expectation_to_object(expectation, method)
+      self._update_method(expectation, method)
       self.update_teardown()
     return expectation
 
@@ -425,12 +429,25 @@ class FlexMock(object):
           method, self._mock, args['kargs'], args['kwargs'], return_value)
     return expectation
 
-  def _add_expectation_to_object(self, expectation, method):
+  def _update_method(self, expectation, method):
     method_instance = self.__create_mock_method(method)
     if hasattr(self._mock, method) and not expectation.original_method:
       expectation.original_method = getattr(self._mock, method)
+      expectation.static = self._is_static(method)
     setattr(self._mock, method, types.MethodType(
         method_instance, self._mock))
+
+  def _is_static(self, method):
+    try:
+      lines = inspect.getsourcelines(getattr(self._mock, method))[0]
+      for line in lines:
+        if line.strip() == '@staticmethod':
+          return True
+        if line.strip().startswith('def '):
+          break
+    except:
+      pass
+    return False
 
   def _get_flexmock_expectation(self, name=None, args=None):
     """Gets attached to the object under mock and is called in that context."""

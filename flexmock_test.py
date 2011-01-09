@@ -637,6 +637,27 @@ class Testflexmock(unittest.TestCase):
     flexmock(user).should_receive('get_stuff').and_execute
     self.assertEqual(('real', 'stuff'), user.get_stuff())
 
+  def test_flexmock_should_properly_restore_static_methods(self):
+    class User:
+      @staticmethod
+      def get_stuff(): return 'ok!'
+    self.assertEqual('ok!', User.get_stuff())
+    flexmock(User).should_receive('get_stuff')
+    self.assertTrue(User.get_stuff() is None)
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('ok!', User.get_stuff())
+
+  def test_flexmock_should_properly_restore_class_methods(self):
+    class User:
+      @classmethod
+      def get_stuff(cls):
+        return cls.__name__
+    self.assertEqual('User', User.get_stuff())
+    flexmock(User).should_receive('get_stuff').and_return('foo')
+    self.assertEqual('foo', User.get_stuff())
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('User', User.get_stuff())
+
 
 if __name__ == '__main__':
   unittest.main()
