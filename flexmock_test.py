@@ -668,6 +668,22 @@ class Testflexmock(unittest.TestCase):
     unittest.TestCase.tearDown(self)
     self.assertEqual('User', User.get_stuff())
 
+  def test_and_execute_should_match_return_value_class(self):
+    class User: pass
+    user = User()
+    foo = flexmock(foo=lambda: ('bar', 'baz'),
+                   bar=lambda: user,
+                   baz=lambda: None,
+                   bax=lambda: None)
+    foo.should_receive('foo').and_execute.and_return(str, str)
+    foo.should_receive('bar').and_execute.and_return(User)
+    foo.should_receive('baz').and_execute.and_return(object)
+    foo.should_receive('bax').and_execute.and_return(None)
+    self.assertEqual(('bar', 'baz'), foo.foo())
+    self.assertEqual(user, foo.bar())
+    self.assertEqual(None, foo.baz())
+    self.assertEqual(None, foo.bax())
+
 
 if __name__ == '__main__':
   unittest.main()

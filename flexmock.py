@@ -522,6 +522,22 @@ class FlexMock(object):
           raise (InvalidExceptionClass('expected %s, raised %s' %
                  (expected, raised)))
 
+    def match_return_values(expected, received):
+      if not received:
+        return True
+      if not isinstance(expected, tuple):
+        expected = (expected,)
+      if not isinstance(received, tuple):
+        received = (received,)
+      if len(received) != len(expected):
+        return False
+      for i, val in enumerate(received):
+        if (val != expected[i] and
+            not (inspect.isclass(expected[i]) and
+                 isinstance(val, expected[i]))):
+          return False
+      return True
+
     def pass_thru(expectation, *kargs, **kwargs):
       return_values = None
       if not expectation.original_method:
@@ -530,9 +546,11 @@ class FlexMock(object):
         return_values = expectation.original_method(*kargs, **kwargs)
       except:
         return _handle_exception_matching(expectation)
-      if expectation.return_values:
-        if return_values != expectation.return_values[0].value:
-          raise InvalidMethodSignature
+      if (expectation.return_values and
+          not match_return_values(expectation.return_values[0].value,
+                                  return_values)):
+        raise (InvalidMethodSignature('expected to return %s, returned %s' %
+               (expectation.return_values[0].value, return_values)))
       return expectation.original_method(*kargs, **kwargs)
 
     def mock_method(self, *kargs, **kwargs):
