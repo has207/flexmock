@@ -334,6 +334,7 @@ class FlexMock(object):
     Returns:
       expectation: Expectation object
     """
+    self._ensure_not_new_instances()
     if method.startswith('__'):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
     expectation = self._retrieve_or_create_expectation(method)
@@ -342,6 +343,11 @@ class FlexMock(object):
       self._update_method(expectation, method)
       self.update_teardown()
     return expectation
+
+  def _ensure_not_new_instances(self):
+    for exp in self._flexmock_expectations:
+      if exp.original_method and exp.original_method.__name__ == '__new__':
+        raise FlexmockException('cannot use should_receive with new_instances')
 
   def _new_instances(self, return_value):
     """Overrides creation of new instances of the mocked class.
@@ -355,7 +361,7 @@ class FlexMock(object):
     self._flexmock_expectations.append(expectation)
     if not expectation.original_method:
       expectation.original_method = getattr(self._mock, method)
-    self._mock.__new__ = self.__create_new_method(return_value)
+    setattr(self._mock, method, self.__create_new_method(return_value))
     self.update_teardown()
 
   def _setup_mock(self, obj_or_class, **kwargs):

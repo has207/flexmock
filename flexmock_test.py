@@ -684,6 +684,11 @@ class Testflexmock(unittest.TestCase):
     self.assertEqual(None, foo.baz())
     self.assertEqual(None, foo.bax())
 
+  def test_new_instances_should_blow_up_on_should_receive(self):
+    class User(object): pass
+    mock = flexmock(User, new_instances=None)
+    self.assertRaises(FlexmockException, mock.should_receive, 'foo')
+
 
 if __name__ == '__main__':
   unittest.main()
