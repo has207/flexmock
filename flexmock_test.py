@@ -701,6 +701,14 @@ class Testflexmock(unittest.TestCase):
     mock = flexmock(User, new_instances=None)
     self.assertRaises(FlexmockException, mock.should_receive, 'foo')
 
+  def test_should_call_alias_should_receive_and_execute(self):
+    class Foo:
+      def get_stuff(self):
+        return 'yay'
+    foo = Foo()
+    flexmock(foo).should_call('get_stuff').and_return('yay').once
+    self.assertRaises(MethodNotCalled, unittest.TestCase.tearDown, self)
+
 
 if __name__ == '__main__':
   unittest.main()

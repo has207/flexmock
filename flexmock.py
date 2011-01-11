@@ -293,8 +293,8 @@ class Expectation(object):
 class FlexMock(object):
   """Creates mock objects or puts existing objects or classes under mock."""
 
-  UPDATED_ATTRS = ['should_receive', '_get_flexmock_expectation',
-                   '_flexmock_expectations']
+  UPDATED_ATTRS = ['should_receive', 'should_call',
+                   '_get_flexmock_expectation', '_flexmock_expectations']
 
   def __init__(self, **kwargs):
     """FlexMock constructor.
@@ -343,6 +343,13 @@ class FlexMock(object):
       self._update_method(expectation, method)
       self.update_teardown()
     return expectation
+
+  def should_call(self, method):
+    """Shortcut for creating a spy.
+    
+    Alias for should_receive().and_exectue.
+    """
+    return self.should_receive(method).and_execute
 
   def _ensure_not_new_instances(self):
     for exp in self._flexmock_expectations:
