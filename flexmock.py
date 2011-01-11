@@ -451,7 +451,8 @@ class FlexMock(object):
     """
     if sys.version_info < (3, 0):
       method = getattr(self._mock, method)
-      if inspect.isfunction(method) and not inspect.ismethod(method):
+      if (not inspect.ismodule(self._mock) and
+          inspect.isfunction(method) and not inspect.ismethod(method)):
         return True
     return False
 

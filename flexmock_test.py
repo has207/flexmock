@@ -10,7 +10,12 @@ from flexmock import InvalidExceptionMessage
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import flexmock
+import sys
 import unittest
+
+
+def module_level_function(some, args):
+  return "%s, %s" % (some, args)
 
 
 class Testflexmock(unittest.TestCase):
@@ -656,6 +661,13 @@ class Testflexmock(unittest.TestCase):
     self.assertTrue(User.get_stuff() is None)
     unittest.TestCase.tearDown(self)
     self.assertEqual('ok!', User.get_stuff())
+
+  def test_flexmock_should_properly_restore_module_level_functions(self):
+    flexmock(sys.modules[self.__module__]).should_receive(
+        'module_level_function')
+    self.assertEqual(None, module_level_function(1, 2))
+    unittest.TestCase.tearDown(self)
+    self.assertEqual('1, 2', module_level_function(1, 2))
 
   def test_flexmock_should_properly_restore_class_methods(self):
     class User:
