@@ -1,3 +1,10 @@
+Release 0.6.8
+- Add should_call() alias for should_receive().and_execute
+- Ensure new_instances can't be used with expectation modifiers
+- Make and_execute match return value by class in addition to value
+- Support for mocking out static methods
+- Bit of test fixage (thanks to derdon)
+
 Release 0.6.7
 - Fixing clobbering of original method by multiple flexmock calls
 - Making and_raise work properly with exception classes and args
