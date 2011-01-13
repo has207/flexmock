@@ -76,6 +76,11 @@ class ReturnValue(object):
       return str(self.value)
 
 
+class FlexmockContainer(object):
+  """Holds global hash of object/expectation mappings."""
+  flexmock_objects = {}
+
+
 class Expectation(object):
   """Holds expectations about methods.
 
@@ -308,7 +313,7 @@ class FlexMock(object):
       setattr(self, attr, value)
 
   @staticmethod
-  def mock(object_or_class=None, **kwargs):
+  def mock(flexmock_class, object_or_class=None, **kwargs):
     """
 
     Args:
@@ -316,9 +321,9 @@ class FlexMock(object):
       kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     if object_or_class is None:
-      mock = FlexMock(**kwargs)
+      mock = flexmock_class(**kwargs)
     else:
-      mock = FlexMock()
+      mock = flexmock_class()
       try:
         mock._setup_mock(object_or_class, **kwargs)
       except AlreadyMocked:
@@ -396,30 +401,31 @@ class FlexMock(object):
   def update_teardown(self, test_runner=unittest.TestCase,
                       teardown_method='tearDown'):
     """Should be implemented by classes inheriting from FlexMock."""
-    if not hasattr(test_runner, '_flexmock_objects'):
-      setattr(test_runner,
-          '_flexmock_objects', {self: self._flexmock_expectations})
-      saved_teardown = getattr(test_runner, teardown_method)
+    if not FlexmockContainer.flexmock_objects:
+      FlexmockContainer.flexmock_objects = {self: self._flexmock_expectations}
+      if hasattr(test_runner, teardown_method):
+        saved_teardown = getattr(test_runner, teardown_method)
+      else:
+        saved_teardown = None
       setattr(test_runner, teardown_method,
           self._flexmock_teardown(saved_teardown))
     else:
-      getattr(test_runner,
-              '_flexmock_objects')[self] = self._flexmock_expectations
+      FlexmockContainer.flexmock_objects[self] = self._flexmock_expectations
 
   def _flexmock_teardown(self, saved_teardown):
-    def teardown(self):
-      saved_teardown(self)
-      if hasattr(self, '_flexmock_objects'):
-        saved = {}
-        for mock_object, expectations in self._flexmock_objects.items():
-          saved[mock_object] = expectations[:]
-          for expectation in expectations:
-            expectation.reset()
-        for mock_object, expectations in saved.items():
-          del self._flexmock_objects[mock_object]
-        for mock_object, expectations in saved.items():
-          for expectation in expectations:
-            expectation.verify()
+    def teardown(self=None):
+      if saved_teardown:
+        saved_teardown(self)
+      saved = {}
+      for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
+        saved[mock_object] = expectations[:]
+        for expectation in expectations:
+          expectation.reset()
+      for mock_object, expectations in saved.items():
+        del FlexmockContainer.flexmock_objects[mock_object]
+      for mock_object, expectations in saved.items():
+        for expectation in expectations:
+          expectation.verify()
     return teardown
 
   def _retrieve_or_create_expectation(self, method=None,
@@ -621,12 +627,21 @@ class FlexMock(object):
     return new
 
 
-def flexmock_unittest(*kargs, **kwargs):
+def flexmock_unittest(object_or_class=None, **kwargs):
   class UnittestFlexMock(FlexMock):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
-  return UnittestFlexMock.mock(*kargs, **kwargs)
+  return FlexMock.mock(UnittestFlexMock, object_or_class, **kwargs)
+
+
+def flexmock_nose(object_or_class=None, **kwargs):
+  class NoseFlexMock(FlexMock):
+    def update_teardown(self, test_runner=None, teardown_method=None):
+      this_func = sys._getframe(2).f_code.co_name
+      this_func = sys._getframe(2).f_globals[this_func]
+      FlexMock.update_teardown(self, this_func, 'teardown')
+  return FlexMock.mock(NoseFlexMock, object_or_class, **kwargs)
 
 
 flexmock = flexmock_unittest
