@@ -312,24 +312,6 @@ class FlexMock(object):
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
-  @staticmethod
-  def mock(flexmock_class, object_or_class=None, **kwargs):
-    """
-
-    Args:
-      object_or_class: object or class to mock
-      kwargs: dict of attribute/value pairs used to initialize the mock object
-    """
-    if object_or_class is None:
-      mock = flexmock_class(**kwargs)
-    else:
-      mock = flexmock_class()
-      try:
-        mock._setup_mock(object_or_class, **kwargs)
-      except AlreadyMocked:
-        mock = object_or_class
-    return mock
-
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 
@@ -353,7 +335,7 @@ class FlexMock(object):
   def should_call(self, method):
     """Shortcut for creating a spy.
     
-    Alias for should_receive().and_exectue.
+    Alias for should_receive().and_execute.
     """
     return self.should_receive(method).and_execute
 
@@ -627,12 +609,32 @@ class FlexMock(object):
     return new
 
 
+def _generate_mock(flexmock_class, object_or_class=None, **kwargs):
+  """Factory function for creating FlexMock objects.
+
+  Args:
+    flexmock_class: class inheriting from FlexMock, used to differentiate
+                    different test runners
+    object_or_class: object or class to mock
+    kwargs: dict of attribute/value pairs used to initialize the mock object
+  """
+  if object_or_class is None:
+    mock = flexmock_class(**kwargs)
+  else:
+    mock = flexmock_class()
+    try:
+      mock._setup_mock(object_or_class, **kwargs)
+    except AlreadyMocked:
+      mock = object_or_class
+  return mock
+
+
 def flexmock_unittest(object_or_class=None, **kwargs):
   class UnittestFlexMock(FlexMock):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
-  return FlexMock.mock(UnittestFlexMock, object_or_class, **kwargs)
+  return _generate_mock(UnittestFlexMock, object_or_class, **kwargs)
 
 
 def flexmock_nose(object_or_class=None, **kwargs):
@@ -641,7 +643,7 @@ def flexmock_nose(object_or_class=None, **kwargs):
       this_func = sys._getframe(2).f_code.co_name
       this_func = sys._getframe(2).f_globals[this_func]
       FlexMock.update_teardown(self, this_func, 'teardown')
-  return FlexMock.mock(NoseFlexMock, object_or_class, **kwargs)
+  return _generate_mock(NoseFlexMock, object_or_class, **kwargs)
 
 
 flexmock = flexmock_unittest
