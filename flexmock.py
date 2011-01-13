@@ -335,7 +335,7 @@ class FlexMock(object):
       expectation: Expectation object
     """
     self._ensure_not_new_instances()
-    if method.startswith('__'):
+    if method.startswith('__') and hasattr(self._mock, '__class__'):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
     expectation = self._retrieve_or_create_expectation(method)
     if expectation not in self._flexmock_expectations:

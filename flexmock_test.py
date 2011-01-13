@@ -567,6 +567,12 @@ class Testflexmock(unittest.TestCase):
     flexmock(foo).should_receive('__private_method').and_return('bar')
     self.assertEqual('bar', foo.public_method())
 
+  def test_flexmock_should_mock_private_class_methods(self):
+    class Foo:
+      pass
+    flexmock(Foo).should_receive('__iter__').and_yield(1, 2, 3)
+    self.assertEqual([1, 2, 3], [x for x in Foo()])
+
   def test_flexmock_should_mock_generators(self):
     class Gen: pass
     gen = Gen()
