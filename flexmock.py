@@ -637,12 +637,39 @@ def flexmock_unittest(object_or_class=None, **kwargs):
   return _generate_mock(UnittestFlexMock, object_or_class, **kwargs)
 
 
+def get_current_function():
+  try:
+    from nose import config
+  except:
+    return None
+  conf = config.Config()
+  func_name = None
+  this_func = None
+  for i in range(0, 10):
+    func_name = sys._getframe(i).f_code.co_name
+    if conf.testMatch.match(func_name):
+      break
+  if func_name in sys._getframe(i).f_globals:
+    this_func = sys._getframe(i).f_globals[func_name]
+  else:
+    for i in range(0, 10):
+      if 'self' in sys._getframe(i).f_locals:
+        if (func_name in dir(sys._getframe(i).f_locals['self'].__class__) and
+           'teardown' in dir(getattr(sys._getframe(i).f_locals['self'].__class__, func_name))):
+          this_func = getattr(sys._getframe(i).f_locals['self'].__class__,
+              func_name)
+          break
+  return this_func
+
+
 def flexmock_nose(object_or_class=None, **kwargs):
   class NoseFlexMock(FlexMock):
     def update_teardown(self, test_runner=None, teardown_method=None):
-      this_func = sys._getframe(2).f_code.co_name
-      this_func = sys._getframe(2).f_globals[this_func]
-      FlexMock.update_teardown(self, this_func, 'teardown')
+      this_func = get_current_function()
+      if this_func:
+        FlexMock.update_teardown(self, this_func, 'teardown')
+      else:
+        FlexMock.update_teardown(self, unittest.TestCase, 'tearDown')
   return _generate_mock(NoseFlexMock, object_or_class, **kwargs)
 
 

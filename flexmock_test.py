@@ -10,10 +10,12 @@ from flexmock import InvalidExceptionClass
 from flexmock import InvalidExceptionMessage
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
+from flexmock import get_current_function
 from flexmock import flexmock
 from flexmock import flexmock_nose
 import sys
 import unittest
+
 
 def module_level_function(some, args):
   return "%s, %s" % (some, args)
@@ -32,24 +34,25 @@ def test_module_level_test_for_nose():
 
 
 def _tear_down(runner):
+  this_func = get_current_function()
+  if this_func and hasattr(this_func, 'teardown'):
+    return this_func.teardown()
   if isinstance(runner, unittest.TestCase):
     return unittest.TestCase.tearDown(runner)
-  else:  # nose
-    func_name = sys._getframe().f_code.co_name
-    this_func = sys._getframe().f_globals[func_name]
-    return this_func.teardown()
 
 
 def assertRaises(exception, method, *kargs, **kwargs):
   try:
     method(*kargs, **kwargs)
   except exception:
-   assert True
-   return
-  assert Fasle
+    assert True
+    return
+  except:
+    pass
+  raise Exception('%s not raised' % exception.__name__)
 
 
-class Testflexmock(unittest.TestCase):
+class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
