@@ -43,9 +43,10 @@ def _tear_down(runner):
 def assertRaises(exception, method, *kargs, **kwargs):
   try:
     method(*kargs, **kwargs)
-    assert False
   except exception:
-    assert True
+   assert True
+   return
+  assert Fasle
 
 
 class Testflexmock(unittest.TestCase):
