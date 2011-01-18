@@ -640,7 +640,7 @@ def flexmock_unittest(object_or_class=None, **kwargs):
 def get_current_function():
   try:
     from nose import config
-  except:
+  except ImportError:
     return None
   conf = config.Config()
   func_name = None

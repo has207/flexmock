@@ -56,7 +56,7 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
-    assert isinstance(mock, FlexMock) is True
+    assert isinstance(mock, FlexMock)
 
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = flexmock(foo='foo', bar='bar')
@@ -279,7 +279,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(user).should_receive('get_name').and_return('john')
     assert 'john' == user.get_name()
     _tear_down(self)
-    assert hasattr(user, 'get_name') is False
+    assert not hasattr(user, 'get_name')
 
   def test_flexmock_removes_new_stubs_from_classes_after_tests(self):
     class User: pass
@@ -287,7 +287,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(User).should_receive('get_name').and_return('john')
     assert 'john' == user.get_name()
     _tear_down(self)
-    assert hasattr(user, 'get_name') is False
+    assert not hasattr(user, 'get_name')
 
   def test_flexmock_removes_stubs_from_multiple_objects_on_teardown(self):
     class User: pass
@@ -299,8 +299,8 @@ class TestFlexmock(unittest.TestCase):
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
     _tear_down(self)
-    assert hasattr(user, 'get_name') is False
-    assert hasattr(group, 'get_name') is False
+    assert not hasattr(user, 'get_name')
+    assert not hasattr(group, 'get_name')
     flexmock(user)
 
   def test_flexmock_removes_stubs_from_multiple_classes_on_teardown(self):
@@ -313,8 +313,8 @@ class TestFlexmock(unittest.TestCase):
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
     _tear_down(self)
-    assert hasattr(user, 'get_name') is False
-    assert hasattr(group, 'get_name') is False
+    assert not hasattr(user, 'get_name')
+    assert not hasattr(group, 'get_name')
     flexmock(User)
 
   def test_flexmock_respects_at_least_when_called_less_than_requested(self):
