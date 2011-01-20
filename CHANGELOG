@@ -1,3 +1,8 @@
+Release 0.6.9
+- Initial nose integration (still no support for generated tests)
+- Fixing private class methods 
+- Some test refactoring to support different test runners
+
 Release 0.6.8
 - Add should_call() alias for should_receive().and_execute
 - Ensure new_instances can't be used with expectation modifiers
