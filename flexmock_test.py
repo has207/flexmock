@@ -1,6 +1,5 @@
 from flexmock import FlexMock
 from flexmock import AlreadyMocked
-from flexmock import AndExecuteInvalidMethod
 from flexmock import AndExecuteNotSupportedForClassMocks
 from flexmock import Expectation
 from flexmock import FlexmockContainer
@@ -8,6 +7,7 @@ from flexmock import FlexmockException
 from flexmock import InvalidMethodSignature
 from flexmock import InvalidExceptionClass
 from flexmock import InvalidExceptionMessage
+from flexmock import MethodDoesNotExist
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import get_current_function
@@ -81,7 +81,9 @@ class TestFlexmock(unittest.TestCase):
     assert 'returning 2' ==  mock.attr2()
 
   def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
+      def method2(self): pass
     foo = Foo()
     flexmock(foo, method1='returning 1', method2='returning 2')
     assert 'returning 1' == foo.method1()
@@ -203,8 +205,8 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_create_partial_new_style_class_mock(self):
     class User(object):
-      def __init__(self):
-        pass
+      def __init__(self): pass
+      def get_name(self): pass
     flexmock(User)
     User.should_receive('get_name').and_return('mike')
     user = User()
@@ -212,8 +214,8 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_create_partial_old_style_class_mock(self):
     class User:
-      def __init__(self):
-        pass
+      def __init__(self): pass
+      def get_name(self): pass
     flexmock(User)
     User.should_receive('get_name').and_return('mike')
     user = User()
@@ -274,48 +276,64 @@ class TestFlexmock(unittest.TestCase):
     assert 'mike' == user.get_name()
 
   def test_flexmock_removes_new_stubs_from_objects_after_tests(self):
-    class User: pass
+    class User:
+      def get_name(self): pass
     user = User()
+    saved = user.get_name
     flexmock(user).should_receive('get_name').and_return('john')
+    assert saved != user.get_name
     assert 'john' == user.get_name()
     _tear_down(self)
-    assert not hasattr(user, 'get_name')
+    assert saved == user.get_name
 
   def test_flexmock_removes_new_stubs_from_classes_after_tests(self):
-    class User: pass
+    class User:
+      def get_name(self): pass
     user = User()
+    saved = user.get_name
     flexmock(User).should_receive('get_name').and_return('john')
+    assert saved != user.get_name
     assert 'john' == user.get_name()
     _tear_down(self)
-    assert not hasattr(user, 'get_name')
+    assert saved == user.get_name
 
   def test_flexmock_removes_stubs_from_multiple_objects_on_teardown(self):
-    class User: pass
-    class Group: pass
+    class User:
+      def get_name(self): pass
+    class Group:
+      def get_name(self): pass
     user = User()
     group = User()
+    saved1 = user.get_name
+    saved2 = group.get_name
     flexmock(user).should_receive('get_name').and_return('john').once
     flexmock(group).should_receive('get_name').and_return('john').once
+    assert saved1 != user.get_name
+    assert saved2 != group.get_name
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
     _tear_down(self)
-    assert not hasattr(user, 'get_name')
-    assert not hasattr(group, 'get_name')
-    flexmock(user)
+    assert saved1 == user.get_name
+    assert saved2 == group.get_name
 
   def test_flexmock_removes_stubs_from_multiple_classes_on_teardown(self):
-    class User: pass
-    class Group: pass
+    class User:
+      def get_name(self): pass
+    class Group:
+      def get_name(self): pass
     user = User()
     group = User()
+    saved1 = user.get_name
+    saved2 = group.get_name
     flexmock(User).should_receive('get_name').and_return('john')
     flexmock(Group).should_receive('get_name').and_return('john')
+    assert saved1 != user.get_name
+    assert saved2 != group.get_name
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
     _tear_down(self)
-    assert not hasattr(user, 'get_name')
-    assert not hasattr(group, 'get_name')
-    flexmock(User)
+    assert saved1 == user.get_name
+    assert saved2 == group.get_name
 
   def test_flexmock_respects_at_least_when_called_less_than_requested(self):
     mock = flexmock(name='temp')
@@ -400,7 +418,8 @@ class TestFlexmock(unittest.TestCase):
     assert foo._mock == flexmock(user)
 
   def test_flexmock_should_not_return_class_object_if_mocking_instance(self):
-    class User: pass
+    class User:
+      def method(self): pass
     user = User()
     user2 = User()
     class_mock = flexmock(User).should_receive(
@@ -410,12 +429,6 @@ class TestFlexmock(unittest.TestCase):
     assert class_mock is not user_mock
     assert 'instance' == user.method()
     assert 'class' == user2.method()
-
-  def test_flexmock_should_blow_up_on_and_execute_for_invalid_method(self):
-    class User: pass
-    user = User()
-    mock = flexmock(user).should_receive('foo').and_execute
-    assertRaises(AndExecuteInvalidMethod, user.foo)
 
   def test_flexmock_should_blow_up_on_and_execute_for_class_mock(self):
     class User:
@@ -462,8 +475,10 @@ class TestFlexmock(unittest.TestCase):
       assert method not in dir(Group)
 
   def test_flexmock_should_cleanup_after_exception(self):
-    class User: pass
-    class Group: pass
+    class User:
+      def method2(self): pass
+    class Group:
+      def method1(self): pass
     flexmock(Group)
     flexmock(User)
     Group.should_receive('method1').once
@@ -503,7 +518,11 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(MethodNotCalled, _tear_down, self)
 
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
-    class Foo(object): pass
+    class Foo(object):
+      def foo(self): pass
+      def method1(self): pass
+      def bar(self): pass
+      def baz(self): pass
     flexmock(Foo).should_receive('foo')
     flexmock(Foo).should_receive('method1').with_args('a').ordered
     flexmock(Foo).should_receive('bar')
@@ -516,7 +535,11 @@ class TestFlexmock(unittest.TestCase):
     Foo.foo()
 
   def test_flexmock_errors_on_improperly_ordered_expectations(self):
-    class Foo(object): pass
+    class Foo(object):
+      def foo(self): pass
+      def method1(self): pass
+      def bar(self): pass
+      def baz(self): pass
     flexmock(Foo)
     Foo.should_receive('foo')
     Foo.should_receive('method1').with_args('a').ordered
@@ -529,7 +552,8 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(MethodCalledOutOfOrder, Foo.method1, 'b')
 
   def test_flexmock_should_accept_multiple_return_values(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').and_return(1, 5).and_return(2)
     assert (1, 5) == foo.method1()
@@ -538,7 +562,8 @@ class TestFlexmock(unittest.TestCase):
     assert 2 == foo.method1()
 
   def test_flexmock_should_accept_multiple_return_values_with_shortcut(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').and_return(1, 2).one_by_one
     assert 1 == foo.method1()
@@ -547,7 +572,8 @@ class TestFlexmock(unittest.TestCase):
     assert 2 == foo.method1()
 
   def test_flexmock_should_mix_multiple_return_values_with_exceptions(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').and_return(1).and_raise(Exception)
     assert 1 == foo.method1()
@@ -556,7 +582,8 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(Exception, foo.method1)
 
   def test_flexmock_should_match_types_on_multiple_arguments(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
     assert 'ok', foo.method1('some string' == 12)
@@ -565,7 +592,8 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 14)
 
   def test_flexmock_should_match_types_on_multiple_arguments_generic(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(
         object, object, object).and_return('ok')
@@ -577,7 +605,8 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(InvalidMethodSignature, foo.method1, 'string', 12, 13, 14)
 
   def test_flexmock_should_match_types_on_multiple_arguments_classes(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     class Bar: pass
     foo = Foo()
     bar = Bar()
@@ -588,7 +617,8 @@ class TestFlexmock(unittest.TestCase):
     assertRaises(InvalidMethodSignature, foo.method1, 12, 'some string')
 
   def test_flexmock_should_match_keyword_arguments(self):
-    class Foo: pass
+    class Foo:
+      def method1(self): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice
     foo.method1(1, arg2=2, arg3=3)
@@ -625,7 +655,8 @@ class TestFlexmock(unittest.TestCase):
     assert [1, 2, 3] == [x for x in Foo()]
 
   def test_flexmock_should_mock_generators(self):
-    class Gen: pass
+    class Gen:
+      def foo(self): pass
     gen = Gen()
     flexmock(gen).should_receive('foo').and_yield(*range(1, 10))
     output = [val for val in gen.foo()]
@@ -765,6 +796,18 @@ class TestFlexmock(unittest.TestCase):
     foo = Foo()
     flexmock(foo).should_call('get_stuff').and_return('yay').once
     assertRaises(MethodNotCalled, _tear_down, self)
+
+  def test_flexmock_should_fail_mocking_nonexistent_methods(self):
+    class User: pass
+    user = User()
+    mock = flexmock(user)
+    try:
+      flexmock(user).should_receive('nonexistent')
+      assert False
+    except MethodDoesNotExist:
+      assert True
+      return
+    assert False
 
 
 if __name__ == '__main__':

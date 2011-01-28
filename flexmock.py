@@ -52,11 +52,11 @@ class MethodCalledOutOfOrder(FlexmockException):
   pass
 
 
-class AlreadyMocked(FlexmockException):
+class MethodDoesNotExist(FlexmockException):
   pass
 
 
-class AndExecuteInvalidMethod(FlexmockException):
+class AlreadyMocked(FlexmockException):
   pass
 
 
@@ -325,6 +325,10 @@ class FlexMock(object):
     if (method.startswith('__') and
         (not inspect.isclass(self._mock) and not inspect.ismodule(self._mock))):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
+    if (not isinstance(self._mock, FlexMock) and
+        not hasattr(self._mock, method) and
+        (not method.startswith('__') and not method.endswith('__'))):
+      raise MethodDoesNotExist('%s does not have method %s' % (self, method))
     expectation = self._retrieve_or_create_expectation(method)
     if expectation not in self._flexmock_expectations:
       self._flexmock_expectations.append(expectation)
@@ -543,8 +547,6 @@ class FlexMock(object):
 
     def pass_thru(expectation, *kargs, **kwargs):
       return_values = None
-      if not expectation.original_method:
-        raise AndExecuteInvalidMethod(expectation.method)
       try:
         return_values = expectation.original_method(*kargs, **kwargs)
       except:
