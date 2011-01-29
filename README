@@ -7,12 +7,9 @@ and implements a number of things that Ruby's FlexMock
 doesn't support, such as proxying/spying and matching arguments using their classes
 in addition to values.
 
-What makes FlexMock unique in the Python testing world is its automatic integration
-with the test runner, allowing for really terse syntax and avoiding both the
-action->assertion and record->replay paradigms supported by all the other Python
-mocking libraries currently available. To be sure, you can still write your
-assertions in the action->assertion mode using FlexMock, but its powerful syntax
-allows you to define both the expectation and the assertion at the same time.
+Why another mocking library for Python?
+
+https://github.com/has207/flexmock/wiki/Why-Flexmock%3F
 
 SUPPORTS:
 
