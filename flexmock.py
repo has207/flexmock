@@ -588,10 +588,19 @@ class FlexMock(object):
   @staticmethod
   def _format_args(method, arguments):
     def to_str(arg):
-      if isinstance(arg, basestring):
-        return '"%s"' % arg
+      if sys.version_info < (3, 0):
+        # prior to 3.0 unicode strings are type unicode that inherits
+        # from basestring along with str, in 3.0 both unicode and basestring
+        # go away and str handles everything properly
+        if isinstance(arg, basestring):
+          return '"%s"' % arg
+        else:
+          return str(arg)
       else:
-        return str(arg)
+        if isinstance(arg, str):
+          return '"%s"' % arg
+        else:
+          return str(arg)
 
     if arguments is None:
       arguments = {'kargs': (), 'kwargs': {}}

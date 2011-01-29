@@ -811,11 +811,14 @@ class TestFlexmock(unittest.TestCase):
     assert False
 
   def test_flexmock_should_not_explode_on_unicode_formatting(self):
-    """
-    To make sure flexmock properly formats method signatures containing unicode arguments
-    """
-    formatted = FlexMock._format_args('method', {'kargs' : (u'嘢',), 'kwargs' : {}})
-    assert formatted == u'method("嘢")'
+    if sys.version_info >= (3, 0):
+      formatted = FlexMock._format_args(
+          'method', {'kargs' : (chr(0x86C7),), 'kwargs' : {}})
+      assert formatted == 'method("蛇")'
+    else:
+      formatted = FlexMock._format_args(
+          'method', {'kargs' : (unichr(0x86C7),), 'kwargs' : {}})
+      assert formatted == 'method("%s")' % unichr(0x86C7)
 
 
 if __name__ == '__main__':
