@@ -399,11 +399,12 @@ class FlexMock(object):
       FlexmockContainer.flexmock_objects[self] = self._flexmock_expectations
 
   def _flexmock_teardown(self, saved_teardown):
-    def teardown(self=None, *kargs, **kwargs):
+    def teardown(*kargs, **kwargs):
       if saved_teardown:
-        saved_teardown(self, *kargs, **kwargs)
+        saved_teardown(*kargs, **kwargs)
       saved = {}
-      for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
+      for mock_object, expectations in \
+          FlexmockContainer.flexmock_objects.items():
         saved[mock_object] = expectations[:]
         for expectation in expectations:
           expectation.reset()
