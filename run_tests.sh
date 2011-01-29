@@ -12,6 +12,6 @@ done
 if test -f "$(which nosetests)"; then
 	echo nosetests
 	nosetests flexmock_test.py
-echo
+else
 	echo nosetests NOT FOUND
 fi

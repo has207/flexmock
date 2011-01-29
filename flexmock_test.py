@@ -2,6 +2,7 @@
 from flexmock import FlexMock
 from flexmock import AlreadyMocked
 from flexmock import AndExecuteNotSupportedForClassMocks
+from flexmock import AttemptingToMockBuiltin
 from flexmock import Expectation
 from flexmock import FlexmockContainer
 from flexmock import FlexmockException
@@ -804,7 +805,6 @@ class TestFlexmock(unittest.TestCase):
     mock = flexmock(user)
     try:
       flexmock(user).should_receive('nonexistent')
-      assert False
     except MethodDoesNotExist:
       assert True
       return
@@ -819,6 +819,14 @@ class TestFlexmock(unittest.TestCase):
       formatted = FlexMock._format_args(
           'method', {'kargs' : (unichr(0x86C7),), 'kwargs' : {}})
       assert formatted == 'method("%s")' % unichr(0x86C7)
+
+  def test_flexmock_should_give_reasonable_error_for_builtins(self):
+    try:
+      flexmock(object).should_receive('time')
+    except AttemptingToMockBuiltin:
+      assert True
+      return
+    assert False
 
 
 if __name__ == '__main__':

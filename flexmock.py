@@ -32,6 +32,13 @@ class FlexmockException(Exception):
   pass
 
 
+class AttemptingToMockBuiltin(Exception):
+  def __str__(self):
+    out = 'Python does not allow you to mock builtin modules. '
+    out += 'Consider wrapping it in a class you can mock instead'
+    return out
+
+
 class InvalidMethodSignature(FlexmockException):
   pass
 
@@ -636,6 +643,8 @@ def _generate_mock(flexmock_class, object_or_class=None, **kwargs):
     mock = flexmock_class()
     try:
       mock._setup_mock(object_or_class, **kwargs)
+    except TypeError:
+      raise AttemptingToMockBuiltin
     except AlreadyMocked:
       mock = object_or_class
   return mock
