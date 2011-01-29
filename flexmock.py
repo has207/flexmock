@@ -141,9 +141,9 @@ class Expectation(object):
     """Override the return value of this expectation's method.
 
     When and_return is given multiple times, each value provided is returned
-    on successive invokations of the method. It is also possible to mix
+    on successive invocations of the method. It is also possible to mix
     and_return with and_raise in the same manner to alternate between returning
-    a value and raising and exception on different method invokations.
+    a value and raising and exception on different method invocations.
 
     When combined with the one_by_one property, value is treated as a list of
     values to be returned in the order specified by successive calls to this
@@ -170,7 +170,7 @@ class Expectation(object):
   def one_by_one(self):
     """Modifies the return value to be treated as a list of return values.
 
-    Each value in the list is returned on successive invokations of the method.
+    Each value in the list is returned on successive invocations of the method.
     """
     if not self._one_by_one:
       self._one_by_one = True
