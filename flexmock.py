@@ -80,7 +80,7 @@ class ReturnValue(object):
     if self.raises:
       return '%s(%s)' % (self.raises, self.value)
     else:
-      return str(self.value)
+      return '%s' % self.value
 
 
 class FlexmockContainer(object):
@@ -128,8 +128,8 @@ class Expectation(object):
     self._one_by_one = False
 
   def __str__(self):
-    return '%s -> (%s)' % (FlexMock._format_args(self.method, self.args),
-                         ', '.join([str(x) for x in self.return_values]))
+    return '%s -> (%s)' % (_format_args(self.method, self.args),
+                           ', '.join(['%s' % x for x in self.return_values]))
 
   @property
   def mock(self):
@@ -278,7 +278,7 @@ class Expectation(object):
     else:
       raise MethodNotCalled(
           '%s expected to be called %s%s times, called %s times' %
-          (FlexMock._format_args(self.method, self.args), self.modifier,
+          (_format_args(self.method, self.args), self.modifier,
            self.expected_calls, self.times_called))
 
   def reset(self):
@@ -486,8 +486,8 @@ class FlexMock(object):
           not exp.times_called):
         raise MethodCalledOutOfOrder(
             '%s called before %s' %
-            (FlexMock._format_args(e.method, e.args),
-             FlexMock._format_args(exp.method, exp.args)))
+            (_format_args(e.method, e.args),
+             _format_args(exp.method, exp.args)))
       if exp.method == name and self._match_args(args, exp.args):
         break
 
@@ -511,6 +511,12 @@ class FlexMock(object):
     except:
       pass
 
+  def __create_new_method(self, return_value):
+    @staticmethod
+    def new(cls, *kargs, **kwargs):
+      return return_value
+    return new
+
   def __create_mock_method(self, method):
     def generator_method(yield_values):
       for value in yield_values:
@@ -519,13 +525,13 @@ class FlexMock(object):
     def _handle_exception_matching(expectation):
       if expectation.return_values:
         raised, instance = sys.exc_info()[:2]
-        message = str(instance)
+        message = '%s' % instance
         expected = expectation.return_values[0].raises
         if not expected:
           raise
         args = expectation.return_values[0].value
         expected_instance = expected(*args['kargs'], **args['kwargs'])
-        expected_message = str(expected_instance)
+        expected_message = '%s' % expected_instance
         if inspect.isclass(expected):
           if expected is not raised and not isinstance(raised, expected):
             raise (InvalidExceptionClass('expected %s, raised %s' %
@@ -590,42 +596,36 @@ class FlexMock(object):
         else:
           return return_value.value
       else:
-        raise InvalidMethodSignature(FlexMock._format_args(method, arguments))
+        raise InvalidMethodSignature(_format_args(method, arguments))
     return mock_method
 
-  @staticmethod
-  def _format_args(method, arguments):
-    def to_str(arg):
-      if sys.version_info < (3, 0):
-        # prior to 3.0 unicode strings are type unicode that inherits
-        # from basestring along with str, in 3.0 both unicode and basestring
-        # go away and str handles everything properly
-        if isinstance(arg, basestring):
-          return '"%s"' % arg
-        else:
-          return str(arg)
+
+def _format_args(method, arguments):
+  def to_str(arg):
+    if sys.version_info < (3, 0):
+      # prior to 3.0 unicode strings are type unicode that inherits
+      # from basestring along with str, in 3.0 both unicode and basestring
+      # go away and str handles everything properly
+      if isinstance(arg, basestring):
+        return '"%s"' % arg
       else:
-        if isinstance(arg, str):
-          return '"%s"' % arg
-        else:
-          return str(arg)
-
-    if arguments is None:
-      arguments = {'kargs': (), 'kwargs': {}}
-    kargs = ', '.join(to_str(arg) for arg in arguments['kargs'])
-    kwargs = ', '.join('%s=%s' % (k, to_str(v)) for k, v in
-                                  arguments['kwargs'].items())
-    if kargs and kwargs:
-      args = '%s, %s' % (kargs, kwargs)
+        return '%s' % arg
     else:
-      args = '%s%s' % (kargs, kwargs)
-    return '%s(%s)' % (method, args)
+      if isinstance(arg, str):
+        return '"%s"' % arg
+      else:
+        return '%s' % arg
 
-  def __create_new_method(self, return_value):
-    @staticmethod
-    def new(cls, *kargs, **kwargs):
-      return return_value
-    return new
+  if arguments is None:
+    arguments = {'kargs': (), 'kwargs': {}}
+  kargs = ', '.join(to_str(arg) for arg in arguments['kargs'])
+  kwargs = ', '.join('%s=%s' % (k, to_str(v)) for k, v in
+                                arguments['kwargs'].items())
+  if kargs and kwargs:
+    args = '%s, %s' % (kargs, kwargs)
+  else:
+    args = '%s%s' % (kargs, kwargs)
+  return '%s(%s)' % (method, args)
 
 
 def _generate_mock(flexmock_class, object_or_class=None, **kwargs):

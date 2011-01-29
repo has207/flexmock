@@ -12,9 +12,11 @@ from flexmock import InvalidExceptionMessage
 from flexmock import MethodDoesNotExist
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
+from flexmock import ReturnValue
 from flexmock import get_current_function
 from flexmock import flexmock
 from flexmock import flexmock_nose
+from flexmock import _format_args
 import sys
 import unittest
 
@@ -812,13 +814,24 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_not_explode_on_unicode_formatting(self):
     if sys.version_info >= (3, 0):
-      formatted = FlexMock._format_args(
+      formatted = _format_args(
           'method', {'kargs' : (chr(0x86C7),), 'kwargs' : {}})
       assert formatted == 'method("蛇")'
     else:
-      formatted = FlexMock._format_args(
+      formatted = _format_args(
           'method', {'kargs' : (unichr(0x86C7),), 'kwargs' : {}})
       assert formatted == 'method("%s")' % unichr(0x86C7)
+
+  def test_return_value_should_not_explode_on_unicode_values(self):
+    class Foo:
+      def method(self): pass
+    foo = Foo()
+    if sys.version_info >= (3, 0):
+      return_value = ReturnValue(chr(0x86C7))
+      assert '%s' % return_value == '蛇'
+    else:
+      return_value = ReturnValue(unichr(0x86C7))
+      assert unicode(return_value) == unichr(0x86C7)
 
   def test_flexmock_should_give_reasonable_error_for_builtins(self):
     try:
