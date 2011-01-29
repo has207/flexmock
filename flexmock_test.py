@@ -1,3 +1,4 @@
+#-*- coding: utf8 -*-
 from flexmock import FlexMock
 from flexmock import AlreadyMocked
 from flexmock import AndExecuteNotSupportedForClassMocks
@@ -808,6 +809,13 @@ class TestFlexmock(unittest.TestCase):
       assert True
       return
     assert False
+
+  def test_flexmock_should_not_explode_on_unicode_formatting(self):
+    """
+    To make sure flexmock properly formats method signatures containing unicode arguments
+    """
+    formatted = FlexMock._format_args('method', {'kargs' : (u'嘢',), 'kwargs' : {}})
+    assert formatted == u'method("嘢")'
 
 
 if __name__ == '__main__':

@@ -338,7 +338,7 @@ class FlexMock(object):
 
   def should_call(self, method):
     """Shortcut for creating a spy.
-    
+
     Alias for should_receive().and_execute.
     """
     return self.should_receive(method).and_execute
@@ -588,7 +588,7 @@ class FlexMock(object):
   @staticmethod
   def _format_args(method, arguments):
     def to_str(arg):
-      if isinstance(arg, str):
+      if isinstance(arg, basestring):
         return '"%s"' % arg
       else:
         return str(arg)
