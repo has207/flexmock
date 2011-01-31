@@ -283,22 +283,20 @@ class Expectation(object):
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
-    if isinstance(self._mock, FlexMock):
-      del self
-      return  # no need to worry about mock objects
-    if self.original_method:
-      if self.static:
-        setattr(self._mock, self.method, staticmethod(self.original_method))
-      else:
-        setattr(self._mock, self.method, self.original_method)
-    elif self.method in dir(self._mock):
-      delattr(self._mock, self.method)
-    for attr in FlexMock.UPDATED_ATTRS:
-      if hasattr(self._mock, attr):
-        try:
-          delattr(self._mock, attr)
-        except AttributeError:
-          pass
+    if not isinstance(self._mock, FlexMock):
+      if self.original_method:
+        if self.static:
+          setattr(self._mock, self.method, staticmethod(self.original_method))
+        else:
+          setattr(self._mock, self.method, self.original_method)
+      elif self.method in dir(self._mock):
+        delattr(self._mock, self.method)
+      for attr in FlexMock.UPDATED_ATTRS:
+        if hasattr(self._mock, attr):
+          try:
+            delattr(self._mock, attr)
+          except AttributeError:
+            pass
     del self
 
 

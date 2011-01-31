@@ -438,7 +438,6 @@ class TestFlexmock(unittest.TestCase):
     class User:
       def foo(self):
         return 'class'
-    user = User()
     try:
       flexmock(User).should_receive('foo').and_execute
       raise Exception('and_execute should have raised an exception')
@@ -804,7 +803,6 @@ class TestFlexmock(unittest.TestCase):
   def test_flexmock_should_fail_mocking_nonexistent_methods(self):
     class User: pass
     user = User()
-    mock = flexmock(user)
     try:
       flexmock(user).should_receive('nonexistent')
     except MethodDoesNotExist:
@@ -825,7 +823,6 @@ class TestFlexmock(unittest.TestCase):
   def test_return_value_should_not_explode_on_unicode_values(self):
     class Foo:
       def method(self): pass
-    foo = Foo()
     if sys.version_info >= (3, 0):
       return_value = ReturnValue(chr(0x86C7))
       assert '%s' % return_value == '蛇'
