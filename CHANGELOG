@@ -1,3 +1,8 @@
+Release 0.7.1
+- Fix bug with "never" not working when the expectation is not met
+- Fix bug in duplicate calls to original method in pass_thru mode (thanks sagara-!)
+- Fix bug in handling unicode characters in ReturnValue
+
 Release 0.7.0
 - Better error handling for trying to mock builtins
 - Added simple test harness for running on multiple versions / test runners
