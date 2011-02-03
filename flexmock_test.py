@@ -830,6 +830,21 @@ class TestFlexmock(unittest.TestCase):
       return_value = ReturnValue(unichr(0x86C7))
       assert unicode(return_value) == unichr(0x86C7)
 
+  def test_pass_thru_should_not_call_orig_twice(self):
+    """
+    Make sure pass_thru doesn't call the original method more than once
+    """
+    class Nyan(object):
+      def __init__(self):
+          self.n = 0
+      def method(self):
+          self.n += 1
+    obj = Nyan()
+    flexmock(obj)
+    obj.should_call('method')
+    obj.method()
+    self.assertEqual(obj.n, 1)
+
   def test_flexmock_should_give_reasonable_error_for_builtins(self):
     try:
       flexmock(object).should_receive('time')

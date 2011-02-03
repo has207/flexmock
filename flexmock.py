@@ -568,7 +568,7 @@ class FlexMock(object):
                                   return_values)):
         raise (InvalidMethodSignature('expected to return %s, returned %s' %
                (expectation.return_values[0].value, return_values)))
-      return expectation.original_method(*kargs, **kwargs)
+      return return_values
 
     def mock_method(self, *kargs, **kwargs):
       arguments = {'kargs': kargs, 'kwargs': kwargs}
