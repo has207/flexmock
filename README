@@ -1,13 +1,8 @@
-FlexMock provides a mock/stub/spy library for Python.
+FlexMock is a mock/stub/spy library for Python.
 
-It is inspired by Ruby's FlexMock, however full feature parity with
-the Ruby version is not a goal. Python FlexMock omits a number of things in the
-Ruby version, mainly various shortcuts for existing functionality,
-and implements a number of things that Ruby's FlexMock
-doesn't support, such as proxying/spying and matching arguments using their classes
-in addition to values.
+It takes inspiration from a Ruby library of the same name, and as a result introduces much simpler syntax than other Python mocking libraries that are largely ported from Java. The aim of Python FlexMock is to be able to provide full support for mocking Python-specific features, and make the creation of fake objects as unobtrusive as possible.
 
-Why another mocking library for Python?
+More details, along with comparisons to other Python mocking libraries, are available here:
 
 https://github.com/has207/flexmock/wiki/Why-Flexmock%3F
 
