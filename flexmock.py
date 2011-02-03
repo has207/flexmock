@@ -702,4 +702,32 @@ def flexmock_nose(object_or_class=None, **kwargs):
   return _generate_mock(NoseFlexMock, object_or_class, **kwargs)
 
 
+def flexmock_pytest(object_or_class=None, **kwargs):
+  class PytestFlexMock(FlexMock):
+    def update_teardown(self, test_runner=None, teardown_method=None):
+      frame = sys._getframe(2)
+      this = frame.f_locals.get('self')
+      if this is None:
+        is_method = False
+      else:
+        # the name ``self`` is in the local namespace. could be a method, but
+        # could also be a function. It's a method if its class name starts with
+        # ``Test`` (this rule is defined by pytest in
+        # http://pytest.org/goodpractises.html#conventions-for-python-test-discovery)
+        class_name = this.__class__.__name__
+        is_method = class_name.startswith('Test')
+      if is_method:
+        # use the method teardown_method if the function is defined within a
+        # class, i.e. if it is a method
+        test_runner = this.__class__
+        teardown_method = 'teardown_method'
+      else:
+        # the function is not a method, so there is no class which belongs to it
+        # -> use the function teardown_function at module level
+        test_runner = __import__(frame.f_globals['__name__'])
+        teardown_method = 'teardown_function'
+      FlexMock.update_teardown(self, test_runner, teardown_method)
+  return _generate_mock(PytestFlexMock, object_or_class, **kwargs)
+
+
 flexmock = flexmock_unittest

@@ -13,7 +13,6 @@ from flexmock import MethodDoesNotExist
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import ReturnValue
-from flexmock import get_current_function
 from flexmock import flexmock
 from flexmock import flexmock_nose
 from flexmock import _format_args
@@ -25,24 +24,8 @@ def module_level_function(some, args):
   return "%s, %s" % (some, args)
 
 
-def test_module_level_test_for_nose():
-  flexmock_nose(foo='bar').should_receive('foo').once
-  func_name = sys._getframe().f_code.co_name
-  this_func = sys._getframe().f_globals[func_name]
-  try:
-    this_func.teardown()
-    assert False
-  except MethodNotCalled:
-    return
-  assert False
-
-
 def _tear_down(runner):
-  this_func = get_current_function()
-  if this_func and hasattr(this_func, 'teardown'):
-    return this_func.teardown()
-  if isinstance(runner, unittest.TestCase):
-    return unittest.TestCase.tearDown(runner)
+  return unittest.TestCase.tearDown(runner)
 
 
 def assertRaises(exception, method, *kargs, **kwargs):
@@ -760,8 +743,11 @@ class TestFlexmock(unittest.TestCase):
     assert 'ok!' == User.get_stuff()
 
   def test_flexmock_should_properly_restore_module_level_functions(self):
-    flexmock(sys.modules[self.__module__]).should_receive(
-        'module_level_function')
+    if 'flexmock_test' in sys.modules:
+      mod = sys.modules['flexmock_test']
+    else:
+      mod = sys.modules['__main__']
+    flexmock(mod).should_receive('module_level_function')
     assert None ==  module_level_function(1, 2)
     _tear_down(self)
     assert '1, 2' == module_level_function(1, 2)
