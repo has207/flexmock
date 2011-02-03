@@ -99,10 +99,11 @@ class Expectation(object):
   AT_LEAST = 'at least '
   AT_MOST = 'at most '
 
-  def __init__(self, name, mock, kargs=None, kwargs=None, return_value=None):
+  def __init__(self, name, mock, kargs=None, kwargs=None, return_value=None,
+      original_method=None):
     self.method = name
     self.modifier = ''
-    self.original_method = None
+    self.original_method = original_method
     self.static = False
     if kargs is None and kwargs is None:
       self.args = None
@@ -428,17 +429,26 @@ class FlexMock(object):
       if expectation.args is None and not expectation.return_values:
         expectation.args = args
       else:
-        expectation = self._create_expectation(method, args, return_value)
+        expectation = self._create_expectation(
+            method, args, return_value, expectation.original_method)
     else:
       expectation = self._create_expectation(method, args, return_value)
     return expectation
 
-  def _create_expectation(self, method, args, return_value):
+  def _create_expectation(
+      self, method, args, return_value, original_method=None):
     if args is None:
-      expectation = Expectation(method, self._mock, args, return_value)
+      expectation = Expectation(
+          method, self._mock, args, return_value=return_value,
+          original_method=original_method)
     else:
       expectation = Expectation(
-          method, self._mock, args['kargs'], args['kwargs'], return_value)
+          method,
+          self._mock,
+          args['kargs'],
+          args['kwargs'],
+          return_value,
+          original_method)
     return expectation
 
   def _update_method(self, expectation, method):

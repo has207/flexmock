@@ -841,10 +841,7 @@ class TestFlexmock(unittest.TestCase):
       return_value = ReturnValue(unichr(0x86C7))
       assert unicode(return_value) == unichr(0x86C7)
 
-  def test_pass_thru_should_not_call_orig_twice(self):
-    """
-    Make sure pass_thru doesn't call the original method more than once
-    """
+  def test_pass_thru_should_call_original_method_only_once(self):
     class Nyan(object):
       def __init__(self):
           self.n = 0
@@ -855,6 +852,32 @@ class TestFlexmock(unittest.TestCase):
     obj.should_call('method')
     obj.method()
     self.assertEqual(obj.n, 1)
+  
+  def test_should_call_works_for_same_method_with_different_args(self):
+    class Foo:
+      def method(self, arg):
+        pass
+    foo = Foo()
+    flexmock(foo).should_call('method').with_args('foo').once
+    flexmock(foo).should_call('method').with_args('bar').once
+    foo.method('foo')
+    foo.method('bar')
+    _tear_down(self)
+
+  def test_should_call_fails_properly_for_same_method_with_different_args(self):
+    class Foo:
+      def method(self, arg):
+        pass
+    foo = Foo()
+    flexmock(foo).should_call('method').with_args('foo').once
+    flexmock(foo).should_call('method').with_args('bar').once
+    foo.method('foo')
+    try:
+      _tear_down(self)
+    except MethodNotCalled:
+      assert True
+      return
+    assert False
 
   def test_flexmock_should_give_reasonable_error_for_builtins(self):
     try:
