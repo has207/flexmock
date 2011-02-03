@@ -414,12 +414,7 @@ class TestFlexmock(unittest.TestCase):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     mock.method_foo()
-    try:
-      _tear_down(self)
-    except MethodNotCalled:
-      assert True
-      return
-    assert False
+    assertRaises(MethodNotCalled, _tear_down, self)
   
   def test_flexmock_get_flexmock_expectation_should_work_with_args(self):
     mock = flexmock(name='temp')
@@ -814,12 +809,8 @@ class TestFlexmock(unittest.TestCase):
   def test_flexmock_should_fail_mocking_nonexistent_methods(self):
     class User: pass
     user = User()
-    try:
-      flexmock(user).should_receive('nonexistent')
-    except MethodDoesNotExist:
-      assert True
-      return
-    assert False
+    assertRaises(MethodDoesNotExist,
+                 flexmock(user).should_receive, 'nonexistent')
 
   def test_flexmock_should_not_explode_on_unicode_formatting(self):
     if sys.version_info >= (3, 0):
@@ -872,20 +863,10 @@ class TestFlexmock(unittest.TestCase):
     flexmock(foo).should_call('method').with_args('foo').once
     flexmock(foo).should_call('method').with_args('bar').once
     foo.method('foo')
-    try:
-      _tear_down(self)
-    except MethodNotCalled:
-      assert True
-      return
-    assert False
+    assertRaises(MethodNotCalled, _tear_down, self)
 
   def test_flexmock_should_give_reasonable_error_for_builtins(self):
-    try:
-      flexmock(object).should_receive('time')
-    except AttemptingToMockBuiltin:
-      assert True
-      return
-    assert False
+    assertRaises(AttemptingToMockBuiltin, flexmock, object)
 
 
 if __name__ == '__main__':
