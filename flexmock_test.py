@@ -403,13 +403,24 @@ class TestFlexmock(unittest.TestCase):
     assert 2 == expectation.expected_calls
     assertRaises(MethodNotCalled, _tear_down, self)
 
-  def test_flexmock_works_with_never(self):
+  def test_flexmock_works_with_never_when_true(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     expectation = mock._get_flexmock_expectation('method_foo')
     assert 0 == expectation.expected_calls
     _tear_down(self)
 
+  def test_flexmock_works_with_never_when_false(self):
+    mock = flexmock(name='temp')
+    mock.should_receive('method_foo').and_return('value_bar').never
+    mock.method_foo()
+    try:
+      _tear_down(self)
+    except MethodNotCalled:
+      assert True
+      return
+    assert False
+  
   def test_flexmock_get_flexmock_expectation_should_work_with_args(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').with_args('value_bar')

@@ -261,7 +261,7 @@ class Expectation(object):
     Raises:
       MethodNotCalled Exception
     """
-    if not self.expected_calls:
+    if self.expected_calls is None:
       return
     failed = False
     if not self.modifier:
