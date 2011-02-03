@@ -8,7 +8,7 @@ https://github.com/has207/flexmock/wiki/Why-Flexmock%3F
 
 SUPPORTS:
 
-- test runner integration with unittest and nose
+- test runner integration with unittest, nose and py.test
 - advanced argument matching, including matching types and user-defined classes
 - expectations on number of times called, including at_least/at_most modifiers
 - mocks returning custom values, including different values on successive invocations
@@ -42,7 +42,8 @@ TESTED WITH:
 - python 2.6 on OSX and Linux
 - python 3.1.2 on OSX
 - should work with other versions and platforms
-- nose integration only tested on python 2.6 but should work with other versions
+- nose integration only tested on python 2.4, 2.5 and 2.6
+- py.test integration only tested on python 2.6
 
 To report bugs or file feature requests:
 
