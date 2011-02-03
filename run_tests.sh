@@ -7,14 +7,17 @@ for version in 2.4 2.5 2.6 2.7 3.1; do
 	else
 		echo python$version NOT FOUND
 	fi
+	if test -f "$(which nosetests)"; then
+		echo nosetests with python$version
+		if python$version -c 'import nose' 2>/dev/null; then
+		  python$version $(which nosetests) flexmock_nose_test.py
+		else
+			echo nose not installed for python$version
+		fi
+	else
+		echo nosetests NOT FOUND
+	fi
 done
-
-if test -f "$(which nosetests)"; then
-	echo nosetests
-	nosetests flexmock_nose_test.py
-else
-	echo nosetests NOT FOUND
-fi
 
 if test -f "$(which py.test)"; then
 	echo py.test
