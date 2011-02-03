@@ -406,8 +406,6 @@ class FlexMock(object):
 
   def _flexmock_teardown(self, saved_teardown):
     def teardown(*kargs, **kwargs):
-      if saved_teardown:
-        saved_teardown(*kargs, **kwargs)
       saved = {}
       for mock_object, expectations in \
           FlexmockContainer.flexmock_objects.items():
@@ -419,6 +417,8 @@ class FlexMock(object):
       for mock_object, expectations in saved.items():
         for expectation in expectations:
           expectation.verify()
+      if saved_teardown:
+        saved_teardown(*kargs, **kwargs)
     return teardown
 
   def _retrieve_or_create_expectation(self, method=None,
