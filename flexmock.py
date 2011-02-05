@@ -99,23 +99,12 @@ class Expectation(object):
   AT_LEAST = 'at least '
   AT_MOST = 'at most '
 
-  def __init__(self, name, mock, kargs=None, kwargs=None, return_value=None,
-      original_method=None):
+  def __init__(self, name, mock, return_value=None, original_method=None):
     self.method = name
     self.modifier = ''
     self.original_method = original_method
     self.static = False
-    if kargs is None and kwargs is None:
-      self.args = None
-    else:
-      self.args = {'kargs': (), 'kwargs': {}}
-      if kargs is not None:
-        if isinstance(kargs, tuple):
-          self.args['kargs'] = kargs
-        else:
-          self.args['kargs'] = (kargs,)
-      if kwargs is not None:
-        self.args['kwargs'] = kwargs
+    self.args = None
     value = ReturnValue(return_value)
     self.return_values = []
     if return_value is not None:
@@ -328,14 +317,15 @@ class FlexMock(object):
       expectation: Expectation object
     """
     self._ensure_not_new_instances()
+    demeter_violations = None
+    if '.' in method:
+      method, demeter_violations = method.split('.', 1)
     if (method.startswith('__') and
         (not inspect.isclass(self._mock) and not inspect.ismodule(self._mock))):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
-    if (not isinstance(self._mock, FlexMock) and
-        not hasattr(self._mock, method) and
-        (not method.startswith('__') and not method.endswith('__'))):
+    if not isinstance(self._mock, FlexMock) and not hasattr(self._mock, method):
       raise MethodDoesNotExist('%s does not have method %s' % (self, method))
-    expectation = self._retrieve_or_create_expectation(method)
+    expectation = self._retrieve_or_create_expectation(method, demeter_violations)
     if expectation not in self._flexmock_expectations:
       self._flexmock_expectations.append(expectation)
       self._update_method(expectation, method)
@@ -403,34 +393,22 @@ class FlexMock(object):
     else:
       FlexmockContainer.flexmock_objects[self] = self._flexmock_expectations
 
-  def _retrieve_or_create_expectation(self, method=None,
-                                      args=None, return_value=None):
+  def _retrieve_or_create_expectation(self, method=None, return_value=None,
+                                      demeter_violations=None):
     if method in [x.method for x in self._flexmock_expectations]:
       expectation = [x for x in self._flexmock_expectations
                      if x.method == method][0]
-      if expectation.args is None and not expectation.return_values:
-        expectation.args = args
-      else:
-        expectation = self._create_expectation(
-            method, args, return_value, expectation.original_method)
+      expectation = self._create_expectation(
+          method, return_value, expectation.original_method)
     else:
-      expectation = self._create_expectation(method, args, return_value)
+      expectation = self._create_expectation(method, return_value)
     return expectation
 
   def _create_expectation(
-      self, method, args, return_value, original_method=None):
-    if args is None:
-      expectation = Expectation(
-          method, self._mock, args, return_value=return_value,
+      self, method, return_value, original_method=None):
+    expectation = Expectation(
+          method, self._mock, return_value=return_value,
           original_method=original_method)
-    else:
-      expectation = Expectation(
-          method,
-          self._mock,
-          args['kargs'],
-          args['kwargs'],
-          return_value,
-          original_method)
     return expectation
 
   def _update_method(self, expectation, method):

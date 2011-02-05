@@ -642,7 +642,7 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_should_mock_private_class_methods(self):
     class Foo:
-      pass
+      def __iter__(self): pass
     flexmock(Foo).should_receive('__iter__').and_yield(1, 2, 3)
     assert [1, 2, 3] == [x for x in Foo()]
 
