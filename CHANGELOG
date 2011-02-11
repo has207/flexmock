@@ -1,3 +1,11 @@
+Release 0.7.2
+- Added support for chained methods
+- Moved flexmock_teardown to module level to expose it for other test runners
+- Added py.test support (thanks to derdon)
+- Lots of test refactoring and improvements for multiple test runner support
+- Fix loop in teardown
+- Fix should_call for same method with different args 
+
 Release 0.7.1
 - Fix bug with "never" not working when the expectation is not met
 - Fix bug in duplicate calls to original method in pass_thru mode (thanks sagara-!)
