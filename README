@@ -20,6 +20,7 @@ SUPPORTS:
 - mocking generators using and_yield
 - easy mocking of static and private methods
 - enforcing expectations call ordering
+- easy mocking of chained methods
 
 INSTALL:
 
