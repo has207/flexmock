@@ -28,13 +28,13 @@ $ sudo python setup.py install
 
 DOCUMENTATION:
 
-Usage documentation is available online:
+Usage documentation:
 
-https://github.com/has207/flexmock/wiki/Documentation
+http://github.com/has207/flexmock/wiki/Documentation
 
-For API docs, generate the pydoc:
+API documentation:
 
-$ pydoc -w flexmock
+http://has207.github.com/flexmock/flexmock.html
 
 TESTED WITH:
 
