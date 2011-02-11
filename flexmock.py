@@ -317,20 +317,27 @@ class FlexMock(object):
       expectation: Expectation object
     """
     self._ensure_not_new_instances()
-    demeter_violations = None
+    chained_methods = None
+    return_value = None
     if '.' in method:
-      method, demeter_violations = method.split('.', 1)
+      method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and
         (not inspect.isclass(self._mock) and not inspect.ismodule(self._mock))):
       method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
     if not isinstance(self._mock, FlexMock) and not hasattr(self._mock, method):
       raise MethodDoesNotExist('%s does not have method %s' % (self, method))
-    expectation = self._retrieve_or_create_expectation(method, demeter_violations)
+    if chained_methods:
+      return_value = FlexMock()
+      chained_expectation = return_value.should_receive(chained_methods)
+    expectation = self._retrieve_or_create_expectation(method, return_value)
     if expectation not in self._flexmock_expectations:
       self._flexmock_expectations.append(expectation)
       self._update_method(expectation, method)
       self.update_teardown()
-    return expectation
+    if chained_methods:
+      return chained_expectation
+    else:
+      return expectation
 
   def should_call(self, method):
     """Shortcut for creating a spy.
@@ -370,7 +377,7 @@ class FlexMock(object):
     else:
       for method, return_value in kwargs.items():
         obj_or_class.should_receive(method).and_return(return_value)
-    expectation = self._retrieve_or_create_expectation()
+    expectation = self._create_expectation(method=None, return_value=None)
     self._flexmock_expectations.append(expectation)
     self.update_teardown()
 
@@ -393,8 +400,7 @@ class FlexMock(object):
     else:
       FlexmockContainer.flexmock_objects[self] = self._flexmock_expectations
 
-  def _retrieve_or_create_expectation(self, method=None, return_value=None,
-                                      demeter_violations=None):
+  def _retrieve_or_create_expectation(self, method, return_value=None):
     if method in [x.method for x in self._flexmock_expectations]:
       expectation = [x for x in self._flexmock_expectations
                      if x.method == method][0]
@@ -670,8 +676,7 @@ def flexmock_pytest(object_or_class=None, **kwargs):
       else:
         # the name ``self`` is in the local namespace. could be a method, but
         # could also be a function. It's a method if its class name starts with
-        # ``Test`` (this rule is defined by pytest in
-        # http://pytest.org/goodpractises.html#conventions-for-python-test-discovery)
+        # ``Test``
         class_name = this.__class__.__name__
         is_method = class_name.startswith('Test')
       if is_method:

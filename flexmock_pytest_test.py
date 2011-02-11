@@ -1,7 +1,12 @@
 from flexmock import MethodNotCalled
 from flexmock import flexmock_pytest as flexmock
-from flexmock_test import TestFlexmock
 from flexmock_test import assertRaises
+
+import flexmock_test
+
+
+class TestPytestUnittestClass(flexmock_test.TestFlexmockUnittest):
+  pass
 
 
 def test_module_level_test_for_pytest():

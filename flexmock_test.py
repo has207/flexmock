@@ -14,7 +14,6 @@ from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import ReturnValue
 from flexmock import flexmock
-from flexmock import flexmock_nose
 from flexmock import _format_args
 import sys
 import unittest
@@ -22,10 +21,6 @@ import unittest
 
 def module_level_function(some, args):
   return "%s, %s" % (some, args)
-
-
-def _tear_down(runner):
-  return unittest.TestCase.tearDown(runner)
 
 
 def assertRaises(exception, method, *kargs, **kwargs):
@@ -39,7 +34,11 @@ def assertRaises(exception, method, *kargs, **kwargs):
   raise Exception('%s not raised' % exception.__name__)
 
 
-class TestFlexmock(unittest.TestCase):
+class RegularClass(object):
+
+  def _tear_down(self):
+    """Override this in the subclasses."""
+    pass
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
@@ -226,21 +225,20 @@ class TestFlexmock(unittest.TestCase):
 
   def test_flexmock_configures_global_mocks_dict(self):
     mock = flexmock(name='temp')
-    for expectations in FlexmockContainer.flexmock_objects.values():
-      assert 0 == len(expectations)
+    assert mock not in FlexmockContainer.flexmock_objects
     mock.should_receive('method_foo')
-    for expectations in FlexmockContainer.flexmock_objects.values():
-      assert 1 == len(expectations)
+    assert mock in FlexmockContainer.flexmock_objects
+    assert len(FlexmockContainer.flexmock_objects[mock]) == 1
 
   def test_flexmock_teardown_verifies_mocks(self):
     mock = flexmock(name='temp')
     mock.should_receive('verify_expectations').times(1)
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_teardown_does_not_verify_stubs(self):
     mock = flexmock(name='temp')
     mock.should_receive('verify_expectations')
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_preserves_stubbed_object_methods_between_tests(self):
     class User:
@@ -249,7 +247,7 @@ class TestFlexmock(unittest.TestCase):
     user = User()
     flexmock(user).should_receive('get_name').and_return('john')
     assert 'john' == user.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert 'mike' == user.get_name()
 
   def test_flexmock_preserves_stubbed_class_methods_between_tests(self):
@@ -259,7 +257,7 @@ class TestFlexmock(unittest.TestCase):
     user = User()
     flexmock(User).should_receive('get_name').and_return('john')
     assert 'john' == user.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert 'mike' == user.get_name()
 
   def test_flexmock_removes_new_stubs_from_objects_after_tests(self):
@@ -270,7 +268,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(user).should_receive('get_name').and_return('john')
     assert saved != user.get_name
     assert 'john' == user.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert saved == user.get_name
 
   def test_flexmock_removes_new_stubs_from_classes_after_tests(self):
@@ -281,7 +279,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(User).should_receive('get_name').and_return('john')
     assert saved != user.get_name
     assert 'john' == user.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert saved == user.get_name
 
   def test_flexmock_removes_stubs_from_multiple_objects_on_teardown(self):
@@ -299,7 +297,7 @@ class TestFlexmock(unittest.TestCase):
     assert saved2 != group.get_name
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert saved1 == user.get_name
     assert saved2 == group.get_name
 
@@ -318,7 +316,7 @@ class TestFlexmock(unittest.TestCase):
     assert saved2 != group.get_name
     assert 'john' == user.get_name()
     assert 'john' == group.get_name()
-    _tear_down(self)
+    self._tear_down()
     assert saved1 == user.get_name
     assert saved2 == group.get_name
 
@@ -328,7 +326,7 @@ class TestFlexmock(unittest.TestCase):
     expectation = mock._get_flexmock_expectation('method_foo')
     assert Expectation.AT_LEAST == expectation.modifier
     mock.method_foo()
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_respects_at_least_when_called_requested_number(self):
     mock = flexmock(name='temp')
@@ -336,7 +334,7 @@ class TestFlexmock(unittest.TestCase):
     expectation = mock._get_flexmock_expectation('method_foo')
     assert Expectation.AT_LEAST == expectation.modifier
     mock.method_foo()
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_respects_at_least_when_called_more_than_requested(self):
     mock = flexmock(name='temp')
@@ -345,7 +343,7 @@ class TestFlexmock(unittest.TestCase):
     assert Expectation.AT_LEAST == expectation.modifier
     mock.method_foo()
     mock.method_foo()
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_respects_at_most_when_called_less_than_requested(self):
     mock = flexmock(name='temp')
@@ -353,7 +351,7 @@ class TestFlexmock(unittest.TestCase):
     expectation = mock._get_flexmock_expectation('method_foo')
     assert Expectation.AT_MOST == expectation.modifier
     mock.method_foo()
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_respects_at_most_when_called_requested_number(self):
     mock = flexmock(name='temp')
@@ -361,7 +359,7 @@ class TestFlexmock(unittest.TestCase):
     expectation = mock._get_flexmock_expectation('method_foo')
     assert Expectation.AT_MOST == expectation.modifier
     mock.method_foo()
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_respects_at_most_when_called_more_than_requested(self):
     mock = flexmock(name='temp')
@@ -370,34 +368,34 @@ class TestFlexmock(unittest.TestCase):
     assert Expectation.AT_MOST == expectation.modifier
     mock.method_foo()
     mock.method_foo()
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_treats_once_as_times_one(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').once
     expectation = mock._get_flexmock_expectation('method_foo')
     assert 1 == expectation.expected_calls
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_treats_twice_as_times_two(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').twice.and_return('value_bar')
     expectation = mock._get_flexmock_expectation('method_foo')
     assert 2 == expectation.expected_calls
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_works_with_never_when_true(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     expectation = mock._get_flexmock_expectation('method_foo')
     assert 0 == expectation.expected_calls
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_works_with_never_when_false(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     mock.method_foo()
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
   
   def test_flexmock_get_flexmock_expectation_should_work_with_args(self):
     mock = flexmock(name='temp')
@@ -456,13 +454,13 @@ class TestFlexmock(unittest.TestCase):
     group = Group()
     flexmock(Group, new_instances=user)
     assert user is Group()
-    _tear_down(self)
+    self._tear_down()
     assert group.__class__ == Group().__class__
 
   def test_flexmock_should_cleanup_added_methods_and_attributes(self):
     class Group(object): pass
     flexmock(Group)
-    _tear_down(self)
+    self._tear_down()
     for method in FlexMock.UPDATED_ATTRS:
       assert method not in dir(Group)
 
@@ -475,7 +473,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(User)
     Group.should_receive('method1').once
     User.should_receive('method2').once
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
     for method in FlexMock.UPDATED_ATTRS:
       assert method not in dir(Group)
     for method in FlexMock.UPDATED_ATTRS:
@@ -493,7 +491,7 @@ class TestFlexmock(unittest.TestCase):
     assert 'a:b' == group.method1('a')
     group.should_receive('method2').once.with_args('c').and_execute
     assert 'c' == group.method2('c')
-    _tear_down(self)
+    self._tear_down()
 
   def test_flexmock_and_execute_respects_unmatched_expectations(self):
     class Group(object):
@@ -502,12 +500,12 @@ class TestFlexmock(unittest.TestCase):
       def method2(self): pass
     group = Group()
     flexmock(group).should_receive('method1').at_least.once.and_execute
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
     flexmock(group)
     group.should_receive('method2').with_args('a').once.and_execute
     group.should_receive('method2').with_args('not a')
     group.method2('not a')
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
     class Foo(object):
@@ -615,7 +613,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice
     foo.method1(1, arg2=2, arg3=3)
     foo.method1(1, arg3=3, arg2=2)
-    _tear_down(self)
+    self._tear_down()
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2)
     assertRaises(InvalidMethodSignature, foo.method1, arg2=2, arg3=3)
     assertRaises(InvalidMethodSignature, foo.method1, 1, arg2=2, arg3=4)
@@ -729,7 +727,7 @@ class TestFlexmock(unittest.TestCase):
     assert 'ok!' == User.get_stuff()
     flexmock(User).should_receive('get_stuff')
     assert User.get_stuff() is None
-    _tear_down(self)
+    self._tear_down()
     assert 'ok!' == User.get_stuff()
 
   def test_flexmock_should_properly_restore_undecorated_static_methods(self):
@@ -739,7 +737,7 @@ class TestFlexmock(unittest.TestCase):
     assert 'ok!' == User.get_stuff()
     flexmock(User).should_receive('get_stuff')
     assert User.get_stuff() is None
-    _tear_down(self)
+    self._tear_down()
     assert 'ok!' == User.get_stuff()
 
   def test_flexmock_should_properly_restore_module_level_functions(self):
@@ -749,7 +747,7 @@ class TestFlexmock(unittest.TestCase):
       mod = sys.modules['__main__']
     flexmock(mod).should_receive('module_level_function')
     assert None ==  module_level_function(1, 2)
-    _tear_down(self)
+    self._tear_down()
     assert '1, 2' == module_level_function(1, 2)
 
   def test_flexmock_should_properly_restore_class_methods(self):
@@ -760,7 +758,7 @@ class TestFlexmock(unittest.TestCase):
     assert 'User' == User.get_stuff()
     flexmock(User).should_receive('get_stuff').and_return('foo')
     assert 'foo' == User.get_stuff()
-    _tear_down(self)
+    self._tear_down()
     assert 'User' == User.get_stuff()
 
   def test_and_execute_should_match_return_value_class(self):
@@ -790,7 +788,7 @@ class TestFlexmock(unittest.TestCase):
         return 'yay'
     foo = Foo()
     flexmock(foo).should_call('get_stuff').and_return('yay').once
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_should_fail_mocking_nonexistent_methods(self):
     class User: pass
@@ -828,7 +826,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(obj)
     obj.should_call('method')
     obj.method()
-    self.assertEqual(obj.n, 1)
+    assert obj.n == 1
   
   def test_should_call_works_for_same_method_with_different_args(self):
     class Foo:
@@ -839,7 +837,7 @@ class TestFlexmock(unittest.TestCase):
     flexmock(foo).should_call('method').with_args('bar').once
     foo.method('foo')
     foo.method('bar')
-    _tear_down(self)
+    self._tear_down()
 
   def test_should_call_fails_properly_for_same_method_with_different_args(self):
     class Foo:
@@ -849,10 +847,41 @@ class TestFlexmock(unittest.TestCase):
     flexmock(foo).should_call('method').with_args('foo').once
     flexmock(foo).should_call('method').with_args('bar').once
     foo.method('foo')
-    assertRaises(MethodNotCalled, _tear_down, self)
+    assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_should_give_reasonable_error_for_builtins(self):
     assertRaises(AttemptingToMockBuiltin, flexmock, object)
+
+  def test_mock_chained_method_calls_works_with_one_level(self):
+    class Foo:
+      def method2(self):
+        return 'foo'
+    class Bar:
+      def method1(self):
+        return Foo()
+    foo = Bar()
+    assert 'foo' == foo.method1().method2()
+    flexmock(foo).should_receive('method1.method2').and_return('bar')
+    assert 'bar' == foo.method1().method2()
+
+  def test_mock_chained_method_calls_works_with_more_than_one_level(self):
+    class Baz:
+      def method3(self):
+        return 'foo'
+    class Foo:
+      def method2(self):
+        return Baz()
+    class Bar:
+      def method1(self):
+        return Foo()
+    foo = Bar()
+    assert 'foo' == foo.method1().method2().method3()
+    flexmock(foo).should_receive('method1.method2.method3').and_return('bar')
+    assert 'bar' == foo.method1().method2().method3()
+
+class TestFlexmockUnittest(RegularClass, unittest.TestCase):
+  def _tear_down(self):
+    return unittest.TestCase.tearDown(self)
 
 
 if __name__ == '__main__':

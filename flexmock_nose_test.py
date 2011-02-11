@@ -2,9 +2,20 @@ from flexmock import MethodNotCalled
 from flexmock import flexmock_nose as flexmock
 from flexmock import get_current_function
 from flexmock import flexmock_teardown
-from flexmock_test import TestFlexmock
 from flexmock_test import assertRaises
 from nose import with_setup
+
+import flexmock_test
+
+
+class TestNoseUnittestClass(flexmock_test.TestFlexmockUnittest):
+  pass
+
+
+class TestNoseRegularClass(flexmock_test.RegularClass):
+  def _tear_down(self):
+    this_func = get_current_function()
+    return this_func.teardown()
 
 
 def empty_setup():
