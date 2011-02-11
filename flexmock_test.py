@@ -864,6 +864,23 @@ class RegularClass(object):
     flexmock(foo).should_receive('method1.method2').and_return('bar')
     assert 'bar' == foo.method1().method2()
 
+  def test_mock_chained_method_supports_args_and_mocks(self):
+    class Foo:
+      def method2(self, arg):
+        return arg
+    class Bar:
+      def method1(self):
+        return Foo()
+    foo = Bar()
+    assert 'foo' == foo.method1().method2('foo')
+    flexmock(foo).should_receive('method1.method2').with_args(
+        'foo').and_return('bar').once
+    assert 'bar' == foo.method1().method2('foo')
+    self._tear_down()
+    flexmock(foo).should_receive('method1.method2').with_args(
+        'foo').and_return('bar').once
+    assertRaises(MethodNotCalled, self._tear_down)
+
   def test_mock_chained_method_calls_works_with_more_than_one_level(self):
     class Baz:
       def method3(self):
