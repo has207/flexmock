@@ -904,6 +904,19 @@ class RegularClass(object):
     assert foo.method(5) == True
     assert foo.method(4) == False
 
+  def test_flexmock_should_mock_the_same_method_multiple_times(self):
+    class Foo:
+      def method(self): pass
+    foo = Foo()
+    flexmock(foo).should_receive('method').and_return(1)
+    assert foo.method() == 1
+    flexmock(foo).should_receive('method').and_return(2)
+    assert foo.method() == 2
+    flexmock(foo).should_receive('method').and_return(3)
+    assert foo.method() == 3
+    flexmock(foo).should_receive('method').and_return(4)
+    assert foo.method() == 4
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):
