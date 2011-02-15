@@ -4,7 +4,7 @@ It takes inspiration from a Ruby library of the same name, and as a result intro
 
 More details, along with comparisons to other Python mocking libraries, are available here:
 
-https://github.com/has207/flexmock/wiki/Why-Flexmock%3F
+http://github.com/has207/flexmock/wiki/Why-Flexmock%3F
 
 SUPPORTS:
 
@@ -48,7 +48,7 @@ TESTED WITH:
 
 To report bugs or file feature requests:
 
-https://github.com/has207/flexmock/issues
+http://github.com/has207/flexmock/issues
 
 Follow pyflexmock on twitter:
 
