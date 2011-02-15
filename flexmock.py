@@ -28,7 +28,7 @@ import types
 import unittest
 
 
-class FlexmockException(Exception):
+class FlexmockError(Exception):
   pass
 
 
@@ -39,35 +39,31 @@ class AttemptingToMockBuiltin(Exception):
     return out
 
 
-class InvalidMethodSignature(FlexmockException):
+class InvalidMethodSignature(FlexmockError):
   pass
 
 
-class InvalidExceptionClass(FlexmockException):
+class InvalidExceptionClass(FlexmockError):
   pass
 
 
-class InvalidExceptionMessage(FlexmockException):
+class InvalidExceptionMessage(FlexmockError):
   pass
 
 
-class MethodNotCalled(FlexmockException):
+class MethodNotCalled(FlexmockError):
   pass
 
 
-class MethodCalledOutOfOrder(FlexmockException):
+class MethodCalledOutOfOrder(FlexmockError):
   pass
 
 
-class MethodDoesNotExist(FlexmockException):
+class MethodDoesNotExist(FlexmockError):
   pass
 
 
-class AlreadyMocked(FlexmockException):
-  pass
-
-
-class AndExecuteNotSupportedForClassMocks(FlexmockException):
+class AlreadyMocked(FlexmockError):
   pass
 
 
@@ -107,6 +103,7 @@ class Expectation(object):
     self.args = None
     value = ReturnValue(return_value)
     self.return_values = []
+    self._replace_with = None
     if return_value is not None:
       self.return_values.append(value)
     self.yield_values = []
@@ -216,8 +213,10 @@ class Expectation(object):
     version. However, we can still keep track of how many times it's called and
     with what arguments, and apply expectations accordingly.
     """
+    if self._replace_with:
+      raise FlexmockError('replace_with cannot be mixed with and_execute')
     if inspect.isclass(self._mock):
-      raise AndExecuteNotSupportedForClassMocks
+      raise FlexmockError('and_execute not supported for class mocks')
     self._pass_thru = True
     return self
 
@@ -235,8 +234,23 @@ class Expectation(object):
       kargs: tuple of kargs to pass to the exception
       kwargs: dict of kwargs to pass to the exception
     """
+    if self._replace_with:
+      raise FlexmockError('replace_with cannot be mixed with return values')
     args = {'kargs': kargs, 'kwargs': kwargs}
     self.return_values.append(ReturnValue(raises=exception, value=args))
+    return self
+
+  def replace_with(self, function):
+    """Gives a function to run instead of the mocked out one.
+
+    Args:
+      function: callable
+    """
+    if self._replace_with:
+      raise FlexmockError('replace_with cannot be specified twice')
+    if self.return_values:
+      raise FlexmockError('replace_with cannot be mixed with return values')
+    self._replace_with = function
     return self
 
   def and_yield(self, *kargs):
@@ -349,7 +363,7 @@ class FlexMock(object):
   def _ensure_not_new_instances(self):
     for exp in self._flexmock_expectations:
       if exp.original_method and exp.original_method.__name__ == '__new__':
-        raise FlexmockException('cannot use should_receive with new_instances')
+        raise FlexmockError('cannot use should_receive with new_instances')
 
   def _new_instances(self, return_value):
     """Overrides creation of new instances of the mocked class.
@@ -551,6 +565,8 @@ class FlexMock(object):
       expectation = self._get_flexmock_expectation(method, arguments)
       if expectation:
         expectation.times_called += 1
+        if expectation._replace_with:
+          return expectation._replace_with(*kargs, **kwargs)
         if expectation._pass_thru:
           return pass_thru(expectation, *kargs, **kwargs)
         if expectation.yield_values:

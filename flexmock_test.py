@@ -1,11 +1,10 @@
 #-*- coding: utf8 -*-
 from flexmock import FlexMock
 from flexmock import AlreadyMocked
-from flexmock import AndExecuteNotSupportedForClassMocks
 from flexmock import AttemptingToMockBuiltin
 from flexmock import Expectation
 from flexmock import FlexmockContainer
-from flexmock import FlexmockException
+from flexmock import FlexmockError
 from flexmock import InvalidMethodSignature
 from flexmock import InvalidExceptionClass
 from flexmock import InvalidExceptionMessage
@@ -428,7 +427,7 @@ class RegularClass(object):
     try:
       flexmock(User).should_receive('foo').and_execute
       raise Exception('and_execute should have raised an exception')
-    except AndExecuteNotSupportedForClassMocks:
+    except FlexmockError:
       pass
 
   def test_flexmock_should_mock_new_instances(self):
@@ -780,7 +779,7 @@ class RegularClass(object):
   def test_new_instances_should_blow_up_on_should_receive(self):
     class User(object): pass
     mock = flexmock(User, new_instances=None)
-    assertRaises(FlexmockException, mock.should_receive, 'foo')
+    assertRaises(FlexmockError, mock.should_receive, 'foo')
 
   def test_should_call_alias_should_receive_and_execute(self):
     class Foo:
@@ -895,6 +894,16 @@ class RegularClass(object):
     assert 'foo' == foo.method1().method2().method3()
     flexmock(foo).should_receive('method1.method2.method3').and_return('bar')
     assert 'bar' == foo.method1().method2().method3()
+
+  def test_flexmock_should_replace_method(self):
+    class Foo:
+      def method(self, arg):
+        return arg
+    foo = Foo()
+    flexmock(foo).should_receive('method').replace_with(lambda x: x == 5)
+    assert foo.method(5) == True
+    assert foo.method(4) == False
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):
