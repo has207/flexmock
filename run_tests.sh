@@ -3,7 +3,7 @@
 for version in 2.4 2.5 2.6 2.7 3.1 3.2; do
 	if test -f "`which python$version`"; then
 		echo python$version
-		python$version flexmock_test.py
+		python$version flexmock_unittest_test.py
 	else
 		echo python$version NOT FOUND
 	fi

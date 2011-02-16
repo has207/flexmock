@@ -6,10 +6,20 @@ from flexmock_test import assertRaises
 from nose import with_setup
 
 import flexmock_test
+import sys
 
 
 class TestNoseUnittestClass(flexmock_test.TestFlexmockUnittest):
   pass
+
+
+if sys.version_info >= (2, 6):
+  import flexmock_modern_test
+  class TestNoseModern(flexmock_modern_test.ModernClass):
+    pass
+
+  class TestNoseUnittestModern(flexmock_modern_test.TestFlexmockUnittestModern):
+    pass
 
 
 class TestNoseRegularClass(flexmock_test.RegularClass):

@@ -321,6 +321,12 @@ class FlexMock(object):
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
+  def __enter__(self):
+    return self._mock
+
+  def __exit__(self, type, value, traceback):
+    return self
+
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 
