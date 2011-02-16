@@ -1,2 +1,2 @@
 test:
-	./run_tests.sh
+	./tests/run_tests.sh
