@@ -5,6 +5,7 @@
  :Author: `Herman Sheremetyev <http://github.com/has207>`_
  :Version: |version|
  :Homepage: `Flexmock Homepage`_
+ :GitHub: `http://github.com/has207/flexmock <http://github.com/has207/flexmock>`_
  :Download: `http://pypi.python.org/pypi/flexmock <http://pypi.python.org/pypi/flexmock>`_
  :License: `FreeBSD-style License`_
  :Issue tracker: `GitHub Issue Tracker <http://github.com/has207/flexmock/issues>`_
