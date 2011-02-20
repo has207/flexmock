@@ -24,6 +24,10 @@ SUPPORTS:
 
 INSTALL:
 
+$ sudo easy_install flexmock
+
+- or download the tarball and run -
+
 $ sudo python setup.py install
 
 DOCUMENTATION:
