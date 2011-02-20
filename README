@@ -2,53 +2,9 @@ FlexMock is a mock/stub/spy library for Python.
 
 It takes inspiration from a Ruby library of the same name, and as a result introduces much simpler syntax than other Python mocking libraries that are largely ported from Java. However, the aim of Python FlexMock is not to clone the Ruby version but to be able to provide full support for mocking Python-specific features, and make the creation of fake objects as unobtrusive as possible.
 
-More details, along with comparisons to other Python mocking libraries, are available here:
+More details, including full API and user documentation, available here:
 
-https://github.com/has207/flexmock/wiki/Why-Flexmock%3F
-
-SUPPORTS:
-
-- test runner integration with unittest, nose and py.test
-- advanced argument matching, including matching types and user-defined classes
-- expectations on number of times called, including at_least/at_most modifiers
-- mocks returning custom values, including different values on successive invocations
-- mocks raising custom exceptions
-- simple syntax for generating new mock objects
-- overriding new instances (on new-style objects)
-- proxying/spying using the and_execute expectation modifier
-- setting expectations on spy return values
-- mocking generators using and_yield
-- easy mocking of static and private methods
-- enforcing expectations call ordering
-- easy mocking of chained methods
-
-INSTALL:
-
-$ sudo easy_install flexmock
-
-- or download the tarball and run -
-
-$ sudo python setup.py install
-
-DOCUMENTATION:
-
-Usage documentation:
-
-http://github.com/has207/flexmock/wiki/Documentation
-
-API documentation:
-
-http://has207.github.com/flexmock/flexmock.html
-
-TESTED WITH:
-
-- python 2.4.4 on OSX
-- python 2.5 on OSX
-- python 2.6 on OSX and Linux
-- python 2.7 on OSX
-- python 3.1.2 on OSX
-- python 3.2.1rc2 on OSX
-- should work with other versions and platforms
+http://has207.github.com/flexmock
 
 To report bugs or file feature requests:
 
