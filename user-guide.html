@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Usage Documentation &mdash; Flexmock v0.7.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.7.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flexmock v0.7.2 documentation" href="index.html" />
+    <link rel="next" title="&lt;no title&gt;" href="api.html" />
+    <link rel="prev" title="Flexmock - Mocking Library" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flexmock - Mocking Library"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="usage-documentation">
+<h1>Usage Documentation<a class="headerlink" href="#usage-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline">¶</a></h2>
+<p>In order to discuss Flexmock usage it&#8217;s important to define the
+following terms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Stub:</th><td class="field-body">fake object that returns a canned value</td>
+</tr>
+<tr class="field"><th class="field-name">Mock:</th><td class="field-body">fake object that returns a canned value and has an expectation, i.e. it includes a built-in assertion</td>
+</tr>
+<tr class="field"><th class="field-name">Spy:</th><td class="field-body">watches method calls and records/verifies if the method is called with required parameters and/or returns expected values/exceptions</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="test-runner-integration">
+<h1>Test runner integration<a class="headerlink" href="#test-runner-integration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="unittest-unittest2">
+<h2>unittest / unittest2<a class="headerlink" href="#unittest-unittest2" title="Permalink to this headline">¶</a></h2>
+<p>FlexMock, by default, assumes your tests are in a class that inherits
+from unittest.TestCase, so if that&#8217;s the case then all you need to do
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="nose">
+<h2>Nose<a class="headerlink" href="#nose" title="Permalink to this headline">¶</a></h2>
+<p>For normal nose tests, including those at module level, inside
+unittest.TestCase classes or in other classes that nose recognizes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_nose</span> <span class="k">as</span> <span class="n">flexmock</span>
+</pre></div>
+</div>
+<p>Generator tests must be decorated by &#64;with_setup(setup_func, flexmock_teardown()). The teardown for these tests is non-trivial to hook into &#8211; if you can figure out a better way, please let me know.</p>
+</div>
+<div class="section" id="py-test">
+<h2>Py.test<a class="headerlink" href="#py-test" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_pytest</span> <span class="k">as</span> <span class="n">flexmock</span>
+</pre></div>
+</div>
+<p><em>(Should also work fine when running nose style tests or straight
+unittest.TestCase tests)</em></p>
+</div>
+<div class="section" id="other-test-runners">
+<h2>Other test runners<a class="headerlink" href="#other-test-runners" title="Permalink to this headline">¶</a></h2>
+<p>As far as I can tell most test runners out there support
+unittest.TestCase so as long as your tests are in a class that inherits
+from unittest.TestCase flexmock will just work, otherwise have a look at
+other test runner integration and send me a patch.</p>
+</div>
+</div>
+<div class="section" id="example-usage">
+<h1>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="make-a-mock-object">
+<h2>Make a mock object<a class="headerlink" href="#make-a-mock-object" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># using the param shortcuts -- limited to specifying attribute/return value pairs</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">method1</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">attr1</span><span class="o">=</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+
+<span class="c"># using the more verbose approach -- gives more flexibility when you need it</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>FlexMock mock objects support the full range of flexmock commands but
+differ from partial mocks (described below) in that should_receive()
+assigns them new methods rather than acting on methods they already
+possess.</p>
+</div>
+<div class="section" id="partially-mock-or-stub-an-existing-object">
+<h2>Partially mock or stub an existing object<a class="headerlink" href="#partially-mock-or-stub-an-existing-object" title="Permalink to this headline">¶</a></h2>
+<p>There are a few, basically equivalent, ways to hook into an existing
+object and overwrite its methods:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># mark the object as partially mocked, allowing it to be used to create new expectations</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+<span class="n">some_object</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<span class="n">some_object</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some other return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+
+<span class="c"># equivalent syntax assigns the object to a variable, possibly for brevity</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some other return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+
+<span class="c"># or you can combine everything into one line if there is only one method to overwrite</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+
+<span class="c"># you can also return the mock object after setting the expectations</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some_value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mock</span>
+
+<span class="c"># note the &quot;mock&quot; modifier above -- the expectation chain returns an expectation otherwise</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_other_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can leave off with_args() to match any arguments, and leave off and_return() to return None.</p>
+</div>
+<div class="section" id="stub-out-a-method-for-all-instances-of-a-class">
+<h2>Stub out a method for all instances of a class<a class="headerlink" href="#stub-out-a-method-for-all-instances-of-a-class" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">User</span><span class="p">:</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;value_bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">user</span><span class="o">.</span><span class="n">method_foo</span><span class="p">()</span>
+<span class="go">&#39;value_bar&#39;``</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-automatically-checked-expectations">
+<h2>Create automatically checked expectations<a class="headerlink" href="#create-automatically-checked-expectations" title="Permalink to this headline">¶</a></h2>
+<p>Using the times(N) modifier, or its aliases &#8211; once, twice, never &#8211;
+allows you to create expectations that will be automatically checked by
+the test runner.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+
+<span class="c"># ensure method_bar(&#39;a&#39;) gets called exactly three times</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c"># ensure method_bar(&#39;b&#39;) gets called at least twice</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">twice</span>
+
+<span class="c"># ensure method_bar(&#39;c&#39;) gets called at most once</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_most</span><span class="o">.</span><span class="n">once</span>
+
+<span class="c"># ensure that method_bar(&#39;d&#39;) is never called</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">never</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="raise-exceptions">
+<h2>Raise exceptions<a class="headerlink" href="#raise-exceptions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">YourException</span><span class="p">)</span>
+
+<span class="c"># or you can add a message to the exception being raised</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">YourException</span><span class="p">(</span><span class="s">&#39;exception message&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-a-spy-or-proxy-to-a-method">
+<h2>Add a spy (or proxy) to a method<a class="headerlink" href="#add-a-spy-or-proxy-to-a-method" title="Permalink to this headline">¶</a></h2>
+<p>In addition to stubbing out a given method and return fake values,
+FlexMock also allows you to call the original method and make
+expectations based on its return values/exceptions and the number of
+times the method is called with the given arguments.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># matching specific arguments</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">and_execute</span>
+
+<span class="c"># matching any arguments</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">twice</span><span class="o">.</span><span class="n">and_execute</span>
+
+<span class="c"># or using the short-hand</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+
+<span class="c"># matching specific return values</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+
+<span class="c"># or match return values by class/type</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+<span class="c"># or ensuring that an appropriate exception is raised --</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+
+<span class="c"># or even checking that the exception message matches your expectations --</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;some error&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If either and_return() or and_raise() is provided, flexmock will
+verify that the return value matches the expected return value or
+exception.</p>
+<p>NOTE: should_call/and_execute changes the behavior of and_return()
+and and_raise() to specify expectations rather than generate given
+values or exceptions.</p>
+</div>
+<div class="section" id="return-different-values-on-successive-method-invocations">
+<h2>Return different values on successive method invocations<a class="headerlink" href="#return-different-values-on-successive-method-invocations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_member&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">get_member</span><span class="p">()</span>
+<span class="go">&#39;user1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">get_member</span><span class="p">()</span>
+<span class="go">&#39;user2&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">get_member</span><span class="p">()</span>
+<span class="go">&#39;user3&#39;</span>
+
+<span class="go"># or use the short-hand form</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_member&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user1&#39;</span><span class="p">,</span> <span class="s">&#39;user2&#39;</span><span class="p">,</span> <span class="s">&#39;user3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">one_by_one</span>
+
+<span class="go"># you can also mix return values with exception raises</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_member&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;user2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="override-new-method-on-a-class-and-return-fake-instances">
+<h2>Override &#8220;__new__&#8221; method on a class and return fake instances<a class="headerlink" href="#override-new-method-on-a-class-and-return-fake-instances" title="Permalink to this headline">¶</a></h2>
+<p>Occasionally you will want a class to create fake objects when it&#8217;s
+being instantiated. FlexMock makes it easy and painless.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;foo&#39;</span> <span class="o">==</span> <span class="n">Group</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Overriding new instances of old-style classes is currently not supported
+directly, you should make the class inherit from &#8220;object&#8221; in your code
+first. Luckily, multiple inheritance should make this pretty painless.</p>
+</div>
+<div class="section" id="create-a-mock-generator">
+<h2>Create a mock generator<a class="headerlink" href="#create-a-mock-generator" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;gen&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">foo</span><span class="o">.</span><span class="n">gen</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="k">print</span> <span class="n">i</span>
+<span class="go">1</span>
+<span class="go">2</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="private-methods">
+<h2>Private methods<a class="headerlink" href="#private-methods" title="Permalink to this headline">¶</a></h2>
+<p>One of the small pains of writing unit tests is that it&#8217;s a bit
+difficult to get at the private methods since Python &#8220;conveniently&#8221;
+renames them when you try to access them from outside the object. With
+FlexMock there is nothing special you need to do to &#8211; mocking private
+methods is exactly the same as any other methods.</p>
+</div>
+<div class="section" id="enforcing-call-order">
+<h2>Enforcing call order<a class="headerlink" href="#enforcing-call-order" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+
+<span class="go"># now calling the methods in the same order will be fine</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<span class="go">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="go">&#39;foo&#39;</span>
+</pre></div>
+</div>
+<p>But trying to call the second one first will result in an exception!</p>
+</div>
+<div class="section" id="chained-methods">
+<h2>Chained methods<a class="headerlink" href="#chained-methods" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s say you have some code that looks something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">http</span> <span class="o">=</span> <span class="n">HTTP</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="s">&#39;http://www.google.com&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parse_html</span><span class="p">()</span><span class="o">.</span><span class="n">retrieve_results</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You could use Flexmock to mock each of these method calls individually:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_url&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+    <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;parse_html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+        <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;retrieve_results&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">([])</span><span class="o">.</span><span class="n">mock</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mock</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>But that looks really error prone and quite difficult to parse when
+reading. Here&#8217;s a better way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_url.parse_html.retrieve_results&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">([])</span>
+</pre></div>
+</div>
+<p>When using this short-hand, Flexmock will create intermediate objects
+and expectations, returning the final one in the chain. As a result, any
+further modifications, such as with_args() or times() modifiers, will
+only be applied to the final method in the chain. If you need finer
+grained control, such as specifying specific arguments to an
+intermediate method, you can always fall back to the above long version.</p>
+</div>
+</div>
+<div class="section" id="expectation-matching">
+<h1>Expectation Matching<a class="headerlink" href="#expectation-matching" title="Permalink to this headline">¶</a></h1>
+<p>Creating an expectation with no arguments will by default match all
+arguments, including no arguments.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+
+<span class="go"># will be matched by any of the following:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">()</span>
+<span class="go">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="go">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<span class="go">&#39;bar&#39;</span>
+</pre></div>
+</div>
+<p>In addition to exact values, you can also match against the type or
+class of the argument.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># match any single argument</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+<span class="c"># match any single string argument</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="c"># match any set of three arguments where the first one is an integer,</span>
+<span class="c"># second one is anything, and third is string &#39;foo&#39;</span>
+<span class="c"># (matching against user defined classes is also supported in the same fashion)</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also override the default match with another expectation for the
+same method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">()</span>
+<span class="go">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<span class="go">&#39;bar&#39;</span>
+
+<span class="go"># but!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="go">&#39;foo&#39;``</span>
+</pre></div>
+</div>
+<p>The order of the expectations being defined is significant, with later
+expectations having higher precedence than previous ones. Which means
+that if you reversed the order of the example expectations above the
+more specific expectation would never be matched.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Usage Documentation</a><ul>
+<li><a class="reference internal" href="#definitions">Definitions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-runner-integration">Test runner integration</a><ul>
+<li><a class="reference internal" href="#unittest-unittest2">unittest / unittest2</a></li>
+<li><a class="reference internal" href="#nose">Nose</a></li>
+<li><a class="reference internal" href="#py-test">Py.test</a></li>
+<li><a class="reference internal" href="#other-test-runners">Other test runners</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#example-usage">Example Usage</a><ul>
+<li><a class="reference internal" href="#make-a-mock-object">Make a mock object</a></li>
+<li><a class="reference internal" href="#partially-mock-or-stub-an-existing-object">Partially mock or stub an existing object</a></li>
+<li><a class="reference internal" href="#stub-out-a-method-for-all-instances-of-a-class">Stub out a method for all instances of a class</a></li>
+<li><a class="reference internal" href="#create-automatically-checked-expectations">Create automatically checked expectations</a></li>
+<li><a class="reference internal" href="#raise-exceptions">Raise exceptions</a></li>
+<li><a class="reference internal" href="#add-a-spy-or-proxy-to-a-method">Add a spy (or proxy) to a method</a></li>
+<li><a class="reference internal" href="#return-different-values-on-successive-method-invocations">Return different values on successive method invocations</a></li>
+<li><a class="reference internal" href="#override-new-method-on-a-class-and-return-fake-instances">Override &#8220;__new__&#8221; method on a class and return fake instances</a></li>
+<li><a class="reference internal" href="#create-a-mock-generator">Create a mock generator</a></li>
+<li><a class="reference internal" href="#private-methods">Private methods</a></li>
+<li><a class="reference internal" href="#enforcing-call-order">Enforcing call order</a></li>
+<li><a class="reference internal" href="#chained-methods">Chained methods</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#expectation-matching">Expectation Matching</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Flexmock - Mocking Library</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/user-guide.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="&lt;no title&gt;"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flexmock - Mocking Library"
+             >previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Herman Sheremetyev.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

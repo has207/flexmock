@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mock Library Comparison &mdash; Flexmock v0.7.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.7.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flexmock v0.7.2 documentation" href="index.html" />
+    <link rel="prev" title="Food For Thought" href="why.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="why.html" title="Food For Thought"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mock-library-comparison">
+<h1>Mock Library Comparison<a class="headerlink" href="#mock-library-comparison" title="Permalink to this headline">¶</a></h1>
+<p>This document shows a side-by-side comparison of how to accomplish some
+basic tasks with Flexmock as well as other Python mocking libraries.
+While it demonstrates that Flexmock is much less verbose, while
+remaining just as capable, it is less interesting in my opinion as it
+focuses on things that are already possible with existing libraries
+instead of Flexmock&#8217;s real strengths in allowing you to do things in
+your tests that are either very difficult or completely impossible with
+other existing tools.</p>
+<p>This comparison is by no means complete, and there are a number of
+libraries out there that are not covered here. In addition it probably
+contains some amount of inaccuracies, so feel free to submit amendments
+or examples for additional libraries.</p>
+<div class="section" id="simple-fake-object">
+<h2>Simple fake object<a class="headerlink" href="#simple-fake-object" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_method</span><span class="o">=</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="n">mymock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">(</span> <span class="p">{</span><span class="s">&quot;some_method&quot;</span><span class="p">:</span> <span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="s">&quot;some_attribute&quot;</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mymock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+
+<span class="c"># pMock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">pmock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">expects</span><span class="p">()</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">will</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">return_value</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">))</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+
+<span class="c"># Mocker</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">)</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-mock">
+<h2>Simple mock<a class="headerlink" href="#simple-mock" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">some_method</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Verify</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="n">mymock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">(</span> <span class="p">{</span><span class="s">&quot;some_method&quot;</span> <span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mymock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">mockCheckCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;some_method&quot;</span><span class="p">)</span>
+
+<span class="c"># pMock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">pmock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">once</span><span class="p">())</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">will</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">return_value</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">))</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
+<span class="c"># Mocker</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-partial-mocks">
+<h2>Creating partial mocks<a class="headerlink" href="#creating-partial-mocks" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">SomeObject</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">some_method</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockObject</span><span class="p">(</span><span class="n">SomeObject</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Verify</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">({</span><span class="s">&quot;some_method&quot;</span><span class="p">,</span> <span class="s">&quot;value&quot;</span><span class="p">},</span> <span class="n">SomeObject</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">mockCheckCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;some_method&quot;</span><span class="p">)</span>
+
+<span class="c"># pMock</span>
+<span class="c"># Doesn&#39;t seem to have support for partial mocks</span>
+
+<span class="c"># Mocker</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">mock</span><span class="p">(</span><span class="n">SomeObject</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">Get</span><span class="p">()</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ensure-calls-are-made-in-specific-order">
+<h2>Ensure calls are made in specific order<a class="headerlink" href="#ensure-calls-are-made-in-specific-order" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">SomeObject</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">ordered</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;first thing&#39;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">ordered</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;second thing&#39;</span><span class="p">)</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockObject</span><span class="p">(</span><span class="n">SomeObject</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&#39;first thing&#39;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&#39;second thing&#39;</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Verify</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="c"># Doesn&#39;t seem to support call ordering</span>
+
+<span class="c"># pMock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">pmock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">once</span><span class="p">())</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">will</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">return_value</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">))</span>
+<span class="n">mock_db</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">once</span><span class="p">())</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="s">&quot;method1&quot;</span><span class="p">)</span>
+<span class="n">mock_db</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">once</span><span class="p">())</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="s">&quot;method2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="s">&quot;method1&quot;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
+<span class="c"># Mocker</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">mock</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">mocker</span><span class="o">.</span><span class="n">order</span><span class="p">():</span>
+  <span class="n">mock</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span>
+  <span class="n">mocker</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="s">&#39;first thing&#39;</span><span class="p">)</span>
+  <span class="n">mock</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span>
+  <span class="n">mocker</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="s">&#39;second thing&#39;</span><span class="p">)</span>
+  <span class="n">mocker</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+  <span class="n">mocker</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="raising-exceptions">
+<h2>Raising exceptions<a class="headerlink" href="#raising-exceptions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">SomeException</span><span class="p">(</span><span class="s">&#39;message&#39;</span><span class="p">))</span>
+<span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">)</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">AndRaise</span><span class="p">(</span><span class="n">SomeException</span><span class="p">(</span><span class="s">&quot;message&quot;</span><span class="p">))</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Verify</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">mockSetExpectation</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">,</span> <span class="n">expectException</span><span class="p">(</span><span class="n">SomeException</span><span class="p">))</span>
+<span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">mockCheckCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;some_method&quot;</span><span class="p">)</span>
+
+<span class="c"># pMock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">pmock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">expects</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">once</span><span class="p">())</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">will</span><span class="p">(</span><span class="n">pmock</span><span class="o">.</span><span class="n">raise_exception</span><span class="p">(</span><span class="n">SomeException</span><span class="p">(</span><span class="s">&quot;message&quot;</span><span class="p">)))</span>
+<span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
+<span class="c"># Mocker</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mocker</span><span class="o">.</span><span class="n">mock</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="n">SomeException</span><span class="p">(</span><span class="s">&quot;message&quot;</span><span class="p">))</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+<span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">)</span>
+<span class="n">mocker</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="override-new-instances-of-a-class">
+<h2>Override new instances of a class<a class="headerlink" href="#override-new-instances-of-a-class" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_module</span><span class="o">.</span><span class="n">SomeClass</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="n">some_other_object</span><span class="p">)</span>
+<span class="n">assertEqual</span><span class="p">(</span><span class="n">some_other_object</span><span class="p">,</span> <span class="n">some_module</span><span class="o">.</span><span class="n">SomeClass</span><span class="p">())</span>
+
+<span class="c"># Mox</span>
+<span class="c"># (you will probably have mox.Mox() available as self.mox in a real test)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Mox</span><span class="p">()</span><span class="o">.</span><span class="n">StubOutWithMock</span><span class="p">(</span><span class="n">some_module</span><span class="p">,</span> <span class="s">&#39;SomeClass&#39;</span><span class="p">,</span> <span class="n">use_mock_anything</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">some_module</span><span class="o">.</span><span class="n">SomeClass</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="n">some_other_object</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">ReplayAll</span><span class="p">()</span>
+<span class="n">assertEqual</span><span class="p">(</span><span class="n">some_other_object</span><span class="p">,</span> <span class="n">some_module</span><span class="o">.</span><span class="n">SomeClass</span><span class="p">())</span>
+
+<span class="c"># Python Mock module</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># pMock</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># Mocker</span>
+<span class="c"># (TODO)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="call-the-same-method-multiple-times">
+<h2>Call the same method multiple times<a class="headerlink" href="#call-the-same-method-multiple-times" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock # (verifies that the method gets called at least twice)</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">twice</span>
+
+<span class="c"># Mox</span>
+<span class="c"># (does not support variable number of calls, so you need to create a new entry for each explicit call)</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockObject</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">(</span><span class="n">mox</span><span class="o">.</span><span class="n">IgnoreArg</span><span class="p">(),</span> <span class="n">mox</span><span class="o">.</span><span class="n">IgnoreArg</span><span class="p">())</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">(</span><span class="n">mox</span><span class="o">.</span><span class="n">IgnoreArg</span><span class="p">(),</span> <span class="n">mox</span><span class="o">.</span><span class="n">IgnoreArg</span><span class="p">())</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">mox</span><span class="o">.</span><span class="n">Verify</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
+
+<span class="c"># Python Mock module</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># pMock</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># Mocker</span>
+<span class="c"># (TODO)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mock-chained-methods">
+<h2>Mock chained methods<a class="headerlink" href="#mock-chained-methods" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="c"># (intermediate method calls are automatically assigned to temporary fake objects</span>
+<span class="c"># and can be called with any arguments)</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span>
+    <span class="s">&#39;method1.method2.method3&#39;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some value&#39;</span><span class="p">)</span>
+<span class="n">assertEqual</span><span class="p">(</span><span class="s">&#39;some_value&#39;</span><span class="p">,</span> <span class="n">some_object</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span><span class="o">.</span><span class="n">method3</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">))</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockObject</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+<span class="n">mock2</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock3</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="n">mock1</span><span class="p">)</span>
+<span class="n">mock2</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="n">mock2</span><span class="p">)</span>
+<span class="n">mock3</span><span class="o">.</span><span class="n">method3</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&#39;some_value&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">mox</span><span class="o">.</span><span class="n">ReplayAll</span><span class="p">()</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;some_value&quot;</span><span class="p">,</span> <span class="n">some_object</span><span class="o">.</span><span class="n">method1</span><span class="p">()</span><span class="o">.</span><span class="n">method2</span><span class="p">()</span><span class="o">.</span><span class="n">method3</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">))</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">mox</span><span class="o">.</span><span class="n">VerifyAll</span><span class="p">()</span>
+
+<span class="c"># Python Mock module</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># pMock</span>
+<span class="c"># (TODO)</span>
+
+<span class="c"># Mocker</span>
+<span class="c"># (TODO)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Mock Library Comparison</a><ul>
+<li><a class="reference internal" href="#simple-fake-object">Simple fake object</a></li>
+<li><a class="reference internal" href="#simple-mock">Simple mock</a></li>
+<li><a class="reference internal" href="#creating-partial-mocks">Creating partial mocks</a></li>
+<li><a class="reference internal" href="#ensure-calls-are-made-in-specific-order">Ensure calls are made in specific order</a></li>
+<li><a class="reference internal" href="#raising-exceptions">Raising exceptions</a></li>
+<li><a class="reference internal" href="#override-new-instances-of-a-class">Override new instances of a class</a></li>
+<li><a class="reference internal" href="#call-the-same-method-multiple-times">Call the same method multiple times</a></li>
+<li><a class="reference internal" href="#mock-chained-methods">Mock chained methods</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="why.html"
+                        title="previous chapter">Food For Thought</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/compare.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="why.html" title="Food For Thought"
+             >previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Herman Sheremetyev.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

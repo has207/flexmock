@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Why Flexmock? &mdash; Flexmock v0.7.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.7.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flexmock v0.7.2 documentation" href="index.html" />
+    <link rel="next" title="Mock Library Comparison" href="compare.html" />
+    <link rel="prev" title="Flexmock API" href="api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="compare.html" title="Mock Library Comparison"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="Flexmock API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="why-flexmock">
+<h1>Why Flexmock?<a class="headerlink" href="#why-flexmock" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="food-for-thought">
+<h2>Food For Thought<a class="headerlink" href="#food-for-thought" title="Permalink to this headline">¶</a></h2>
+<p>While it&#8217;s easy to write tests for brand new code that you specifically
+craft to fit in with the testing metaphors permitted by a given mocking
+library, it is much more difficult to take untested legacy code and add
+unit tests. Due to various restrictions in the tools or the language
+itself, it is often (always?) necessary to refactor legacy code to bring
+it under test. This creates a chicken-egg problem of not being able to
+refactor safely without tests and being unable to write tests without
+refactoring. Dealing with this problem is non-trivial in practice and
+having the right tools makes a huge difference both in speed and
+ultimate success rate.</p>
+</div>
+<div class="section" id="what-we-have-now">
+<h2>What We Have Now<a class="headerlink" href="#what-we-have-now" title="Permalink to this headline">¶</a></h2>
+<p>Existing Python mocking libraries fall into two categories. The first
+group (mox, mocker, pymock) follows the record/replay approach that
+generally goes something along the lines of:</p>
+<div class="highlight-python"><pre>- setting up a mock
+- specifying the methods you'll be replacing, along with return values, exceptions raised, etc
+- replaying the replacement version
+- exercising your code
+- finally doing verification/unsetting the mocked methods</pre>
+</div>
+<p>As you can imagine this approach requires a lot of manual effort to
+write every single test, and for every single method you mock. In
+addition, it is difficult to factor out common actions between tests as
+you have to perform the replay step manually before the code is
+exercised and then verify the mocks at the end, often also manually.</p>
+<p>The second group of mocking libraries (pmock, mock, fudge) take a
+somewhat more sensible approach:</p>
+<div class="highlight-python"><pre>- setting up a mock
+- specifying the methods to replace, along with return values, exceptions raised, etc
+- exercising the code
+- doing the verification/cleanup</pre>
+</div>
+<p>While these libraries allow you to skip the &#8220;replay&#8221; step, they still
+have the same issues of verification at the end. Some of them provide
+additional syntax, in the form of decorators or &#8220;teardown&#8221; methods you
+can explicitly declare to help with some of the setup/verification
+tedium. However, all they basically accomplish is shift the logic to a
+different place, not free you from worrying about it altogether.</p>
+</div>
+<div class="section" id="the-alternative">
+<h2>The Alternative<a class="headerlink" href="#the-alternative" title="Permalink to this headline">¶</a></h2>
+<p>Flexmock provides a third alternative &#8211; integration with the test
+runner that takes care of the verification and cleanup steps, leaving
+you with:</p>
+<div class="highlight-python"><pre>- creating the mock
+- specifying expectations
+- exercising the code</pre>
+</div>
+<p><em>(The first two steps can usually be combined into a single line of
+code, reducing it to essentially one step.)</em></p>
+<p>It goes without saying that this is a lot less code, which makes writing
+tests easier, faster, and less error-prone. But the fact that the entire
+setup/verification logic of the mock can be generated before the code
+under test is exercised offers another, less obvious, advantage. Namely,
+you can factor out the mock code into helper functions and share them
+across tests. Since Flexmock allows you to specify both the behavior of
+the fake object along with any expectations, it makes it extremely
+simple to generate helper functions that ensure that certain behavior is
+verified across a number of different tests.</p>
+</div>
+<div class="section" id="let-s-look-at-some-code">
+<h2>Let&#8217;s Look At Some Code<a class="headerlink" href="#let-s-look-at-some-code" title="Permalink to this headline">¶</a></h2>
+<p>As a quick example to bring this concept home, let&#8217;s take a look at a
+very simple servlet:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">UserServlet</span><span class="p">:</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+    <span class="k">pass</span>  <span class="c"># expensive authentication lookup</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">authenticate</span><span class="p">():</span>
+      <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">redirect_login</span><span class="p">()</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">authenticate</span><span class="p">():</span>
+      <span class="n">User</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">redirect_login</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><em>(I&#8217;m using class methods to avoid having to instantiate the UserServlet
+in the following tests. In reality Flexmock handles both classes and
+instances in the same manner, so this is only to simplify the example
+while keeping it somewhat realistic.)</em></p>
+<p>And here is a test that ensures that the servlet properly authenticates
+the request before performing the creation and deletion steps:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
+<span class="kn">from</span> <span class="nn">user_servlet</span> <span class="kn">import</span> <span class="n">UserServlet</span>
+<span class="kn">from</span> <span class="nn">user_logic</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="k">class</span> <span class="nc">TestUserServlet</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_ensure_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">flexmock</span><span class="p">(</span><span class="n">UserServlet</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;authenticate&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">ordered</span>
+
+  <span class="k">def</span> <span class="nf">test_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_authenticated</span><span class="p">()</span>
+    <span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;eve&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+    <span class="n">UserServlet</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;eve&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">test_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_authenticated</span><span class="p">()</span>
+    <span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;delete&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="mi">1231</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+    <span class="n">UserServlet</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">1231</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>I intentionally added the imports and &#8220;main&#8221; call into the example test
+to demonstrate that this is the <strong>entire</strong> test. Unlike other mocking
+libraries, Flexmock does not require any extra magic in order to create
+expectations or verify them, there is no hidden &#8220;teardown&#8221; method you
+need to add to the test class, or decorators you need to hang on the
+test methods.</p>
+<p>This is the entire test, and it ensures that when UserServlet receives a
+<em>create</em> or <em>delete</em> request, it first authenticates the user, then
+performs the creation/deletion logic. Both the authentication function
+and the database logic are mocked out and verified to have been called
+in the correct order, with the correct arguments. This seems like an
+extremely simple concept, but all other available mocking libraries seem
+to make it rather awkward to implement.</p>
+</div>
+<div class="section" id="to-sum-up">
+<h2>To Sum Up<a class="headerlink" href="#to-sum-up" title="Permalink to this headline">¶</a></h2>
+<p>The above example is extremely simple, and only showcases a fraction of
+what Flexmock can do. In addition to the rather straightforward ability
+to mock out methods and generate expectations, Flexmock features
+powerful argument matching, based not just on values but on both
+built-in and user-defined types or classes. It allows you to &#8220;spy&#8221; on
+methods rather than stubbing them, calling the original method and
+checking its return value or raised exceptions, as well as verify the
+amount of times the method has been called. It can mock generators and
+requires no special syntax for dealing with private and static methods,
+module level functions, class level and instance methods. It also makes
+it easy to override new instances of classes with custom objects.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Why Flexmock?</a><ul>
+<li><a class="reference internal" href="#food-for-thought">Food For Thought</a></li>
+<li><a class="reference internal" href="#what-we-have-now">What We Have Now</a></li>
+<li><a class="reference internal" href="#the-alternative">The Alternative</a></li>
+<li><a class="reference internal" href="#let-s-look-at-some-code">Let&#8217;s Look At Some Code</a></li>
+<li><a class="reference internal" href="#to-sum-up">To Sum Up</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">Flexmock API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="compare.html"
+                        title="next chapter">Mock Library Comparison</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/why.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="compare.html" title="Mock Library Comparison"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="Flexmock API"
+             >previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.7.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Herman Sheremetyev.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
