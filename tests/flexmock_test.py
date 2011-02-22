@@ -921,6 +921,8 @@ class RegularClass(object):
     class Foo(object): pass
     flexmock(Foo).new_instances('bar')
     assert 'bar' == Foo()
+    self._tear_down()
+    assert 'bar' != Foo()
 
   def test_new_instances_raises_error_when_not_a_class(self):
     class Foo(object): pass
