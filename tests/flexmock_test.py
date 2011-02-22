@@ -917,6 +917,17 @@ class RegularClass(object):
     flexmock(foo).should_receive('method').and_return(4)
     assert foo.method() == 4
 
+  def test_new_instances_should_be_a_method(self):
+    class Foo(object): pass
+    flexmock(Foo).new_instances('bar')
+    assert 'bar' == Foo()
+
+  def test_new_instances_raises_error_when_not_a_class(self):
+    class Foo(object): pass
+    foo = Foo()
+    flexmock(foo)
+    assertRaises(FlexmockError, foo.new_instances, 'bar')
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):

@@ -307,7 +307,7 @@ class Expectation(object):
 class FlexMock(object):
   """Creates mock objects or puts existing objects or classes under mock."""
 
-  UPDATED_ATTRS = ['should_receive', 'should_call',
+  UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances',
                    '_get_flexmock_expectation', '_flexmock_expectations']
 
   def __init__(self, **kwargs):
@@ -365,6 +365,16 @@ class FlexMock(object):
     Alias for should_receive().and_execute.
     """
     return self.should_receive(method).and_execute
+
+  def new_instances(self, object_to_return):
+    """Overrides __new__ method on the class to return custom objects.
+
+    Alias for should_receive('__new__').and_return(object_to_return)
+    """
+    if inspect.isclass(self._mock):
+      return self.should_receive('__new__').and_return(object_to_return)
+    else:
+      raise FlexmockError('new_instances can only be called on a class mock')
 
   def _ensure_not_new_instances(self):
     for exp in self._flexmock_expectations:
