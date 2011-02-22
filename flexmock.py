@@ -26,6 +26,7 @@ import inspect
 import sys
 import types
 import unittest
+import warnings
 
 
 class FlexmockError(Exception):
@@ -384,6 +385,8 @@ class FlexMock(object):
   def _new_instances(self, return_value):
     """Overrides creation of new instances of the mocked class.
 
+    DEPRECATED: will be removed in 0.7.4
+
     Args:
       return_value: the object that should be created instead of the default
     """
@@ -403,6 +406,10 @@ class FlexMock(object):
       setattr(obj_or_class, attr, getattr(self, attr))
     self._mock = obj_or_class
     if 'new_instances' in kwargs and inspect.isclass(obj_or_class):
+      warnings.warn('new_instances parameter is deprecated. '
+                    'It will be removed in Flexmock version 0.7.4 '
+                    'You need to switch to using the new_instances method call',
+                    PendingDeprecationWarning)
       self._new_instances(kwargs['new_instances'])
     else:
       for method, return_value in kwargs.items():
