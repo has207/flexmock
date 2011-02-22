@@ -1,16 +1,21 @@
 #!/bin/sh
 
+PYTHON_VERSIONS=${PYTHON_VERSIONS:-"2.4 2.5 2.6 2.7 3.1 3.2"}
+RUNNERS=${RUNNERS:-"all"}
 SCRIPT=$(cd ${0%/*} && echo $PWD/${0##*/})
 TEST_PATH=$(dirname $SCRIPT)
 FLEXMOCK_PATH=$(echo $TEST_PATH | sed -e s/tests$//)
 export PYTHONPATH=$TEST_PATH:$FLEXMOCK_PATH:$PYTHONPATH
 
-for version in 2.4 2.5 2.6 2.7 3.1 3.2; do
+for version in $PYTHON_VERSIONS; do
 	if test -f "`which python$version`"; then
 		echo python$version
 		python$version $TEST_PATH/flexmock_unittest_test.py
 	else
 		echo python$version NOT FOUND
+	fi
+	if [ "$RUNNERS" = "unittest" ]; then
+		exit 0
 	fi
 
 	if test -f "$(which nosetests)"; then
