@@ -306,7 +306,7 @@ class Expectation(object):
 
 
 class FlexMock(object):
-  """Creates mock objects or puts existing objects or classes under mock."""
+  """Fake object class returned by the flexmock() function."""
 
   UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances',
                    '_get_flexmock_expectation', '_flexmock_expectations']
@@ -426,7 +426,11 @@ class FlexMock(object):
 
   def update_teardown(self, test_runner=unittest.TestCase,
                       teardown_method='tearDown'):
-    """Should be implemented by classes inheriting from FlexMock."""
+    """Should be implemented by classes inheriting from FlexMock.
+
+    This is used for test runner integration and should not be accessed
+    from tests.
+    """
     if not FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects = {self: self._flexmock_expectations}
       if hasattr(test_runner, teardown_method):
@@ -664,6 +668,16 @@ def _generate_mock(flexmock_class, object_or_class=None, **kwargs):
 
 
 def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
+  """Generates flexmock-specific teardown function.
+
+  Args:
+    saved_teardown: additional function to call on teardown
+    *kargs: passed to saved_teardown
+    *kwargs: passed to saved_teardown
+
+  Returns:
+    function
+  """
   def teardown(*kargs, **kwargs):
     saved = {}
     for mock_object, expectations in \
@@ -681,12 +695,38 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
   return teardown
 
 
-def flexmock_unittest(object_or_class=None, **kwargs):
+def flexmock_unittest(object_or_class_or_module=None, **kwargs):
+  """Main entry point into the flexmock API.
+
+  This function is used to either generate a new fake object or take
+  an existing object (or class or module) and use it as a basis for
+  a partial mock. In case of a partial mock, the passed in object
+  is modified to support basic FlexMock class functionality making
+  it unnecessary to make successive flexmock() calls on the same
+  objects to generate new expectations.
+
+  Example:
+    >>> flexmock(SomeClass)
+    <flexmock.UnittestFlexMock object at 0xeb9b0>
+
+    >>> SomeClass.should_receive('some_method')
+    <flexmock.Expectation object at 0xe16b0>
+
+  NOTE: it's safe to call flexmock() on the same object, it will return the
+  same FlexMock object each time.
+
+  Args:
+    object_or_class_or_module: object to mock (optional)
+    *kwargs: method/return_value pairs to attach to the object
+
+  Returns:
+    FlexMock object, based on object_or_class_or_module if one was provided.
+  """
   class UnittestFlexMock(FlexMock):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
       FlexMock.update_teardown(self, test_runner, teardown_method)
-  return _generate_mock(UnittestFlexMock, object_or_class, **kwargs)
+  return _generate_mock(UnittestFlexMock, object_or_class_or_module, **kwargs)
 
 
 def get_current_function():
