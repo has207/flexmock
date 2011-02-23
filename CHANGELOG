@@ -1,3 +1,10 @@
+Release 0.7.3
+- Added new_instances method (new_instances param will be deprecated in next release!)
+- Added replace_with to enable returning results of custom functions
+- Added "with" support for FlexMock objects
+- Moved tests to their own directory
+- Lots of documentation cleanup and updates
+
 Release 0.7.2
 - Added support for chained methods
 - Moved flexmock_teardown to module level to expose it for other test runners
