@@ -130,5 +130,10 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 gh-pages:
-	cp _build/html/*html .
-	sed -i '' -e 's/\_static/http:\/\/github\.com\/has207\/flexmock\/raw\/gh-pages\/\_static/'  *.html
+	cp -r _build/html/* .
+	rm -rf static/
+	rm -rf modules/
+	mv _static static
+	mv _modules modules
+	sed -i '' -e 's/\_static/static/'  {,modules/}*.html
+	sed -i '' -e 's/\_modules/modules/'  {,modules/}*.html

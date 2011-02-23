@@ -1,5 +1,12 @@
 Flexmock API
 ============
 
-.. automodule:: flexmock
-   :members:
+.. module:: flexmock
+
+.. autofunction:: flexmock
+
+.. autoclass:: FlexMock
+  :members:
+
+.. autoclass:: Expectation
+  :members:

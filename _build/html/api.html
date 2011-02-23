@@ -53,27 +53,42 @@
             
   <div class="section" id="module-flexmock">
 <span id="flexmock-api"></span><h1>Flexmock API<a class="headerlink" href="#module-flexmock" title="Permalink to this headline">¶</a></h1>
-<p>Copyright 2010 Herman Sheremetyev. All rights reserved.</p>
-<p>Redistribution and use in source and binary forms, with or without modification, are
-permitted provided that the following conditions are met:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>Redistributions of source code must retain the above copyright notice, this list of
-conditions and the following disclaimer.</li>
-<li>Redistributions in binary form must reproduce the above copyright notice, this list
-of conditions and the following disclaimer in the documentation and/or other materials
-provided with the distribution.</li>
-</ol>
-</div></blockquote>
-<p>THIS SOFTWARE IS PROVIDED BY THE AUTHOR <a href="#id1"><span class="problematic" id="id2">``</span></a>AS IS&#8217;&#8217; AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<dl class="function">
+<dt id="flexmock.flexmock">
+<tt class="descclassname">flexmock.</tt><tt class="descname">flexmock</tt><big>(</big><em>object_or_class=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#flexmock.flexmock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="flexmock.FlexMock">
+<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">FlexMock</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates mock objects or puts existing objects or classes under mock.</p>
+<dl class="method">
+<dt id="flexmock.FlexMock.should_call">
+<tt class="descname">should_call</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for creating a spy.</p>
+<p>Alias for should_receive().and_execute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.FlexMock.should_receive">
+<tt class="descname">should_receive</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a method Expectation to the provided class or instance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>method: string name of the method to add</dd>
+<dt>Returns:</dt>
+<dd>expectation: Expectation object</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.FlexMock.update_teardown">
+<tt class="descname">update_teardown</tt><big>(</big><em>test_runner=&lt;class 'unittest.case.TestCase'&gt;</em>, <em>teardown_method='tearDown'</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.update_teardown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.update_teardown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be implemented by classes inheriting from FlexMock.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="flexmock.Expectation">
 <em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Expectation</tt><big>(</big><em>name</em>, <em>mock</em>, <em>return_value=None</em>, <em>original_method=None</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation" title="Permalink to this definition">¶</a></dt>
@@ -199,43 +214,6 @@ method rather than a single list to be returned each time.</p>
 <dd><p>Override the arguments used to match this expectation&#8217;s method.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="class">
-<dt id="flexmock.FlexMock">
-<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">FlexMock</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates mock objects or puts existing objects or classes under mock.</p>
-<dl class="method">
-<dt id="flexmock.FlexMock.should_call">
-<tt class="descname">should_call</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shortcut for creating a spy.</p>
-<p>Alias for should_receive().and_execute.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="flexmock.FlexMock.should_receive">
-<tt class="descname">should_receive</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_receive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a method Expectation to the provided class or instance.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>method: string name of the method to add</dd>
-<dt>Returns:</dt>
-<dd>expectation: Expectation object</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="flexmock.FlexMock.update_teardown">
-<tt class="descname">update_teardown</tt><big>(</big><em>test_runner=&lt;class 'unittest.case.TestCase'&gt;</em>, <em>teardown_method='tearDown'</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.update_teardown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.update_teardown" title="Permalink to this definition">¶</a></dt>
-<dd><p>Should be implemented by classes inheriting from FlexMock.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="flexmock.FlexmockContainer">
-<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">FlexmockContainer</tt><a class="reference internal" href="_modules/flexmock.html#FlexmockContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexmockContainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Holds global hash of object/expectation mappings.</p>
 </dd></dl>
 
 </div>

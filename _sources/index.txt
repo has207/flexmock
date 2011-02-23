@@ -5,6 +5,7 @@
  :Author: `Herman Sheremetyev <http://github.com/has207>`_
  :Version: |version|
  :Homepage: `Flexmock Homepage`_
+ :GitHub: `http://github.com/has207/flexmock <http://github.com/has207/flexmock>`_
  :Download: `http://pypi.python.org/pypi/flexmock <http://pypi.python.org/pypi/flexmock>`_
  :License: `FreeBSD-style License`_
  :Issue tracker: `GitHub Issue Tracker <http://github.com/has207/flexmock/issues>`_
@@ -13,9 +14,23 @@
  .. _Flexmock Homepage: http://has207.github.com/flexmock
  .. _FreeBSD-style License: http://github.com/has207/flexmock/blob/master/LICENSE
 
-FlexMock is a mock/stub/spy library for Python.
+Flexmock is a mock/stub/spy library for Python.
 
-It takes inspiration from a Ruby library of the same name, and as a result introduces much simpler syntax than other Python mocking libraries that are largely ported from Java. However, the aim of Python FlexMock is not to clone the Ruby version but to be able to provide full support for mocking Python-specific features, and make the creation of fake objects as unobtrusive as possible.
+Its API is inspired by a Ruby library of the same name.
+However, it is not a goal of Python Flexmock to be a clone of the Ruby version.
+Instead, the focus is on providing full support for testing Python programs
+and making the creation of fake objects as unobtrusive as possible.
+
+As a result, Python Flexmock removes a number of redandancies in
+the Ruby Flexmock API, alters some defaults, and introduces a number of Python-only features.
+
+Flexmock's design focuses on simplicity and intuitivenes. This means that the API
+is as lean as possible, though a few convenient short-hand methods are provided to aid
+brevity and readability.
+
+Flexmock declarations are structured to read more like English sentences than API calls,
+and it is possible to chain them together in any order to achieve high degree of
+expressiveness in a single line of code.
 
 Installation
 ============

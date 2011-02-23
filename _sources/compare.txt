@@ -3,12 +3,6 @@ Mock Library Comparison
 
 This document shows a side-by-side comparison of how to accomplish some
 basic tasks with Flexmock as well as other Python mocking libraries.
-While it demonstrates that Flexmock is much less verbose, while
-remaining just as capable, it is less interesting in my opinion as it
-focuses on things that are already possible with existing libraries
-instead of Flexmock's real strengths in allowing you to do things in
-your tests that are either very difficult or completely impossible with
-other existing tools.
 
 This comparison is by no means complete, and there are a number of
 libraries out there that are not covered here. In addition it probably
@@ -21,7 +15,7 @@ Simple fake object
 ::
 
     # Flexmock
-    mock = flexmock(some_method="calculated value", some_attribute="value")
+    mock = flexmock(some_method=lambda: "calculated value", some_attribute="value")
     assertEquals("calculated value", mock.some_method())
     assertEquals("value", mock.some_attribute)
 
@@ -30,11 +24,12 @@ Simple fake object
     mock.some_method().AndReturn("calculated value")
     mock.some_attribute = "value"
     mox.Replay(mock)
-    assertEquals("value", mock.some_method())
+    assertEquals("calculated value", mock.some_method())
     assertEquals("value", mock.some_attribute)
 
     # Python Mock module
-    mymock = mock.Mock( {"some_method": "calculated value", "some_attribute": "value"})
+    mymock = mock.Mock( {"some_method": "calculated value"})
+    mymock.some_attribute = "value"
     assertEquals("calculated value", mymock.some_method())
     assertEquals("value", mock.some_attribute)
 
@@ -103,7 +98,7 @@ Creating partial mocks
     mock = mox.MockObject(SomeObject)
     mock.some_method().AndReturn("value")
     mox.Replay(mock)
-    assertEquals("hello", mock.some_method())
+    assertEquals("value", mock.some_method())
     mox.Verify(mock)
 
     # Python Mock module

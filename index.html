@@ -8,8 +8,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
     <title>Flexmock - Mocking Library &mdash; Flexmock v0.7.2 documentation</title>
-    <link rel="stylesheet" href="http://github.com/has207/flexmock/raw/gh-pages/_static/default.css" type="text/css" />
-    <link rel="stylesheet" href="http://github.com/has207/flexmock/raw/gh-pages/_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="static/default.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -19,9 +19,9 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="http://github.com/has207/flexmock/raw/gh-pages/_static/jquery.js"></script>
-    <script type="text/javascript" src="http://github.com/has207/flexmock/raw/gh-pages/_static/underscore.js"></script>
-    <script type="text/javascript" src="http://github.com/has207/flexmock/raw/gh-pages/_static/doctools.js"></script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Flexmock v0.7.2 documentation" href="#" />
     <link rel="next" title="Usage Documentation" href="user-guide.html" /> 
   </head>
@@ -73,8 +73,19 @@
 </tbody>
 </table>
 </div></blockquote>
-<p>FlexMock is a mock/stub/spy library for Python.</p>
-<p>It takes inspiration from a Ruby library of the same name, and as a result introduces much simpler syntax than other Python mocking libraries that are largely ported from Java. However, the aim of Python FlexMock is not to clone the Ruby version but to be able to provide full support for mocking Python-specific features, and make the creation of fake objects as unobtrusive as possible.</p>
+<p>Flexmock is a mock/stub/spy library for Python.</p>
+<p>Its API is inspired by a Ruby library of the same name.
+However, it is not a goal of Python Flexmock to be a clone of the Ruby version.
+Instead, the focus is on providing full support for testing Python programs
+and making the creation of fake objects as unobtrusive as possible.</p>
+<p>As a result, Python Flexmock removes a number of redandancies in
+the Ruby Flexmock API, alters some defaults, and introduces a number of Python-only features.</p>
+<p>Flexmock&#8217;s design focuses on simplicity and intuitivenes. This means that the API
+is as lean as possible, though a few convenient short-hand methods are provided to aid
+brevity and readability.</p>
+<p>Flexmock declarations are structured to read more like English sentences than API calls,
+and it is possible to chain them together in any order to achieve high degree of
+expressiveness in a single line of code.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>$ sudo easy_install flexmock</pre>

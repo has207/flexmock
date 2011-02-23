@@ -76,50 +76,50 @@
 <span class="kn">import</span> <span class="nn">unittest</span>
 
 
-<span class="k">class</span> <span class="nc">FlexmockException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="FlexmockException"><a class="viewcode-back" href="../api.html#flexmock.FlexmockException">[docs]</a><span class="k">class</span> <span class="nc">FlexmockException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">AttemptingToMockBuiltin</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="AttemptingToMockBuiltin"><a class="viewcode-back" href="../api.html#flexmock.AttemptingToMockBuiltin">[docs]</a><span class="k">class</span> <span class="nc">AttemptingToMockBuiltin</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;Python does not allow you to mock builtin modules. &#39;</span>
     <span class="n">out</span> <span class="o">+=</span> <span class="s">&#39;Consider wrapping it in a class you can mock instead&#39;</span>
     <span class="k">return</span> <span class="n">out</span>
 
-
-<span class="k">class</span> <span class="nc">InvalidMethodSignature</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="InvalidMethodSignature"><a class="viewcode-back" href="../api.html#flexmock.InvalidMethodSignature">[docs]</a><span class="k">class</span> <span class="nc">InvalidMethodSignature</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">InvalidExceptionClass</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="InvalidExceptionClass"><a class="viewcode-back" href="../api.html#flexmock.InvalidExceptionClass">[docs]</a><span class="k">class</span> <span class="nc">InvalidExceptionClass</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">InvalidExceptionMessage</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="InvalidExceptionMessage"><a class="viewcode-back" href="../api.html#flexmock.InvalidExceptionMessage">[docs]</a><span class="k">class</span> <span class="nc">InvalidExceptionMessage</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">MethodNotCalled</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="MethodNotCalled"><a class="viewcode-back" href="../api.html#flexmock.MethodNotCalled">[docs]</a><span class="k">class</span> <span class="nc">MethodNotCalled</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">MethodCalledOutOfOrder</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="MethodCalledOutOfOrder"><a class="viewcode-back" href="../api.html#flexmock.MethodCalledOutOfOrder">[docs]</a><span class="k">class</span> <span class="nc">MethodCalledOutOfOrder</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">MethodDoesNotExist</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="MethodDoesNotExist"><a class="viewcode-back" href="../api.html#flexmock.MethodDoesNotExist">[docs]</a><span class="k">class</span> <span class="nc">MethodDoesNotExist</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">AlreadyMocked</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="AlreadyMocked"><a class="viewcode-back" href="../api.html#flexmock.AlreadyMocked">[docs]</a><span class="k">class</span> <span class="nc">AlreadyMocked</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">AndExecuteNotSupportedForClassMocks</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="AndExecuteNotSupportedForClassMocks"><a class="viewcode-back" href="../api.html#flexmock.AndExecuteNotSupportedForClassMocks">[docs]</a><span class="k">class</span> <span class="nc">AndExecuteNotSupportedForClassMocks</span><span class="p">(</span><span class="n">FlexmockException</span><span class="p">):</span>
   <span class="k">pass</span>
 
-
-<span class="k">class</span> <span class="nc">ReturnValue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ReturnValue"><a class="viewcode-back" href="../api.html#flexmock.ReturnValue">[docs]</a><span class="k">class</span> <span class="nc">ReturnValue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">raises</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">raises</span> <span class="o">=</span> <span class="n">raises</span>
@@ -130,7 +130,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 
-
+</div>
 <div class="viewcode-block" id="FlexmockContainer"><a class="viewcode-back" href="../api.html#flexmock.FlexmockContainer">[docs]</a><span class="k">class</span> <span class="nc">FlexmockContainer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Holds global hash of object/expectation mappings.&quot;&quot;&quot;</span>
   <span class="n">flexmock_objects</span> <span class="o">=</span> <span class="p">{}</span>
@@ -672,7 +672,7 @@
   <span class="k">return</span> <span class="n">mock</span>
 
 
-<span class="k">def</span> <span class="nf">flexmock_teardown</span><span class="p">(</span><span class="n">saved_teardown</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="flexmock_teardown"><a class="viewcode-back" href="../api.html#flexmock.flexmock_teardown">[docs]</a><span class="k">def</span> <span class="nf">flexmock_teardown</span><span class="p">(</span><span class="n">saved_teardown</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">teardown</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">saved</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">mock_object</span><span class="p">,</span> <span class="n">expectations</span> <span class="ow">in</span> \
@@ -689,21 +689,21 @@
       <span class="n">saved_teardown</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">teardown</span>
 
-
-<span class="k">def</span> <span class="nf">flexmock_unittest</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="flexmock_unittest"><a class="viewcode-back" href="../api.html#flexmock.flexmock_unittest">[docs]</a><span class="k">def</span> <span class="nf">flexmock_unittest</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="k">class</span> <span class="nc">UnittestFlexMock</span><span class="p">(</span><span class="n">FlexMock</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_runner</span><span class="o">=</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">,</span>
         <span class="n">teardown_method</span><span class="o">=</span><span class="s">&#39;tearDown&#39;</span><span class="p">):</span>
       <span class="n">FlexMock</span><span class="o">.</span><span class="n">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_runner</span><span class="p">,</span> <span class="n">teardown_method</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">_generate_mock</span><span class="p">(</span><span class="n">UnittestFlexMock</span><span class="p">,</span> <span class="n">object_or_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">def</span> <span class="nf">get_current_function</span><span class="p">():</span>
+</div>
+<div class="viewcode-block" id="get_current_function"><a class="viewcode-back" href="../api.html#flexmock.get_current_function">[docs]</a><span class="k">def</span> <span class="nf">get_current_function</span><span class="p">():</span>
   <span class="n">func_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
   <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_globals</span><span class="p">[</span><span class="n">func_name</span><span class="p">]</span>
 
-
-<span class="k">def</span> <span class="nf">flexmock_nose</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="flexmock_nose"><a class="viewcode-back" href="../api.html#flexmock.flexmock_nose">[docs]</a><span class="k">def</span> <span class="nf">flexmock_nose</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="k">class</span> <span class="nc">NoseFlexMock</span><span class="p">(</span><span class="n">FlexMock</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_runner</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">teardown_method</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
       <span class="n">this_func</span> <span class="o">=</span> <span class="n">get_current_function</span><span class="p">()</span>
@@ -713,8 +713,8 @@
         <span class="n">FlexMock</span><span class="o">.</span><span class="n">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">,</span> <span class="s">&#39;tearDown&#39;</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">_generate_mock</span><span class="p">(</span><span class="n">NoseFlexMock</span><span class="p">,</span> <span class="n">object_or_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">def</span> <span class="nf">flexmock_pytest</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="flexmock_pytest"><a class="viewcode-back" href="../api.html#flexmock.flexmock_pytest">[docs]</a><span class="k">def</span> <span class="nf">flexmock_pytest</span><span class="p">(</span><span class="n">object_or_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="k">class</span> <span class="nc">PytestFlexMock</span><span class="p">(</span><span class="n">FlexMock</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_runner</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">teardown_method</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
       <span class="n">frame</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -740,7 +740,7 @@
       <span class="n">FlexMock</span><span class="o">.</span><span class="n">update_teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_runner</span><span class="p">,</span> <span class="n">teardown_method</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">_generate_mock</span><span class="p">(</span><span class="n">PytestFlexMock</span><span class="p">,</span> <span class="n">object_or_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
+</div>
 <span class="n">flexmock</span> <span class="o">=</span> <span class="n">flexmock_unittest</span>
 </pre></div>
 
