@@ -1,6 +1,9 @@
 Mock Library Comparison
 =======================
 
+(Flexmock for Mox, Mock, python-mock, pMock, and Mocker users.)
+---------------------------------------------------------------
+
 This document shows a side-by-side comparison of how to accomplish some
 basic tasks with Flexmock as well as other Python mocking libraries.
 
@@ -27,7 +30,17 @@ Simple fake object
     assertEquals("calculated value", mock.some_method())
     assertEquals("value", mock.some_attribute)
 
-    # Python Mock module
+    # Mock
+    my_mock = mock.Mock()
+    my_mock.some_method.return_value = "calculated value"
+    my_mock.some_attribute = "value"
+    assertEquals("calculated value", my_mock.some_method())
+    assertEquals("value", my_mock.some_attribute)
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     mymock = mock.Mock( {"some_method": "calculated value"})
     mymock.some_attribute = "value"
     assertEquals("calculated value", mymock.some_method())
@@ -56,7 +69,7 @@ Simple mock
 
     # Flexmock
     mock = flexmock()
-    mock.should_receive(some_method).and_return("value").once
+    mock.should_receive("some_method").and_return("value").once
     assertEquals("value", mock.some_method())
 
     # Mox
@@ -66,7 +79,16 @@ Simple mock
     assertEquals("value", mock.some_method())
     mox.Verify(mock)
 
-    # Python Mock module
+    # Mock
+    my_mock = mock.Mock()
+    my_mock.some_method.return_value = "value"
+    assertEquals("value", mock.some_method())
+    my_mock.some_method.assert_called_with()
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     mymock = mock.Mock( {"some_method" : "value"})
     assertEquals("value", mymock.some_method())
     mock.mockCheckCall(self, 0, "some_method")
@@ -91,7 +113,7 @@ Creating partial mocks
 ::
 
     # Flexmock
-    flexmock(SomeObject).should_receive(some_method).and_return('value')
+    flexmock(SomeObject).should_receive("some_method").and_return('value')
     assertEquals("value", mock.some_method())
 
     # Mox
@@ -101,7 +123,15 @@ Creating partial mocks
     assertEquals("value", mock.some_method())
     mox.Verify(mock)
 
-    # Python Mock module
+    # Mock
+    with mock.patch("SomeObject") as my_mock:
+      my_mock.some_method.return_value("value")
+      assertEquals("value", mock.some_method())
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     mock = mock.Mock({"some_method", "value"}, SomeObject)
     assertEquals("value", mock.some_method())
     mock.mockCheckCall(self, 0, "some_method")
@@ -134,7 +164,13 @@ Ensure calls are made in specific order
     mox.Replay(mock)
     mox.Verify(mock)
 
-    # Python Mock module
+    # Mock
+    # TODO
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     # Doesn't seem to support call ordering
 
     # pMock
@@ -161,7 +197,7 @@ Raising exceptions
 
     # Flexmock
     mock = flexmock()
-    mock.should_receive('some_method').and_raise(SomeException('message'))
+    mock.should_receive("some_method").and_raise(SomeException("message"))
     assertRaises(SomeException, mock.some_method)
 
     # Mox
@@ -171,7 +207,15 @@ Raising exceptions
     assertRaises(SomeException, mock.some_method)
     mox.Verify(mock)
 
-    # Python Mock module
+    # Mock
+    my_mock = mock.Mock()
+    my_mock.some_method = mock.Mock(side_effect=SomeException("message"))
+    assertRaises(SomeException, my_mock.some_method)
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     mock = mock.Mock()
     mock.mockSetExpectation('some_method', expectException(SomeException))
     assertRaises(SomeException, mock.some_method)
@@ -206,8 +250,14 @@ Override new instances of a class
     some_module.SomeClass().AndReturn(some_other_object)
     mox.ReplayAll()
     assertEqual(some_other_object, some_module.SomeClass())
-    
-    # Python Mock module
+
+    # Mock
+    # (TODO) 
+
+    # Minimock
+    # (TODO) 
+
+    # python-mock
     # (TODO)
     
     # pMock
@@ -232,6 +282,12 @@ Call the same method multiple times
     mox.Replay(mock)
     mox.Verify(mock)
     
+    # Mock
+    # (TODO) 
+
+    # Minimock
+    # (TODO) 
+
     # Python Mock module
     # (TODO)
     
@@ -264,6 +320,12 @@ Mock chained methods
     self.mox.ReplayAll()
     assertEquals("some_value", some_object.method1().method2().method3(arg1, arg2))
     self.mox.VerifyAll()
+
+    # Mock
+    # (TODO) 
+
+    # Minimock
+    # (TODO) 
 
     # Python Mock module
     # (TODO)

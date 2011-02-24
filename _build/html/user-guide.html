@@ -113,12 +113,12 @@ other test runner integration and send me a patch.</p>
 <div class="section" id="make-a-mock-object">
 <h2>Make a mock object<a class="headerlink" href="#make-a-mock-object" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># using the param shortcuts -- limited to specifying attribute/return value pairs</span>
-<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">method1</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">attr1</span><span class="o">=</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
 
 <span class="c"># using the more verbose approach -- gives more flexibility when you need it</span>
 <span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;baz&quot;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method3&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>FlexMock mock objects support the full range of flexmock commands but

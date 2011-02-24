@@ -71,12 +71,12 @@ Make a mock object
 ::
 
   # using the param shortcuts -- limited to specifying attribute/return value pairs
-  mock = flexmock(method1=lambda: 'a', attr1='b')
+  mock = flexmock(some_attribute="value", some_method=lambda: "another value")
 
   # using the more verbose approach -- gives more flexibility when you need it
   mock = flexmock()
-  mock.should_receive('method2').and_return('c')
-  mock.should_receive('method3').and_raise(Exception)
+  mock.should_receive("method2").with_args("foo", "bar").and_return("baz")
+  mock.should_receive("method3").and_raise(Exception)
 
 FlexMock mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
