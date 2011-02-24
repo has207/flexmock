@@ -165,7 +165,7 @@ or examples for additional libraries.</p>
 
 <span class="c"># Mock</span>
 <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s">&quot;SomeObject&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_mock</span><span class="p">:</span>
-  <span class="n">my_mock</span><span class="o">.</span><span class="n">some_method</span><span class="o">.</span><span class="n">return_value</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+  <span class="n">my_mock</span><span class="o">.</span><span class="n">some_method</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
   <span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
 
 <span class="c"># Minimock</span>

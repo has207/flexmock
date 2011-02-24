@@ -125,7 +125,7 @@ Creating partial mocks
 
     # Mock
     with mock.patch("SomeObject") as my_mock:
-      my_mock.some_method.return_value("value")
+      my_mock.some_method.return_value = "value"
       assertEquals("value", mock.some_method())
 
     # Minimock
