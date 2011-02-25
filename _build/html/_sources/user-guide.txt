@@ -22,7 +22,7 @@ Test runner integration
 unittest / unittest2
 --------------------
 
-FlexMock, by default, assumes your tests are in a class that inherits
+Flexmock, by default, assumes your tests are in a class that inherits
 from unittest.TestCase, so if that's the case then all you need to do
 is:
 
@@ -78,7 +78,7 @@ Make a mock object
   mock.should_receive("method2").with_args("foo", "bar").and_return("baz")
   mock.should_receive("method3").and_raise(Exception)
 
-FlexMock mock objects support the full range of flexmock commands but
+Flexmock mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 assigns them new methods rather than acting on methods they already
 possess.
@@ -161,7 +161,7 @@ Add a spy (or proxy) to a method
 --------------------------------
 
 In addition to stubbing out a given method and return fake values,
-FlexMock also allows you to call the original method and make
+Flexmock also allows you to call the original method and make
 expectations based on its return values/exceptions and the number of
 times the method is called with the given arguments.
 
@@ -219,13 +219,14 @@ Override "__new__" method on a class and return fake instances
 ------------------------------------------------------------------
 
 Occasionally you will want a class to create fake objects when it's
-being instantiated. FlexMock makes it easy and painless.
+being instantiated. Flexmock makes it easy and painless.
 
 ::
 
     >>> class Group(object): pass
-    >>> flexmock(Group, new_instances='foo')
-    >>> 'foo' == Group()
+    >>> mock_group = flexmock(name='fake')
+    >>> flexmock(Group).new_instances(mock_group)
+    >>> Group().name == 'fake'
     True
 
 Overriding new instances of old-style classes is currently not supported
@@ -250,7 +251,7 @@ Private methods
 One of the small pains of writing unit tests is that it's a bit
 difficult to get at the private methods since Python "conveniently"
 renames them when you try to access them from outside the object. With
-FlexMock there is nothing special you need to do to -- mocking private
+Flexmock there is nothing special you need to do to -- mocking private
 methods is exactly the same as any other methods.
 
 Enforcing call order

@@ -55,7 +55,7 @@
 <span id="flexmock-api"></span><h1>Flexmock API<a class="headerlink" href="#module-flexmock" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="flexmock.flexmock">
-<tt class="descclassname">flexmock.</tt><tt class="descname">flexmock</tt><big>(</big><em>object_or_class_or_module=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#flexmock.flexmock" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">flexmock.</tt><tt class="descname">flexmock</tt><big>(</big><em>spec=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#flexmock.flexmock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main entry point into the flexmock API.</p>
 <p>This function is used to either generate a new fake object or take
 an existing object (or class or module) and use it as a basis for
@@ -65,11 +65,9 @@ it unnecessary to make successive flexmock() calls on the same
 objects to generate new expectations.</p>
 <dl class="docutils">
 <dt>Example:</dt>
-<dd><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">SomeClass</span><span class="p">)</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">SomeClass</span><span class="p">)</span>
 <span class="go">&lt;flexmock.UnittestFlexMock object at 0xeb9b0&gt;</span>
-</pre></div>
-</div>
-<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">SomeClass</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SomeClass</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span>
 <span class="go">&lt;flexmock.Expectation object at 0xe16b0&gt;</span>
 </pre></div>
 </div>
@@ -79,10 +77,13 @@ objects to generate new expectations.</p>
 same FlexMock object each time.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>object_or_class_or_module: object to mock (optional)
-<a href="#id1"><span class="problematic" id="id2">*</span></a>kwargs: method/return_value pairs to attach to the object</dd>
+<dd><ul class="first last simple">
+<li>spec: object (or class or module) to mock</li>
+<li>kwargs: method/return_value pairs to attach to the object</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>FlexMock object, based on object_or_class_or_module if one was provided.</dd>
+<dd>FlexMock object, based on spec if one was provided.</dd>
 </dl>
 </dd></dl>
 
@@ -96,9 +97,15 @@ same FlexMock object each time.</p>
 <dd><p>Adds a method Expectation to the provided class or instance.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>method: string name of the method to add</dd>
+<dd><ul class="first last simple">
+<li>method: string name of the method to add</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>expectation: Expectation object</dd>
+<dd><ul class="first last simple">
+<li>expectation: Expectation object</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -150,9 +157,12 @@ method rather than a single list to be returned each time.</p>
 <dd><p>Specifies the exception to be raised when this expectation is met.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>exception: class or instance of the exception
-kargs: tuple of kargs to pass to the exception
-kwargs: dict of kwargs to pass to the exception</dd>
+<dd><ul class="first last simple">
+<li>exception: class or instance of the exception</li>
+<li>kargs: tuple of kargs to pass to the exception</li>
+<li>kwargs: dict of kwargs to pass to the exception</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -226,7 +236,10 @@ with what arguments, and apply expectations accordingly.</p>
 <dd><p>Gives a function to run instead of the mocked out one.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>function: callable</dd>
+<dd><ul class="first last simple">
+<li>function: callable</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 

@@ -76,7 +76,7 @@ following terms.</p>
 <h1>Test runner integration<a class="headerlink" href="#test-runner-integration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="unittest-unittest2">
 <h2>unittest / unittest2<a class="headerlink" href="#unittest-unittest2" title="Permalink to this headline">¶</a></h2>
-<p>FlexMock, by default, assumes your tests are in a class that inherits
+<p>Flexmock, by default, assumes your tests are in a class that inherits
 from unittest.TestCase, so if that&#8217;s the case then all you need to do
 is:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
@@ -121,7 +121,7 @@ other test runner integration and send me a patch.</p>
 <span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method3&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>FlexMock mock objects support the full range of flexmock commands but
+<p>Flexmock mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 assigns them new methods rather than acting on methods they already
 possess.</p>
@@ -196,7 +196,7 @@ the test runner.</p>
 <div class="section" id="add-a-spy-or-proxy-to-a-method">
 <h2>Add a spy (or proxy) to a method<a class="headerlink" href="#add-a-spy-or-proxy-to-a-method" title="Permalink to this headline">¶</a></h2>
 <p>In addition to stubbing out a given method and return fake values,
-FlexMock also allows you to call the original method and make
+Flexmock also allows you to call the original method and make
 expectations based on its return values/exceptions and the number of
 times the method is called with the given arguments.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># matching specific arguments</span>
@@ -249,10 +249,11 @@ values or exceptions.</p>
 <div class="section" id="override-new-method-on-a-class-and-return-fake-instances">
 <h2>Override &#8220;__new__&#8221; method on a class and return fake instances<a class="headerlink" href="#override-new-method-on-a-class-and-return-fake-instances" title="Permalink to this headline">¶</a></h2>
 <p>Occasionally you will want a class to create fake objects when it&#8217;s
-being instantiated. FlexMock makes it easy and painless.</p>
+being instantiated. Flexmock makes it easy and painless.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;foo&#39;</span> <span class="o">==</span> <span class="n">Group</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock_group</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;fake&#39;</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -276,7 +277,7 @@ first. Luckily, multiple inheritance should make this pretty painless.</p>
 <p>One of the small pains of writing unit tests is that it&#8217;s a bit
 difficult to get at the private methods since Python &#8220;conveniently&#8221;
 renames them when you try to access them from outside the object. With
-FlexMock there is nothing special you need to do to &#8211; mocking private
+Flexmock there is nothing special you need to do to &#8211; mocking private
 methods is exactly the same as any other methods.</p>
 </div>
 <div class="section" id="enforcing-call-order">

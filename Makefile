@@ -37,9 +37,14 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	PYTHONPATH=. $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	cp -r _build/html/* .
+	rm -rf static/
+	rm -rf modules/
+	mv _static static
+	mv _modules modules
+	sed -i '' -e 's/\_static/static/'  {,modules/}*.html
+	sed -i '' -e 's/\_modules/modules/'  {,modules/}*.html
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
@@ -129,11 +134,3 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-gh-pages:
-	cp -r _build/html/* .
-	rm -rf static/
-	rm -rf modules/
-	mv _static static
-	mv _modules modules
-	sed -i '' -e 's/\_static/static/'  {,modules/}*.html
-	sed -i '' -e 's/\_modules/modules/'  {,modules/}*.html
