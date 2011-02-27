@@ -406,12 +406,12 @@ class FlexMock(object):
       - kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._flexmock_expectations = []
-    self._mock = self
+    self._object = self
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
   def __enter__(self):
-    return self._mock
+    return self._object
 
   def __exit__(self, type, value, traceback):
     return self
@@ -425,14 +425,19 @@ class FlexMock(object):
     Returns:
       - expectation: Expectation object
     """
+    if method in self.UPDATED_ATTRS:
+      raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
     return_value = None
     if '.' in method:
       method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and
-        (not inspect.isclass(self._mock) and not inspect.ismodule(self._mock))):
-      method = '_%s__%s' % (self._mock.__class__.__name__, method.lstrip('_'))
-    if not isinstance(self._mock, FlexMock) and not hasattr(self._mock, method):
+        (not inspect.isclass(self._object) and
+        not inspect.ismodule(self._object))):
+      method = ('_%s__%s' % (self._object.__class__.__name__,
+                             method.lstrip('_')))
+    if (not isinstance(self._object, FlexMock) and
+        not hasattr(self._object, method)):
       raise MethodDoesNotExist('%s does not have method %s' % (self, method))
     if chained_methods:
       return_value = FlexMock()
@@ -473,7 +478,7 @@ class FlexMock(object):
       Expectation object, i.e. can be chain modified by other Expectation
       methods
     """
-    if inspect.isclass(self._mock):
+    if inspect.isclass(self._object):
       return self.should_receive('__new__').and_return(kargs).one_by_one
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
@@ -483,7 +488,7 @@ class FlexMock(object):
     self._ensure_not_already_mocked(obj_or_class)
     for attr in self.UPDATED_ATTRS:
       setattr(obj_or_class, attr, getattr(self, attr))
-    self._mock = obj_or_class
+    self._object = obj_or_class
     for method, return_value in kwargs.items():
       obj_or_class.should_receive(method).and_return(return_value)
     expectation = self._create_expectation(method=None, return_value=None)
@@ -526,17 +531,18 @@ class FlexMock(object):
   def _create_expectation(
       self, method, return_value, original_method=None):
     expectation = Expectation(
-          method, self._mock, return_value=return_value,
+          method, self._object, return_value=return_value,
           original_method=original_method)
     return expectation
 
   def _update_method(self, expectation, method):
     method_instance = self.__create_mock_method(method)
-    if hasattr(self._mock, method) and not expectation.original_method:
-      expectation.original_method = getattr(self._mock, method)
+    if (hasattr(self._object, method) and
+        not expectation.original_method):
+      expectation.original_method = getattr(self._object, method)
       expectation.static = self._is_static(method)
-    setattr(self._mock, method, types.MethodType(
-        method_instance, self._mock))
+    setattr(self._object, method, types.MethodType(
+        method_instance, self._object))
 
   def _is_static(self, method):
     """Infer whether the method is static based on its properties.
@@ -545,8 +551,8 @@ class FlexMock(object):
     This monkeying around is only necessary in Python < 3.0
     """
     if sys.version_info < (3, 0):
-      method = getattr(self._mock, method)
-      if (not inspect.ismodule(self._mock) and
+      method = getattr(self._object, method)
+      if (not inspect.ismodule(self._object) and
           inspect.isfunction(method) and not inspect.ismethod(method)):
         return True
     return False

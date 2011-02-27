@@ -405,7 +405,7 @@ class RegularClass(object):
     class User(object): pass
     user = User()
     foo = flexmock(user)
-    assert foo._mock == flexmock(user)
+    assert foo._object == flexmock(user)
 
   def test_flexmock_should_not_return_class_object_if_mocking_instance(self):
     class User:
@@ -771,7 +771,7 @@ class RegularClass(object):
 
   def test_new_instances_should_blow_up_on_should_receive(self):
     class User(object): pass
-    mock = flexmock(User, new_instances=None)
+    mock = flexmock(User).new_instances(None).mock
     assertRaises(FlexmockError, mock.should_receive, 'foo')
 
   def test_should_call_alias_should_receive_and_execute(self):
@@ -928,6 +928,13 @@ class RegularClass(object):
     flexmock(Foo).new_instances('foo', 'bar')
     assert 'foo' == Foo()
     assert 'bar' == Foo()
+
+  def test_should_receive_should_not_replace_flexmock_methods(self):
+    class Foo:
+      def bar(self): pass
+    foo = Foo()
+    flexmock(foo)
+    assertRaises(FlexmockError, foo.should_receive, 'should_receive')
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
