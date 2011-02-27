@@ -463,6 +463,10 @@ class FlexMock(object):
 
     Args:
       - kargs: objects to return on each successive call to __new__
+
+    Returns:
+      Expectation object, i.e. can be chain modified by other Expectation
+      methods
     """
     if inspect.isclass(self._mock):
       return self.should_receive('__new__').and_return(kargs).one_by_one
