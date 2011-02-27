@@ -430,20 +430,13 @@ class RegularClass(object):
     except FlexmockError:
       pass
 
-  def test_flexmock_should_mock_new_instances(self):
-    class User(object): pass
-    class Group(object): pass
-    user = User()
-    flexmock(Group, new_instances=user)
-    assert user is Group()
-
   def test_flexmock_should_mock_new_instances_with_multiple_params(self):
     class User(object): pass
     class Group(object):
       def __init__(self, arg, arg2):
         pass
     user = User()
-    flexmock(Group, new_instances=user)
+    flexmock(Group).new_instances(user)
     assert user is Group(1, 2)
 
   def test_flexmock_should_revert_new_instances_on_teardown(self):
@@ -451,7 +444,7 @@ class RegularClass(object):
     class Group(object): pass
     user = User()
     group = Group()
-    flexmock(Group, new_instances=user)
+    flexmock(Group).new_instances(user)
     assert user is Group()
     self._tear_down()
     assert group.__class__ == Group().__class__
@@ -929,6 +922,12 @@ class RegularClass(object):
     foo = Foo()
     flexmock(foo)
     assertRaises(FlexmockError, foo.new_instances, 'bar')
+
+  def test_new_instances_works_with_multiple_return_values(self):
+    class Foo(object): pass
+    flexmock(Foo).new_instances('foo', 'bar')
+    assert 'foo' == Foo()
+    assert 'bar' == Foo()
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

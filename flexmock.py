@@ -337,7 +337,6 @@ class FlexMock(object):
     Returns:
       - expectation: Expectation object
     """
-    self._ensure_not_new_instances()
     chained_methods = None
     return_value = None
     if '.' in method:
@@ -367,37 +366,18 @@ class FlexMock(object):
     """
     return self.should_receive(method).and_execute
 
-  def new_instances(self, object_to_return):
+  def new_instances(self, *kargs):
     """Overrides __new__ method on the class to return custom objects.
 
-    Alias for should_receive('__new__').and_return(object_to_return)
-    """
-    if inspect.isclass(self._mock):
-      return self.should_receive('__new__').and_return(object_to_return)
-    else:
-      raise FlexmockError('new_instances can only be called on a class mock')
-
-  def _ensure_not_new_instances(self):
-    for exp in self._flexmock_expectations:
-      if exp.original_method and exp.original_method.__name__ == '__new__':
-        raise FlexmockError('cannot use should_receive with new_instances')
-
-  def _new_instances(self, return_value):
-    """Overrides creation of new instances of the mocked class.
-
-    DEPRECATED: will be removed in 0.7.4
+    Alias for should_receive('__new__').and_return(kargs).one_by_one
 
     Args:
-      - return_value: the object that should be created instead of the default
+      - kargs: objects to return on each successive call to __new__
     """
-    method = '__new__'
-    expectation = self._retrieve_or_create_expectation(
-        method, return_value=return_value)
-    self._flexmock_expectations.append(expectation)
-    if not expectation.original_method:
-      expectation.original_method = getattr(self._mock, method)
-    setattr(self._mock, method, self.__create_new_method(return_value))
-    self.update_teardown()
+    if inspect.isclass(self._mock):
+      return self.should_receive('__new__').and_return(kargs).one_by_one
+    else:
+      raise FlexmockError('new_instances can only be called on a class mock')
 
   def _setup_mock(self, obj_or_class, **kwargs):
     """Puts the provided object or class under mock."""
@@ -405,15 +385,8 @@ class FlexMock(object):
     for attr in self.UPDATED_ATTRS:
       setattr(obj_or_class, attr, getattr(self, attr))
     self._mock = obj_or_class
-    if 'new_instances' in kwargs and inspect.isclass(obj_or_class):
-      warnings.warn('new_instances parameter is deprecated. '
-                    'It will be removed in Flexmock version 0.7.4 '
-                    'You need to switch to using the new_instances method call',
-                    PendingDeprecationWarning)
-      self._new_instances(kwargs['new_instances'])
-    else:
-      for method, return_value in kwargs.items():
-        obj_or_class.should_receive(method).and_return(return_value)
+    for method, return_value in kwargs.items():
+      obj_or_class.should_receive(method).and_return(return_value)
     expectation = self._create_expectation(method=None, return_value=None)
     self._flexmock_expectations.append(expectation)
     self.update_teardown()
