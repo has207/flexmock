@@ -135,7 +135,7 @@ class Expectation(object):
       - kwargs: optional named arguments
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
@@ -156,7 +156,7 @@ class Expectation(object):
       - values: optional list of return values, defaults to None if not given
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     if len(values) == 1:
       value = values[0]
@@ -179,7 +179,7 @@ class Expectation(object):
       - number: int
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     self.expected_calls = number
     return self
@@ -193,7 +193,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     if not self._one_by_one:
       self._one_by_one = True
@@ -214,7 +214,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     return self.times(1)
 
@@ -225,7 +225,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     return self.times(2)
 
@@ -236,7 +236,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     return self.times(0)
 
@@ -250,7 +250,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     self.modifier = self.AT_LEAST
     return self
@@ -265,7 +265,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     self.modifier = self.AT_MOST
     return self
@@ -298,7 +298,7 @@ class Expectation(object):
     This is a property method so must be called without parentheses.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     self._ordered = True
     return self
@@ -308,11 +308,11 @@ class Expectation(object):
 
     Args:
       - exception: class or instance of the exception
-      - kargs: tuple of kargs to pass to the exception
-      - kwargs: dict of kwargs to pass to the exception
+      - kargs: optional keyword arguments to pass to the exception
+      - kwargs: optional named arguments to pass to the exception
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be mixed with return values')
@@ -327,7 +327,7 @@ class Expectation(object):
       - function: callable
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be specified twice')
@@ -342,7 +342,7 @@ class Expectation(object):
     In effect, the mocked object becomes a generator.
 
     Returns:
-      self, i.e. can be chained with other Expectation methods
+      - self, i.e. can be chained with other Expectation methods
     """
     for value in kargs:
       self.yield_values.append(ReturnValue(value))
@@ -423,7 +423,7 @@ class FlexMock(object):
       - method: string name of the method to add
 
     Returns:
-      - expectation: Expectation object
+      - Expectation object
     """
     if method in self.UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
@@ -460,8 +460,7 @@ class FlexMock(object):
     with what arguments, and apply expectations accordingly.
 
     Returns:
-      Expectation object, i.e. can be chain modified by other Expectation
-      methods
+      - Expectation object
     """
     expectation = self.should_receive(method)
     return expectation.replace_with(expectation.original_method)
@@ -475,8 +474,7 @@ class FlexMock(object):
       - kargs: objects to return on each successive call to __new__
 
     Returns:
-      Expectation object, i.e. can be chain modified by other Expectation
-      methods
+      - Expectation object
     """
     if inspect.isclass(self._object):
       return self.should_receive('__new__').and_return(kargs).one_by_one
@@ -754,7 +752,7 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
     - kwargs: passed to saved_teardown
 
   Returns:
-    function
+    - function
   """
   def teardown(*kargs, **kwargs):
     saved = {}
@@ -797,7 +795,7 @@ def flexmock_unittest(spec=None, **kwargs):
     - kwargs: method/return_value pairs to attach to the object
 
   Returns:
-    FlexMock object, based on spec if one was provided.
+    - FlexMock object, based on spec if one was provided.
   """
   class UnittestFlexMock(FlexMock):
     def update_teardown(self, test_runner=unittest.TestCase,
