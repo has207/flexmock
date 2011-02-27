@@ -274,15 +274,13 @@ class Expectation(object):
   def and_execute(self):
     """Creates a spy.
 
-    This means that the original method will be called rather than the fake
-    version. However, we can still keep track of how many times it's called and
-    with what arguments, and apply expectations accordingly.
+    DEPRECATED: will be removed in 0.7.5!
 
-    This is a property method so must be called without parentheses.
-
-    Returns:
-      self, i.e. can be chained with other Expectation methods
     """
+    warnings.warn('and_execute property is deprecated. '
+                  'It will be removed in Flexmock version 0.7.5 '
+                  'You need to switch to using the should_call method call',
+                  PendingDeprecationWarning)
     if self._replace_with:
       raise FlexmockError('replace_with cannot be mixed with and_execute')
     if inspect.isclass(self._mock):
@@ -450,11 +448,18 @@ class FlexMock(object):
       return expectation
 
   def should_call(self, method):
-    """Shortcut for creating a spy.
+    """Creates a spy.
 
-    Alias for should_receive().and_execute.
+    This means that the original method will be called rather than the fake
+    version. However, we can still keep track of how many times it's called and
+    with what arguments, and apply expectations accordingly.
+
+    Returns:
+      Expectation object, i.e. can be chain modified by other Expectation
+      methods
     """
-    return self.should_receive(method).and_execute
+    expectation = self.should_receive(method)
+    return expectation.replace_with(expectation.original_method)
 
   def new_instances(self, *kargs):
     """Overrides __new__ method on the class to return custom objects.
