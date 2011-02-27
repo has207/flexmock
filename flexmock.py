@@ -128,11 +128,19 @@ class Expectation(object):
     return self._mock
 
   def with_args(self, *kargs, **kwargs):
-    """Override the arguments used to match this expectation's method."""
+    """Override the arguments used to match this expectation's method.
+
+    Args:
+      - kargs: optional keyword arguments
+      - kwargs: optional named arguments
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
-  def and_return(self, *value):
+  def and_return(self, *values):
     """Override the return value of this expectation's method.
 
     When and_return is given multiple times, each value provided is returned
@@ -143,9 +151,17 @@ class Expectation(object):
     When combined with the one_by_one property, value is treated as a list of
     values to be returned in the order specified by successive calls to this
     method rather than a single list to be returned each time.
+
+    Args:
+      - values: optional list of return values, defaults to None if not given
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
     """
-    if len(value) == 1:
-      value = value[0]
+    if len(values) == 1:
+      value = values[0]
+    else:
+      value = values
     if not self._one_by_one:
       value = ReturnValue(value)
       self.return_values.append(value)
@@ -157,7 +173,14 @@ class Expectation(object):
     return self
 
   def times(self, number):
-    """Number of times this expectation's method is expected to be called."""
+    """Number of times this expectation's method is expected to be called.
+
+    Args:
+      - number: int
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     self.expected_calls = number
     return self
 
@@ -166,6 +189,11 @@ class Expectation(object):
     """Modifies the return value to be treated as a list of return values.
 
     Each value in the list is returned on successive invocations of the method.
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
     """
     if not self._one_by_one:
       self._one_by_one = True
@@ -181,28 +209,64 @@ class Expectation(object):
 
   @property
   def once(self):
-    """Alias for times(1)."""
+    """Alias for times(1).
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     return self.times(1)
 
   @property
   def twice(self):
-    """Alias for times(2)."""
+    """Alias for times(2).
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     return self.times(2)
 
   @property
   def never(self):
-    """Alias for times(0)."""
+    """Alias for times(0).
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     return self.times(0)
 
   @property
   def at_least(self):
-    """Modifies the associated "times" expectation."""
+    """Modifies the associated times() expectation.
+
+    When given, an exception will only be raised if the method is called less
+    than times() specified. Does nothing if times() is not given.
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     self.modifier = self.AT_LEAST
     return self
 
   @property
   def at_most(self):
-    """Modifies the associated "times" expectation."""
+    """Modifies the associated "times" expectation.
+
+    When given, an exception will only be raised if the method is called more
+    than times() specified. Does nothing if times() is not given.
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     self.modifier = self.AT_MOST
     return self
 
@@ -213,6 +277,11 @@ class Expectation(object):
     This means that the original method will be called rather than the fake
     version. However, we can still keep track of how many times it's called and
     with what arguments, and apply expectations accordingly.
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be mixed with and_execute')
@@ -223,7 +292,16 @@ class Expectation(object):
 
   @property
   def ordered(self):
-    """Makes the expectation respect the order of should_receive statements."""
+    """Makes the expectation respect the order of should_receive statements.
+
+    An exception will be raised if methods are called out of order, determined
+    by order of should_receive calls in the test.
+
+    This is a property method so must be called without parentheses.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     self._ordered = True
     return self
 
@@ -234,6 +312,9 @@ class Expectation(object):
       - exception: class or instance of the exception
       - kargs: tuple of kargs to pass to the exception
       - kwargs: dict of kwargs to pass to the exception
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be mixed with return values')
@@ -246,6 +327,9 @@ class Expectation(object):
 
     Args:
       - function: callable
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be specified twice')
@@ -255,7 +339,13 @@ class Expectation(object):
     return self
 
   def and_yield(self, *kargs):
-    """Specifies the list of items to be yielded on successive method calls."""
+    """Specifies the list of items to be yielded on successive method calls.
+
+    In effect, the mocked object becomes a generator.
+
+    Returns:
+      self, i.e. can be chained with other Expectation methods
+    """
     for value in kargs:
       self.yield_values.append(ReturnValue(value))
     return self
