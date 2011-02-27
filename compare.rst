@@ -40,6 +40,9 @@ Simple fake object
     # Minimock
     # (TODO) 
 
+    # Fudge
+    # (TODO)
+
     # python-mock
     mymock = mock.Mock( {"some_method": "calculated value"})
     mymock.some_attribute = "value"
@@ -83,10 +86,13 @@ Simple mock
     my_mock = mock.Mock()
     my_mock.some_method.return_value = "value"
     assertEquals("value", mock.some_method())
-    my_mock.some_method.assert_called_with()
+    my_mock.some_method.assert_called_once_with()
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # python-mock
     mymock = mock.Mock( {"some_method" : "value"})
@@ -131,6 +137,9 @@ Creating partial mocks
     # Minimock
     # (TODO) 
 
+    # Fudge
+    # (TODO)
+
     # python-mock
     mock = mock.Mock({"some_method", "value"}, SomeObject)
     assertEquals("value", mock.some_method())
@@ -156,19 +165,28 @@ Ensure calls are made in specific order
     mock = flexmock(SomeObject)
     mock.should_receive('method1').once.ordered.and_return('first thing')
     mock.should_receive('method2').once.ordered.and_return('second thing')
+    # exercise the code
 
     # Mox
     mock = mox.MockObject(SomeObject)
     mock.method1().AndReturn('first thing')
     mock.method2().AndReturn('second thing')
     mox.Replay(mock)
+    # exercise the code
     mox.Verify(mock)
 
     # Mock
-    # TODO
+    mock = mock.Mock(spec=SomeObject)
+    mock.method1.return_value = 'first thing'
+    mock.method2.return_value = 'second thing'
+    # exercise the code
+    assert mock.method_calls == [('method1',) ('method2',)]
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # python-mock
     # Doesn't seem to support call ordering
@@ -178,6 +196,7 @@ Ensure calls are made in specific order
     mock.expects(pmock.once()).some_method().will(pmock.return_value("value"))
     mock_db.expects(pmock.once()).method1().id("method1")
     mock_db.expects(pmock.once()).method2().id("method2").after("method1")
+    # exercise the code
     mock.verify()
 
     # Mocker
@@ -188,6 +207,7 @@ Ensure calls are made in specific order
       mock.method2()
       mocker.result('second thing')
       mocker.replay()
+      # exercise the code
       mocker.verify()
 
 Raising exceptions
@@ -209,11 +229,14 @@ Raising exceptions
 
     # Mock
     my_mock = mock.Mock()
-    my_mock.some_method = mock.Mock(side_effect=SomeException("message"))
+    my_mock.some_method.side_effect = SomeException("message")
     assertRaises(SomeException, my_mock.some_method)
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # python-mock
     mock = mock.Mock()
@@ -252,10 +275,15 @@ Override new instances of a class
     assertEqual(some_other_object, some_module.SomeClass())
 
     # Mock
-    # (TODO) 
+    with mock.patch('somemodule.Someclass') as MockClass:
+      MockClass.return_value = some_other_object
+      assert some_other_object == some_module.SomeClass()
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # python-mock
     # (TODO)
@@ -266,13 +294,14 @@ Override new instances of a class
     # Mocker
     # (TODO)
 
-Call the same method multiple times
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Verify a method was called multiple times
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
     # Flexmock # (verifies that the method gets called at least twice)
     flexmock(some_object).should_receive('some_method').at_least.twice
+    # exercise the code
     
     # Mox
     # (does not support variable number of calls, so you need to create a new entry for each explicit call)
@@ -280,13 +309,19 @@ Call the same method multiple times
     mock.some_method(mox.IgnoreArg(), mox.IgnoreArg())
     mock.some_method(mox.IgnoreArg(), mox.IgnoreArg())
     mox.Replay(mock)
+    # exercise the code
     mox.Verify(mock)
     
     # Mock
-    # (TODO) 
+    my_mock = mock.Mock(spec=SomeObject)
+    # exercise the code
+    assert my_mock.some_method.call_count >= 2
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # Python Mock module
     # (TODO)
@@ -318,14 +353,21 @@ Mock chained methods
     mock2.method2().AndReturn(mock2)
     mock3.method3(arg1, arg2).AndReturn('some_value')
     self.mox.ReplayAll()
-    assertEquals("some_value", some_object.method1().method2().method3(arg1, arg2))
+    assertEqual("some_value", some_object.method1().method2().method3(arg1, arg2))
     self.mox.VerifyAll()
 
     # Mock
-    # (TODO) 
+    my_mock = mock.Mock()
+    my_mock.method1.return_value.method2.return_value.method3.return_value = 'some value'
+    method3 = my_mock.method1.return_value.method2.return_value.method3
+    method3.assert_called_once_with(arg1, arg2)
+    assertEqual('some_value', my_mock.method1().method2().method3(arg1, arg2))
 
     # Minimock
     # (TODO) 
+
+    # Fudge
+    # (TODO)
 
     # Python Mock module
     # (TODO)
@@ -335,3 +377,8 @@ Mock chained methods
 
     # Mocker
     # (TODO)
+
+Mock context manager
+~~~~~~~~~~~~~~~~~~~~
+
+(TODO)
