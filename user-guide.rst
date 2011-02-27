@@ -15,12 +15,14 @@ following terms.
 
 -----------
 
-Test runner integration
-=======================
+Compatibility
+=============
 
+Test runner integration
+-----------------------
 
 unittest / unittest2
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 Flexmock, by default, assumes your tests are in a class that inherits
 from unittest.TestCase, so if that's the case then all you need to do
@@ -31,7 +33,7 @@ is:
     from flexmock import flexmock
 
 Nose
-----
+~~~~
 
 For normal nose tests, including those at module level, inside
 unittest.TestCase classes or in other classes that nose recognizes:
@@ -43,7 +45,7 @@ unittest.TestCase classes or in other classes that nose recognizes:
 Generator tests must be decorated by @with_setup(setup_func, flexmock_teardown()). The teardown for these tests is non-trivial to hook into -- if you can figure out a better way, please let me know.
 
 Py.test
--------
+~~~~~~~
 
 ::
 
@@ -53,7 +55,7 @@ Py.test
 unittest.TestCase tests)*
 
 Other test runners
-------------------
+~~~~~~~~~~~~~~~~~~
 
 As far as I can tell most test runners out there support
 unittest.TestCase so as long as your tests are in a class that inherits
@@ -308,6 +310,14 @@ only be applied to the final method in the chain. If you need finer
 grained control, such as specifying specific arguments to an
 intermediate method, you can always fall back to the above long version.
 
+Replacing methods with custom functions
+---------------------------------------
+
+There are times when it is useful to replace a method with a custom lambda or function in order to return custom values based on provided arguments or a global value that changes between method calls.
+
+::
+
+   flexmock(some_object).should_receive('some_method').replace_with(lambda x, y, z: y == 5)
 
 Expectation Matching
 ====================

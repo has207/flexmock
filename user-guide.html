@@ -72,10 +72,12 @@ following terms.</p>
 </div>
 </div>
 <hr class="docutils" />
+<div class="section" id="compatibility">
+<h1>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="test-runner-integration">
-<h1>Test runner integration<a class="headerlink" href="#test-runner-integration" title="Permalink to this headline">¶</a></h1>
+<h2>Test runner integration<a class="headerlink" href="#test-runner-integration" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="unittest-unittest2">
-<h2>unittest / unittest2<a class="headerlink" href="#unittest-unittest2" title="Permalink to this headline">¶</a></h2>
+<h3>unittest / unittest2<a class="headerlink" href="#unittest-unittest2" title="Permalink to this headline">¶</a></h3>
 <p>Flexmock, by default, assumes your tests are in a class that inherits
 from unittest.TestCase, so if that&#8217;s the case then all you need to do
 is:</p>
@@ -84,7 +86,7 @@ is:</p>
 </div>
 </div>
 <div class="section" id="nose">
-<h2>Nose<a class="headerlink" href="#nose" title="Permalink to this headline">¶</a></h2>
+<h3>Nose<a class="headerlink" href="#nose" title="Permalink to this headline">¶</a></h3>
 <p>For normal nose tests, including those at module level, inside
 unittest.TestCase classes or in other classes that nose recognizes:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_nose</span> <span class="k">as</span> <span class="n">flexmock</span>
@@ -93,7 +95,7 @@ unittest.TestCase classes or in other classes that nose recognizes:</p>
 <p>Generator tests must be decorated by &#64;with_setup(setup_func, flexmock_teardown()). The teardown for these tests is non-trivial to hook into &#8211; if you can figure out a better way, please let me know.</p>
 </div>
 <div class="section" id="py-test">
-<h2>Py.test<a class="headerlink" href="#py-test" title="Permalink to this headline">¶</a></h2>
+<h3>Py.test<a class="headerlink" href="#py-test" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_pytest</span> <span class="k">as</span> <span class="n">flexmock</span>
 </pre></div>
 </div>
@@ -101,11 +103,12 @@ unittest.TestCase classes or in other classes that nose recognizes:</p>
 unittest.TestCase tests)</em></p>
 </div>
 <div class="section" id="other-test-runners">
-<h2>Other test runners<a class="headerlink" href="#other-test-runners" title="Permalink to this headline">¶</a></h2>
+<h3>Other test runners<a class="headerlink" href="#other-test-runners" title="Permalink to this headline">¶</a></h3>
 <p>As far as I can tell most test runners out there support
 unittest.TestCase so as long as your tests are in a class that inherits
 from unittest.TestCase flexmock will just work, otherwise have a look at
 other test runner integration and send me a patch.</p>
+</div>
 </div>
 </div>
 <div class="section" id="example-usage">
@@ -325,6 +328,13 @@ only be applied to the final method in the chain. If you need finer
 grained control, such as specifying specific arguments to an
 intermediate method, you can always fall back to the above long version.</p>
 </div>
+<div class="section" id="replacing-methods-with-custom-functions">
+<h2>Replacing methods with custom functions<a class="headerlink" href="#replacing-methods-with-custom-functions" title="Permalink to this headline">¶</a></h2>
+<p>There are times when it is useful to replace a method with a custom lambda or function in order to return custom values based on provided arguments or a global value that changes between method calls.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="expectation-matching">
 <h1>Expectation Matching<a class="headerlink" href="#expectation-matching" title="Permalink to this headline">¶</a></h1>
@@ -387,11 +397,14 @@ more specific expectation would never be matched.</p>
 <li><a class="reference internal" href="#definitions">Definitions</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#compatibility">Compatibility</a><ul>
 <li><a class="reference internal" href="#test-runner-integration">Test runner integration</a><ul>
 <li><a class="reference internal" href="#unittest-unittest2">unittest / unittest2</a></li>
 <li><a class="reference internal" href="#nose">Nose</a></li>
 <li><a class="reference internal" href="#py-test">Py.test</a></li>
 <li><a class="reference internal" href="#other-test-runners">Other test runners</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#example-usage">Example Usage</a><ul>
@@ -407,6 +420,7 @@ more specific expectation would never be matched.</p>
 <li><a class="reference internal" href="#private-methods">Private methods</a></li>
 <li><a class="reference internal" href="#enforcing-call-order">Enforcing call order</a></li>
 <li><a class="reference internal" href="#chained-methods">Chained methods</a></li>
+<li><a class="reference internal" href="#replacing-methods-with-custom-functions">Replacing methods with custom functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#expectation-matching">Expectation Matching</a></li>
