@@ -83,7 +83,7 @@ class ReturnValue(object):
 class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
   flexmock_objects = {}
-  teardown_updated = False
+  teardown_updated = []
 
   @classmethod
   def get_flexmock_expectation(cls, obj, name=None, args=None):
@@ -525,13 +525,14 @@ class FlexMock(object):
     This is used for test runner integration and should not be accessed
     from tests.
     """
-    if not FlexmockContainer.teardown_updated:
+    if (not FlexmockContainer.teardown_updated or
+        self not in FlexmockContainer.teardown_updated):
       if hasattr(test_runner, teardown_method):
         saved_teardown = getattr(test_runner, teardown_method)
       else:
         saved_teardown = None
       setattr(test_runner, teardown_method, flexmock_teardown(saved_teardown))
-      FlexmockContainer.teardown_updated = True
+      FlexmockContainer.teardown_updated.append(self)
 
   def _retrieve_or_create_expectation(self, method, return_value=None):
     if method in [x.method for x in FlexmockContainer.flexmock_objects[self]]:
