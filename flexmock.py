@@ -156,6 +156,9 @@ class Expectation(object):
     return '%s -> (%s)' % (_format_args(self.method, self.args),
                            ', '.join(['%s' % x for x in self.return_values]))
 
+  def __call__(self):
+    return self
+
   @property
   def mock(self):
     """Return the mock associated with this expectation.

@@ -961,6 +961,11 @@ class RegularClass(object):
     mock.should_receive('bar').and_return('baz')
     assert foo.bar() == 'baz'
 
+  def test_expectation_properties_work_with_parens(self):
+    foo = flexmock()
+    foo.should_receive('bar').at_least().once().and_return('baz')
+    assert 'baz' == foo.bar()
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):
