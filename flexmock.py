@@ -454,6 +454,9 @@ class FlexMock(object):
   def __exit__(self, type, value, traceback):
     return self
 
+  def __call__(self):
+    return self
+
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 

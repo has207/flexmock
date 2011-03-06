@@ -962,8 +962,8 @@ class RegularClass(object):
     assert foo.bar() == 'baz'
 
   def test_expectation_properties_work_with_parens(self):
-    foo = flexmock()
-    foo.should_receive('bar').at_least().once().and_return('baz')
+    foo = flexmock().should_receive(
+        'bar').at_least().once().and_return('baz').mock()
     assert 'baz' == foo.bar()
 
 
