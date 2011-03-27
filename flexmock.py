@@ -369,7 +369,7 @@ class Expectation(object):
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be specified twice')
-    if function.__name__ == self.method:
+    if function == self.original_method:
       self._pass_thru = True
     if inspect.isclass(self._mock):
       raise FlexmockError('replace_with not supported for class mocks')
