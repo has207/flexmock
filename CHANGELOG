@@ -1,3 +1,10 @@
+Release 0.7.4
+- Fixed exception type check when no message specified 
+- Make properties work optionally with parentheses
+- Make sure should_receive does not replace flexmock methods
+- Removed new_instances= param in favor of new_instances() method
+- Refactoring to move all state to FlexmockContainer class
+
 Release 0.7.3
 - Added new_instances method (new_instances param will be deprecated in next release!)
 - Added replace_with to enable returning results of custom functions
