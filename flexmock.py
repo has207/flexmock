@@ -354,8 +354,6 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
-    if self._replace_with:
-      raise FlexmockError('replace_with cannot be mixed with return values')
     args = {'kargs': kargs, 'kwargs': kwargs}
     self.return_values.append(ReturnValue(raises=exception, value=args))
     return self
@@ -371,8 +369,10 @@ class Expectation(object):
     """
     if self._replace_with:
       raise FlexmockError('replace_with cannot be specified twice')
-    if self.return_values:
-      raise FlexmockError('replace_with cannot be mixed with return values')
+    if function.__name__ == self.method:
+      self._pass_thru = True
+    if inspect.isclass(self._mock):
+      raise FlexmockError('replace_with not supported for class mocks')
     self._replace_with = function
     return self
 
@@ -641,10 +641,10 @@ class FlexMock(object):
           self, method, arguments)
       if expectation:
         expectation.times_called += 1
-        if expectation._replace_with:
-          return expectation._replace_with(*kargs, **kwargs)
         if expectation._pass_thru:
           return pass_thru(expectation, *kargs, **kwargs)
+        elif expectation._replace_with:
+          return expectation._replace_with(*kargs, **kwargs)
         if expectation.yield_values:
           return generator_method(expectation.yield_values)
         elif expectation.return_values:
