@@ -36,7 +36,7 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 
-html:
+html: clean
 	PYTHONPATH=. $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	cp -r _build/html/* .
 	rm -rf static/

@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flexmock API &mdash; Flexmock v0.7.3 documentation</title>
+    <title>Flexmock API &mdash; Flexmock v0.7.4 documentation</title>
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.7.3 documentation" href="index.html" />
+    <link rel="top" title="Flexmock v0.7.4 documentation" href="index.html" />
     <link rel="next" title="Why Flexmock?" href="why.html" />
     <link rel="prev" title="Usage Documentation" href="user-guide.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="user-guide.html" title="Usage Documentation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -130,7 +130,7 @@ with what arguments, and apply expectations accordingly.</p>
 
 <dl class="method">
 <dt id="flexmock.FlexMock.new_instances">
-<tt class="descname">new_instances</tt><big>(</big><em>*kargs</em><big>)</big><a class="headerlink" href="#flexmock.FlexMock.new_instances" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">new_instances</tt><big>(</big><em>*kargs</em><big>)</big><a class="reference internal" href="modules/flexmock.html#FlexMock.new_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.new_instances" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overrides __new__ method on the class to return custom objects.</p>
 <p>Alias for should_receive(&#8216;__new__&#8217;).and_return(kargs).one_by_one</p>
 <dl class="docutils">
@@ -151,7 +151,7 @@ with what arguments, and apply expectations accordingly.</p>
 
 <dl class="class">
 <dt id="flexmock.Expectation">
-<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Expectation</tt><big>(</big><em>name</em>, <em>mock</em>, <em>return_value=None</em>, <em>original_method=None</em><big>)</big><a class="reference internal" href="modules/flexmock.html#Expectation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Expectation</tt><big>(</big><em>mock</em>, <em>name=None</em>, <em>return_value=None</em>, <em>original_method=None</em><big>)</big><a class="reference internal" href="modules/flexmock.html#Expectation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Holds expectations about methods.</p>
 <p>The information contained in the Expectation object includes method name,
 its argument list, return values, and any exceptions that the method might
@@ -222,7 +222,7 @@ method rather than a single list to be returned each time.</p>
 
 <dl class="method">
 <dt id="flexmock.Expectation.replace_with">
-<tt class="descname">replace_with</tt><big>(</big><em>function</em><big>)</big><a class="headerlink" href="#flexmock.Expectation.replace_with" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">replace_with</tt><big>(</big><em>function</em><big>)</big><a class="reference internal" href="modules/flexmock.html#Expectation.replace_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.replace_with" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gives a function to run instead of the mocked out one.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -442,7 +442,7 @@ by order of should_receive calls in the test.</p>
         <li class="right" >
           <a href="user-guide.html" title="Usage Documentation"
              >previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
