@@ -596,10 +596,10 @@ class FlexMock(object):
         expected_instance = expected(*args['kargs'], **args['kwargs'])
         expected_message = '%s' % expected_instance
         if inspect.isclass(expected):
-          if expected is not raised and not isinstance(raised, expected):
+          if expected is not raised and expected not in raised.__bases__:
             raise (InvalidExceptionClass('expected %s, raised %s' %
                    (expected, raised)))
-          elif expected_message != message:
+          if expected_message and expected_message != message:
             raise (InvalidExceptionMessage('expected %s, raised %s' %
                    (expected_message, message)))
         elif expected is not raised:

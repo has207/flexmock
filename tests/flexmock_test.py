@@ -691,13 +691,21 @@ class RegularClass(object):
         'get_stuff').and_execute.and_raise(FakeException, 2, 1)
     assertRaises(InvalidExceptionMessage, user.get_stuff)
 
-  def test_flexmock_should_blow_up_on_wrong_exception_type(self):
+  def test_flexmock_should_blow_up_on_wrong_spy_exception_type(self):
     class User:
       def get_stuff(self): raise AlreadyMocked('foo')
     user = User()
     flexmock(user).should_receive(
         'get_stuff').and_execute.and_raise(MethodNotCalled)
     assertRaises(InvalidExceptionClass, user.get_stuff)
+
+  def test_flexmock_should_match_spy_exception_parent_type(self):
+    class User:
+      def get_stuff(self): raise AlreadyMocked('foo')
+    user = User()
+    flexmock(user).should_receive(
+        'get_stuff').and_execute.and_raise(FlexmockError)
+    user.get_stuff()
 
   def test_flexmock_should_blow_up_on_wrong_spy_return_values(self):
     class User:
