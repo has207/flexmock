@@ -371,8 +371,6 @@ class Expectation(object):
       raise FlexmockError('replace_with cannot be specified twice')
     if function == self.original_method:
       self._pass_thru = True
-    if inspect.isclass(self._mock):
-      raise FlexmockError('replace_with not supported for class mocks')
     self._replace_with = function
     return self
 
@@ -479,7 +477,8 @@ class FlexMock(object):
                              method.lstrip('_')))
     if (not isinstance(self._object, FlexMock) and
         not hasattr(self._object, method)):
-      raise MethodDoesNotExist('%s does not have method %s' % (self, method))
+      raise MethodDoesNotExist('%s does not have method %s' %
+                               (self._object, method))
     if chained_methods:
       return_value = FlexMock()
       chained_expectation = return_value.should_receive(chained_methods)

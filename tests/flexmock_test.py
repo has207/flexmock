@@ -432,15 +432,12 @@ class RegularClass(object):
     assert 'instance' == user.method()
     assert 'class' == user2.method()
 
-  def test_flexmock_should_blow_up_on_should_call_for_class_mock(self):
+  def test_flexmock_should_not_blow_up_on_should_call_for_class_mock(self):
     class User:
       def foo(self):
         return 'class'
-    try:
-      flexmock(User).should_call('foo')
-      raise Exception('should_call should have raised an exception')
-    except FlexmockError:
-      pass
+    flexmock(User).should_call('foo')
+    self._tear_down()
 
   def test_flexmock_should_mock_new_instances_with_multiple_params(self):
     class User(object): pass
