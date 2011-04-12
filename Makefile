@@ -4,3 +4,6 @@ quick:
 test:
 	./tests/run_tests.sh
 
+coverage:
+	PYTHONPATH=. coverage run tests/flexmock_test.py 
+	coverage html --omit tests\/flexmock_test\.py --include flexmock\.py
