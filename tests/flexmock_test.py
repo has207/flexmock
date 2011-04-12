@@ -906,6 +906,16 @@ class RegularClass(object):
     assert foo.method(5) == True
     assert foo.method(4) == False
 
+  def test_flexmock_should_replace_cannot_be_specified_twice(self):
+    class Foo:
+      def method(self, arg):
+        return arg
+    foo = Foo()
+    expectation = flexmock(foo).should_receive(
+        'method').replace_with(lambda x: x == 5)
+    assertRaises(FlexmockError,
+                 expectation.replace_with, lambda x: x == 3)
+
   def test_flexmock_should_mock_the_same_method_multiple_times(self):
     class Foo:
       def method(self): pass
@@ -967,6 +977,13 @@ class RegularClass(object):
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):
     return unittest.TestCase.tearDown(self)
+
+if sys.version_info >= (2, 6):
+  import flexmock_modern_test
+
+  class TestUnittestModern(flexmock_modern_test.TestFlexmockUnittestModern):
+    pass
+
 
 
 if __name__ == '__main__':

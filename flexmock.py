@@ -420,8 +420,6 @@ class Expectation(object):
           setattr(self._mock, self.method, staticmethod(self.original_method))
         else:
           setattr(self._mock, self.method, self.original_method)
-      elif self.method in dir(self._mock):
-        delattr(self._mock, self.method)
       for attr in FlexMock.UPDATED_ATTRS:
         if hasattr(self._mock, attr):
           try:
@@ -532,10 +530,9 @@ class FlexMock(object):
     """
     if (not FlexmockContainer.teardown_updated or
         self not in FlexmockContainer.teardown_updated):
+      saved_teardown = None
       if hasattr(test_runner, teardown_method):
         saved_teardown = getattr(test_runner, teardown_method)
-      else:
-        saved_teardown = None
       setattr(test_runner, teardown_method, flexmock_teardown(saved_teardown))
       FlexmockContainer.teardown_updated.append(self)
 
@@ -572,12 +569,6 @@ class FlexMock(object):
           inspect.isfunction(method) and not inspect.ismethod(method)):
         return True
     return False
-
-  def __create_new_method(self, return_value):
-    @staticmethod
-    def new(cls, *kargs, **kwargs):
-      return return_value
-    return new
 
   def __create_mock_method(self, method):
     def generator_method(yield_values):
@@ -785,9 +776,10 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
         expectation.reset()
     for mock_object, expectations in saved.items():
       del FlexmockContainer.flexmock_objects[mock_object]
-    for mock_object, expectations in saved.items():
-      for expectation in expectations:
-        expectation.verify()
+    if not sys.exc_info()[0]:
+      for mock_object, expectations in saved.items():
+        for expectation in expectations:
+          expectation.verify()
     if saved_teardown:
       saved_teardown(*kargs, **kwargs)
   return teardown

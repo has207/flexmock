@@ -13,3 +13,7 @@ class ModernClass(object):
 class TestFlexmockUnittestModern(ModernClass, unittest.TestCase):
   def _tear_down(self):
     return unittest.TestCase.tearDown(self)
+
+
+if __name__ == '__main__':
+  unittest.main()
