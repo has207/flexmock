@@ -782,7 +782,15 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
           expectation.verify()
     if saved_teardown:
       saved_teardown(*kargs, **kwargs)
-  return teardown
+
+  if 'func_code' in dir(teardown):
+    code = 'func_code'
+  else:
+    code = '__code__'
+  if saved_teardown and getattr(saved_teardown, code) is getattr(teardown, code):
+    return saved_teardown
+  else:
+    return teardown
 
 
 def flexmock_unittest(spec=None, **kwargs):
