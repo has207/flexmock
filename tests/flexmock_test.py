@@ -973,6 +973,17 @@ class RegularClass(object):
         'bar').at_least().once().and_return('baz').mock()
     assert 'baz' == foo.bar()
 
+  def test_mocking_down_the_inheritance_chain_class_to_class(self):
+    class Parent(object):
+      def foo(self): pass
+    class Child(Parent):
+      def bar(self): pass
+
+    flexmock(Parent).should_receive('foo').and_return('outer')
+    flexmock(Child).should_receive('bar').and_return('inner')
+    assert 'outer', Parent().foo()
+    assert 'inner', Child().bar()
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def _tear_down(self):

@@ -722,7 +722,10 @@ def _attach_flexmock_methods(mock, obj):
       if hasattr(obj, attr):
         return
     for attr in FlexMock.UPDATED_ATTRS:
-      setattr(obj, attr, getattr(mock, attr))
+      if type(obj.__dict__) is dict:
+        obj.__dict__[attr] = getattr(mock, attr)
+      else:
+        setattr(obj, attr, getattr(mock, attr))
   except TypeError:
     raise AttemptingToMockBuiltin
 
@@ -730,8 +733,7 @@ def _attach_flexmock_methods(mock, obj):
 def _get_same_methods(obj):
   same_methods = []
   for attr in FlexMock.UPDATED_ATTRS:
-    if (hasattr(obj, attr) and
-        (hasattr(obj, '__class__') and not hasattr(obj.__class__, attr))):
+    if attr in obj.__dict__:
       same_methods.append(attr)
   return same_methods
 
