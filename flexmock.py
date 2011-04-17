@@ -661,6 +661,8 @@ class Mock(object):
 
 def _format_args(method, arguments):
   def to_str(arg):
+    if '_sre.SRE_Pattern' in str(type(arg)):
+      return '/%s/' % arg.pattern
     if sys.version_info < (3, 0):
       # prior to 3.0 unicode strings are type unicode that inherits
       # from basestring along with str, in 3.0 both unicode and basestring
