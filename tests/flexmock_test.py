@@ -14,6 +14,7 @@ from flexmock import MethodCalledOutOfOrder
 from flexmock import ReturnValue
 from flexmock import flexmock
 from flexmock import _format_args
+import re
 import sys
 import unittest
 
@@ -679,9 +680,26 @@ class RegularClass(object):
       def __str__(self):
         return '%s, %s' % (self.p1, self.p2)
     class User:
-      def get_stuff(self): raise FakeException(1, 2)
+      def get_stuff(self): raise FakeException('1', '2')
     user = User()
-    flexmock(user).should_call('get_stuff').and_raise(FakeException, 2, 1)
+    flexmock(user).should_call('get_stuff').and_raise(FakeException, '2', '1')
+    assertRaises(InvalidExceptionMessage, user.get_stuff)
+
+  def test_flexmock_should_verify_spy_matches_exception_regexp(self):
+    class User:
+      def get_stuff(self): raise Exception('123asdf345')
+    user = User()
+    flexmock(user).should_call(
+        'get_stuff').and_raise(Exception, re.compile('asdf'))
+    user.get_stuff()
+    self._tear_down()
+
+  def test_flexmock_should_verify_spy_matches_exception_regexp_mismatch(self):
+    class User:
+      def get_stuff(self): raise Exception('123asdf345')
+    user = User()
+    flexmock(user).should_call(
+        'get_stuff').and_raise(Exception, re.compile('^asdf'))
     assertRaises(InvalidExceptionMessage, user.get_stuff)
 
   def test_flexmock_should_blow_up_on_wrong_spy_exception_type(self):
@@ -983,6 +1001,30 @@ class RegularClass(object):
     flexmock(Child).should_receive('bar').and_return('inner')
     assert 'outer', Parent().foo()
     assert 'inner', Child().bar()
+
+  def test_arg_matching_works_with_regexp(self):
+    class Foo:
+      def foo(arg1, arg2): pass
+    foo = Foo()
+    flexmock(foo).should_receive('foo').with_args(
+        re.compile('^arg1.*asdf$'), arg2=re.compile('f')).and_return('mocked')
+    assert 'mocked' == foo.foo('arg1somejunkasdf', arg2='aadsfdas')
+
+  def test_arg_matching_with_regexp_fails_when_regexp_doesnt_match_karg(self):
+    class Foo:
+      def foo(arg1, arg2): pass
+    foo = Foo()
+    flexmock(foo).should_receive('foo').with_args(
+        re.compile('^arg1.*asdf$'), arg2=re.compile('a')).and_return('mocked')
+    assertRaises(InvalidMethodSignature, foo.foo, 'arg1somejunkasdfa', arg2='a')
+
+  def test_arg_matching_with_regexp_fails_when_regexp_doesnt_match_kwarg(self):
+    class Foo:
+      def foo(arg1, arg2): pass
+    foo = Foo()
+    flexmock(foo).should_receive('foo').with_args(
+        re.compile('^arg1.*asdf$'), arg2=re.compile('a')).and_return('mocked')
+    assertRaises(InvalidMethodSignature, foo.foo, 'arg1somejunkasdf', arg2='b')
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

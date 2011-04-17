@@ -23,6 +23,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 import inspect
+import re
 import sys
 import types
 import unittest
@@ -587,11 +588,15 @@ class Mock(object):
           if expected is not raised and expected not in raised.__bases__:
             raise (InvalidExceptionClass('expected %s, raised %s' %
                    (expected, raised)))
-          if expected_message and expected_message != message:
-            raise (InvalidExceptionMessage('expected %s, raised %s' %
+          if args['kargs'] and '_sre.SRE_Pattern' in str(args['kargs'][0]):
+            if not args['kargs'][0].search(message):
+              raise (InvalidExceptionMessage('expected /%s/, raised "%s"' %
+                     (args['kargs'][0].pattern, message)))
+          elif expected_message and expected_message != message:
+            raise (InvalidExceptionMessage('expected "%s", raised "%s"' %
                    (expected_message, message)))
         elif expected is not raised:
-          raise (InvalidExceptionClass('expected %s, raised %s' %
+          raise (InvalidExceptionClass('expected "%s", raised "%s"' %
                  (expected, raised)))
 
     def match_return_values(expected, received):
@@ -741,20 +746,28 @@ def _match_args(given_args, expected_args):
       expected_args == {'kargs': (), 'kwargs': {}}):
     return True
   if (len(given_args['kargs']) != len(expected_args['kargs']) or
-      len(given_args['kwargs']) != len(expected_args['kwargs'])):
+      len(given_args['kwargs']) != len(expected_args['kwargs']) or
+      given_args['kwargs'].keys() != expected_args['kwargs'].keys()):
     return False
-  try:
-    for i, arg in enumerate(given_args['kargs']):
-      if (arg != expected_args['kargs'][i] and
-          not isinstance(arg, expected_args['kargs'][i])):
-        return False
-    for k, v in given_args['kwargs']:
-      if (v != expected_args['kwargs'][k] and
-          not isinstance(v, expected_args['kwargs'][k])):
-        return False
+  for i, arg in enumerate(given_args['kargs']):
+    if not _arguments_match(arg, expected_args['kargs'][i]):
+      return False
+  for k, v in given_args['kwargs'].items():
+    if not _arguments_match(v, expected_args['kwargs'][k]):
+      return False
+  return True
+
+
+def _arguments_match(arg, expected_arg):
+  if arg == expected_arg:
     return True
-  except:
-    pass
+  elif inspect.isclass(expected_arg) and isinstance(arg, expected_arg):
+    return True
+  elif ('_sre.SRE_Pattern' in str(type(expected_arg)) and
+        expected_arg.search(arg)):
+    return True
+  else:
+    return False
 
 
 def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
