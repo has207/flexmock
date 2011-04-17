@@ -416,7 +416,8 @@ class Expectation(object):
     """Returns the methods overriden by this expectation to their originals."""
     if not isinstance(self._mock, Mock):
       if self.original_method:
-        if (self.method in self._mock.__dict__ and
+        if (hasattr(self._mock, '__dict__') and
+            self.method in self._mock.__dict__ and
             type(self._mock.__dict__) is dict):
           del self._mock.__dict__[self.method]
           if not hasattr(self._mock, self.method):
