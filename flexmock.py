@@ -414,13 +414,13 @@ class Expectation(object):
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
-    if not isinstance(self._mock, FlexMock):
+    if not isinstance(self._mock, Mock):
       if self.original_method:
         if self.static:
           setattr(self._mock, self.method, staticmethod(self.original_method))
         else:
           setattr(self._mock, self.method, self.original_method)
-      for attr in FlexMock.UPDATED_ATTRS:
+      for attr in Mock.UPDATED_ATTRS:
         if hasattr(self._mock, attr):
           try:
             delattr(self._mock, attr)
@@ -429,13 +429,13 @@ class Expectation(object):
     del self
 
 
-class FlexMock(object):
+class Mock(object):
   """Fake object class returned by the flexmock() function."""
 
   UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
 
   def __init__(self, **kwargs):
-    """FlexMock constructor.
+    """Mock constructor.
 
     Args:
       - kwargs: dict of attribute/value pairs used to initialize the mock object
@@ -462,7 +462,7 @@ class FlexMock(object):
     Returns:
       - Expectation object
     """
-    if method in FlexMock.UPDATED_ATTRS:
+    if method in Mock.UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
     return_value = None
@@ -473,12 +473,12 @@ class FlexMock(object):
         not inspect.ismodule(self._object))):
       method = ('_%s__%s' % (self._object.__class__.__name__,
                              method.lstrip('_')))
-    if (not isinstance(self._object, FlexMock) and
+    if (not isinstance(self._object, Mock) and
         not hasattr(self._object, method)):
       raise MethodDoesNotExist('%s does not have method %s' %
                                (self._object, method))
     if chained_methods:
-      return_value = FlexMock()
+      return_value = Mock()
       chained_expectation = return_value.should_receive(chained_methods)
     if self not in FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects[self] = []
@@ -523,7 +523,7 @@ class FlexMock(object):
 
   def update_teardown(self, test_runner=unittest.TestCase,
                       teardown_method='tearDown'):
-    """Should be implemented by classes inheriting from FlexMock.
+    """Should be implemented by classes inheriting from Mock.
 
     This is used for test runner integration and should not be accessed
     from tests.
@@ -685,10 +685,10 @@ def _format_args(method, arguments):
 
 
 def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
-  """Factory function for creating FlexMock objects.
+  """Factory function for creating Mock objects.
 
   Args:
-    - flexmock_class: class inheriting from FlexMock, used to differentiate
+    - flexmock_class: class inheriting from Mock, used to differentiate
                     different test runners
     - object_or_class: object or class to mock
     - kwargs: dict of attribute/value pairs used to initialize the mock object
@@ -697,7 +697,7 @@ def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
     return flexmock_class(**kwargs)
 
   # already mocked, return the mocked object
-  if FlexMock.UPDATED_ATTRS == _get_same_methods(obj_or_class):
+  if Mock.UPDATED_ATTRS == _get_same_methods(obj_or_class):
     for method, return_value in kwargs.items():
       obj_or_class.should_receive(method).and_return(return_value)
     return obj_or_class
@@ -718,10 +718,10 @@ def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
 
 def _attach_flexmock_methods(mock, obj):
   try:
-    for attr in FlexMock.UPDATED_ATTRS:
+    for attr in Mock.UPDATED_ATTRS:
       if hasattr(obj, attr):
         return
-    for attr in FlexMock.UPDATED_ATTRS:
+    for attr in Mock.UPDATED_ATTRS:
       if type(obj.__dict__) is dict:
         obj.__dict__[attr] = getattr(mock, attr)
       else:
@@ -732,7 +732,7 @@ def _attach_flexmock_methods(mock, obj):
 
 def _get_same_methods(obj):
   same_methods = []
-  for attr in FlexMock.UPDATED_ATTRS:
+  for attr in Mock.UPDATED_ATTRS:
     if attr in obj.__dict__:
       same_methods.append(attr)
   return same_methods
@@ -801,31 +801,31 @@ def flexmock_unittest(spec=None, **kwargs):
   This function is used to either generate a new fake object or take
   an existing object (or class or module) and use it as a basis for
   a partial mock. In case of a partial mock, the passed in object
-  is modified to support basic FlexMock class functionality making
+  is modified to support basic Mock class functionality making
   it unnecessary to make successive flexmock() calls on the same
   objects to generate new expectations.
 
   Example:
     >>> flexmock(SomeClass)
-    <flexmock.UnittestFlexMock object at 0xeb9b0>
+    <flexmock.UnittestMock object at 0xeb9b0>
     >>> SomeClass.should_receive('some_method')
     <flexmock.Expectation object at 0xe16b0>
 
   NOTE: it's safe to call flexmock() on the same object, it will return the
-  same FlexMock object each time.
+  same Mock object each time.
 
   Args:
     - spec: object (or class or module) to mock
     - kwargs: method/return_value pairs to attach to the object
 
   Returns:
-    - FlexMock object, based on spec if one was provided.
+    - Mock object, based on spec if one was provided.
   """
-  class UnittestFlexMock(FlexMock):
+  class UnittestMock(Mock):
     def update_teardown(self, test_runner=unittest.TestCase,
         teardown_method='tearDown'):
-      FlexMock.update_teardown(self, test_runner, teardown_method)
-  return generate_mock(UnittestFlexMock, spec, **kwargs)
+      Mock.update_teardown(self, test_runner, teardown_method)
+  return generate_mock(UnittestMock, spec, **kwargs)
 
 
 def get_current_function():
@@ -834,18 +834,18 @@ def get_current_function():
 
 
 def flexmock_nose(object_or_class=None, **kwargs):
-  class NoseFlexMock(FlexMock):
+  class NoseMock(Mock):
     def update_teardown(self, test_runner=None, teardown_method=None):
       this_func = get_current_function()
       if this_func:
-        FlexMock.update_teardown(self, this_func, 'teardown')
+        Mock.update_teardown(self, this_func, 'teardown')
       else:
-        FlexMock.update_teardown(self, unittest.TestCase, 'tearDown')
-  return generate_mock(NoseFlexMock, object_or_class, **kwargs)
+        Mock.update_teardown(self, unittest.TestCase, 'tearDown')
+  return generate_mock(NoseMock, object_or_class, **kwargs)
 
 
 def flexmock_pytest(object_or_class=None, **kwargs):
-  class PytestFlexMock(FlexMock):
+  class PytestMock(Mock):
     def update_teardown(self, test_runner=None, teardown_method=None):
       frame = sys._getframe(2)
       this = frame.f_locals.get('self')
@@ -867,8 +867,8 @@ def flexmock_pytest(object_or_class=None, **kwargs):
         # -> use the function teardown_function at module level
         test_runner = __import__(frame.f_globals['__name__'])
         teardown_method = 'teardown_function'
-      FlexMock.update_teardown(self, test_runner, teardown_method)
-  return generate_mock(PytestFlexMock, object_or_class, **kwargs)
+      Mock.update_teardown(self, test_runner, teardown_method)
+  return generate_mock(PytestMock, object_or_class, **kwargs)
 
 
 flexmock = flexmock_unittest

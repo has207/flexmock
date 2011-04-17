@@ -1,5 +1,5 @@
 #-*- coding: utf8 -*-
-from flexmock import FlexMock
+from flexmock import Mock
 from flexmock import AlreadyMocked
 from flexmock import AttemptingToMockBuiltin
 from flexmock import Expectation
@@ -41,7 +41,7 @@ class RegularClass(object):
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
-    assert isinstance(mock, FlexMock)
+    assert isinstance(mock, Mock)
 
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = flexmock(foo='foo', bar='bar')
@@ -462,7 +462,7 @@ class RegularClass(object):
     class Group(object): pass
     flexmock(Group)
     self._tear_down()
-    for method in FlexMock.UPDATED_ATTRS:
+    for method in Mock.UPDATED_ATTRS:
       assert method not in dir(Group)
 
   def test_flexmock_should_cleanup_after_exception(self):
@@ -475,9 +475,9 @@ class RegularClass(object):
     Group.should_receive('method1').once
     User.should_receive('method2').once
     assertRaises(MethodNotCalled, self._tear_down)
-    for method in FlexMock.UPDATED_ATTRS:
+    for method in Mock.UPDATED_ATTRS:
       assert method not in dir(Group)
-    for method in FlexMock.UPDATED_ATTRS:
+    for method in Mock.UPDATED_ATTRS:
       assert method not in dir(User)
 
   def test_flexmock_should_call_respects_matched_expectations(self):
