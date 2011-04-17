@@ -416,8 +416,11 @@ class Expectation(object):
     """Returns the methods overriden by this expectation to their originals."""
     if not isinstance(self._mock, Mock):
       if self.original_method:
-        if self.static:
-          setattr(self._mock, self.method, staticmethod(self.original_method))
+        if (self.method in self._mock.__dict__ and
+            type(self._mock.__dict__) is dict):
+          del self._mock.__dict__[self.method]
+          if not hasattr(self._mock, self.method):
+            self._mock.__dict__[self.method] = self.original_method
         else:
           setattr(self._mock, self.method, self.original_method)
       for attr in Mock.UPDATED_ATTRS:
@@ -552,23 +555,17 @@ class Mock(object):
     method_instance = self.__create_mock_method(method)
     if (hasattr(self._object, method) and
         not expectation.original_method):
-      expectation.original_method = getattr(self._object, method)
-      expectation.static = self._is_static(method)
-    setattr(self._object, method, types.MethodType(
-        method_instance, self._object))
-
-  def _is_static(self, method):
-    """Infer whether the method is static based on its properties.
-
-    This way we can re-insert it properly when it's time to clean up.
-    This monkeying around is only necessary in Python < 3.0
-    """
-    if sys.version_info < (3, 0):
-      method = getattr(self._object, method)
-      if (not inspect.ismodule(self._object) and
-          inspect.isfunction(method) and not inspect.ismethod(method)):
-        return True
-    return False
+      if hasattr(self._object, '__dict__') and method in self._object.__dict__:
+        expectation.original_method = self._object.__dict__[method]
+      else:
+        expectation.original_method = getattr(self._object, method)
+    if (hasattr(self._object, '__dict__') and
+        type(self._object.__dict__) is dict):
+      self._object.__dict__[method] = types.MethodType(
+          method_instance, self._object)
+    else:
+      setattr(self._object, method, types.MethodType(
+          method_instance, self._object))
 
   def __create_mock_method(self, method):
     def generator_method(yield_values):
