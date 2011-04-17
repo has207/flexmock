@@ -138,7 +138,6 @@ class Expectation(object):
     self.method = name
     self.modifier = ''
     self.original_method = original_method
-    self.static = False
     self.args = None
     value = ReturnValue(return_value)
     self.return_values = []
