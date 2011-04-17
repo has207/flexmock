@@ -461,10 +461,15 @@ class RegularClass(object):
 
   def test_flexmock_should_cleanup_added_methods_and_attributes(self):
     class Group(object): pass
+    group = Group()
     flexmock(Group)
+    assert 'should_receive' in Group.__dict__
+    flexmock(group)
+    assert 'should_receive' in group.__dict__
     self._tear_down()
     for method in Mock.UPDATED_ATTRS:
-      assert method not in dir(Group)
+      assert method not in Group.__dict__
+      assert method not in group.__dict__
 
   def test_flexmock_should_cleanup_after_exception(self):
     class User:
@@ -985,6 +990,8 @@ class RegularClass(object):
     assert 'new_instances' not in dir(foo)
     mock.should_receive('bar').and_return('baz')
     assert foo.bar() == 'baz'
+    self._tear_down()
+    assert foo.should_receive() == 'real'
 
   def test_expectation_properties_work_with_parens(self):
     foo = flexmock().should_receive(

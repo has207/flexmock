@@ -424,12 +424,6 @@ class Expectation(object):
             self._mock.__dict__[self.method] = self.original_method
         else:
           setattr(self._mock, self.method, self.original_method)
-      for attr in Mock.UPDATED_ATTRS:
-        if hasattr(self._mock, attr):
-          try:
-            delattr(self._mock, attr)
-          except AttributeError:
-            pass
     del self
 
 
@@ -701,7 +695,7 @@ def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
     return flexmock_class(**kwargs)
 
   # already mocked, return the mocked object
-  if Mock.UPDATED_ATTRS == _get_same_methods(obj_or_class):
+  if Mock.UPDATED_ATTRS == _get_same_methods(flexmock_class, obj_or_class):
     for method, return_value in kwargs.items():
       obj_or_class.should_receive(method).and_return(return_value)
     return obj_or_class
@@ -716,17 +710,19 @@ def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
     mock.should_receive(method).and_return(return_value)
   FlexmockContainer.add_expectation(obj_or_class, Expectation(obj_or_class))
   mock.update_teardown()
-  _attach_flexmock_methods(mock, obj_or_class)
+  _attach_flexmock_methods(mock, flexmock_class, obj_or_class)
   return mock
 
 
-def _attach_flexmock_methods(mock, obj):
+def _attach_flexmock_methods(mock, flexmock_class, obj):
   try:
     for attr in Mock.UPDATED_ATTRS:
       if hasattr(obj, attr):
-        return
+        if (_get_code(getattr(obj, attr)) is not
+            _get_code(getattr(flexmock_class, attr))):
+          return
     for attr in Mock.UPDATED_ATTRS:
-      if type(obj.__dict__) is dict:
+      if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
         obj.__dict__[attr] = getattr(mock, attr)
       else:
         setattr(obj, attr, getattr(mock, attr))
@@ -734,12 +730,25 @@ def _attach_flexmock_methods(mock, obj):
     raise AttemptingToMockBuiltin
 
 
-def _get_same_methods(obj):
+def _get_same_methods(flexmock_class, obj):
   same_methods = []
   for attr in Mock.UPDATED_ATTRS:
-    if attr in obj.__dict__:
-      same_methods.append(attr)
+    if hasattr(obj, '__dict__') and attr in obj.__dict__:
+      if (_get_code(getattr(flexmock_class, attr)) is
+          _get_code(obj.__dict__[attr])):
+        same_methods.append(attr)
   return same_methods
+
+
+def _get_code(func):
+  if 'func_code' in dir(func):
+    code = 'func_code'
+  elif 'im_func' in dir(func):
+    func = func.im_func
+    code = 'func_code'
+  else:
+    code = '__code__'
+  return getattr(func, code)
 
 
 def _match_args(given_args, expected_args):
@@ -788,6 +797,19 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       saved[mock_object] = expectations[:]
       for expectation in expectations:
         expectation.reset()
+    instances = [x for x in saved.keys()
+                 if not isinstance(x, Mock) and not inspect.isclass(x)]
+    classes = [x for x in saved.keys() if inspect.isclass(x)]
+    for obj in set(instances + classes):
+      for attr in Mock.UPDATED_ATTRS:
+        if (hasattr(obj, '__dict__') and
+            type(obj.__dict__) is dict and attr in obj.__dict__):
+          del obj.__dict__[attr]
+        elif hasattr(obj, attr):
+          try:
+            delattr(obj, attr)
+          except AttributeError:
+            pass
     for mock_object, expectations in saved.items():
       del FlexmockContainer.flexmock_objects[mock_object]
     if not sys.exc_info()[0]:
@@ -797,11 +819,7 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
     if saved_teardown:
       saved_teardown(*kargs, **kwargs)
 
-  if 'func_code' in dir(teardown):
-    code = 'func_code'
-  else:
-    code = '__code__'
-  if saved_teardown and getattr(saved_teardown, code) is getattr(teardown, code):
+  if saved_teardown and _get_code(saved_teardown) is _get_code(teardown):
     return saved_teardown
   else:
     return teardown
