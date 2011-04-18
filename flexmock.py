@@ -76,9 +76,12 @@ class ReturnValue(object):
 
   def __str__(self):
     if self.raises:
-      return '%s(%s)' % (self.raises, self.value)
+      return '%s(%s)' % (self.raises, _arg_to_str(self.value))
     else:
-      return '%s' % self.value
+      if len(self.value) == 1:
+        return '%s' % _arg_to_str(self.value[0])
+      else:
+        return '(%s)' % ', '.join([_arg_to_str(x) for x in self.value])
 
 
 class FlexmockContainer(object):
@@ -602,9 +605,7 @@ class Mock(object):
       if len(received) != len(expected):
         return False
       for i, val in enumerate(received):
-        if (val != expected[i] and
-            not (inspect.isclass(expected[i]) and
-                 isinstance(val, expected[i]))):
+        if not _arguments_match(val, expected[i]):
           return False
       return True
 
@@ -618,7 +619,7 @@ class Mock(object):
           not match_return_values(expectation.return_values[0].value,
                                   return_values)):
         raise (InvalidMethodSignature('expected to return %s, returned %s' %
-               (expectation.return_values[0].value, return_values)))
+               (expectation.return_values[0], return_values)))
       return return_values
 
     def mock_method(runtime_self, *kargs, **kwargs):
@@ -652,28 +653,29 @@ class Mock(object):
     return mock_method
 
 
-def _format_args(method, arguments):
-  def to_str(arg):
-    if '_sre.SRE_Pattern' in str(type(arg)):
-      return '/%s/' % arg.pattern
-    if sys.version_info < (3, 0):
-      # prior to 3.0 unicode strings are type unicode that inherits
-      # from basestring along with str, in 3.0 both unicode and basestring
-      # go away and str handles everything properly
-      if isinstance(arg, basestring):
-        return '"%s"' % arg
-      else:
-        return '%s' % arg
+def _arg_to_str(arg):
+  if '_sre.SRE_Pattern' in str(type(arg)):
+    return '/%s/' % arg.pattern
+  if sys.version_info < (3, 0):
+    # prior to 3.0 unicode strings are type unicode that inherits
+    # from basestring along with str, in 3.0 both unicode and basestring
+    # go away and str handles everything properly
+    if isinstance(arg, basestring):
+      return '"%s"' % arg
     else:
-      if isinstance(arg, str):
-        return '"%s"' % arg
-      else:
-        return '%s' % arg
+      return '%s' % arg
+  else:
+    if isinstance(arg, str):
+      return '"%s"' % arg
+    else:
+      return '%s' % arg
 
+
+def _format_args(method, arguments):
   if arguments is None:
     arguments = {'kargs': (), 'kwargs': {}}
-  kargs = ', '.join(to_str(arg) for arg in arguments['kargs'])
-  kwargs = ', '.join('%s=%s' % (k, to_str(v)) for k, v in
+  kargs = ', '.join(_arg_to_str(arg) for arg in arguments['kargs'])
+  kwargs = ', '.join('%s=%s' % (k, _arg_to_str(v)) for k, v in
                                 arguments['kwargs'].items())
   if kargs and kwargs:
     args = '%s, %s' % (kargs, kwargs)

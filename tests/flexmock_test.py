@@ -16,6 +16,7 @@ from flexmock import flexmock
 from flexmock import _format_args
 import re
 import sys
+import unicodedata
 import unittest
 
 
@@ -32,6 +33,13 @@ def assertRaises(exception, method, *kargs, **kwargs):
   except:
     pass
   raise Exception('%s not raised' % exception.__name__)
+
+
+def assertEqual(expected, received, msg=''):
+  if not msg:
+    msg = 'expected %s, received %s' % (expected, received)
+  if expected != received:
+    raise AssertionError('%s != %s : %s' % (expected, received, msg))
 
 
 class RegularClass(object):
@@ -665,6 +673,14 @@ class RegularClass(object):
     flexmock(user).should_call('get_stuff').and_return('real', 'stuff')
     assert ('real', 'stuff') == user.get_stuff()
 
+  def test_flexmock_should_verify_correct_spy_regexp_return_values(self):
+    class User:
+      def get_stuff(self): return 'real', 'stuff'
+    user = User()
+    flexmock(user).should_call('get_stuff').and_return(
+        re.compile('ea.*'), re.compile('^stuff$'))
+    assert ('real', 'stuff') == user.get_stuff()
+
   def test_flexmock_should_verify_spy_raises_correct_exception_class(self):
     class FakeException(Exception):
       def __init__(self, param, param2):
@@ -824,21 +840,23 @@ class RegularClass(object):
     if sys.version_info >= (3, 0):
       formatted = _format_args(
           'method', {'kargs' : (chr(0x86C7),), 'kwargs' : {}})
-      assert formatted == 'method("蛇")'
+      assertEqual('method("蛇")', formatted)
     else:
       formatted = _format_args(
           'method', {'kargs' : (unichr(0x86C7),), 'kwargs' : {}})
-      assert formatted == 'method("%s")' % unichr(0x86C7)
+      assertEqual('method("%s")' % unichr(0x86C7), formatted)
 
   def test_return_value_should_not_explode_on_unicode_values(self):
     class Foo:
       def method(self): pass
     if sys.version_info >= (3, 0):
       return_value = ReturnValue(chr(0x86C7))
-      assert '%s' % return_value == '蛇'
+      assertEqual('"蛇"', '%s' % return_value)
+      return_value = ReturnValue((chr(0x86C7), chr(0x86C7)))
+      assertEqual('("蛇", "蛇")', '%s' % return_value)
     else:
       return_value = ReturnValue(unichr(0x86C7))
-      assert unicode(return_value) == unichr(0x86C7)
+      assertEqual('"%s"' % unichr(0x86C7), unicode(return_value))
 
   def test_pass_thru_should_call_original_method_only_once(self):
     class Nyan(object):
