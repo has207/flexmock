@@ -84,10 +84,15 @@ Using the more verbose approach -- gives more flexibility when you need it
   mock.should_receive("method2").with_args("foo", "bar").and_return("baz")
   mock.should_receive("method3").and_raise(Exception)
 
-Flexmock mock objects support the full range of flexmock commands but
+ 
+Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 assigns them new methods rather than acting on methods they already
 possess.
+
+If you do not specify the arguments then any set of arguments, including none, will be matched.
+If you do not provide a return value then None is returned by default.
+
 
 Partially mock or stub an existing object
 -----------------------------------------
@@ -129,7 +134,6 @@ Note the "mock" modifier above -- the expectation chain returns an expectation o
 
     mock.should_receive('some_other_method').with_args().and_return('foo', 'bar')
 
-NOTE: You can leave off with_args() to match any arguments, and leave off and_return() to return None.
 
 Stub out a method for all instances of a class
 ----------------------------------------------
@@ -217,6 +221,12 @@ Matching specific return values
 
     flexmock(some_object).should_call('method_bar').and_return('foo')
 
+Matching a regular expression
+
+::
+
+    flexmock(some_object).should_call('method_bar').and_return(re.compile('^foo'))
+
 Match return values by class/type
 
 ::
@@ -234,6 +244,12 @@ Check that the exception message matches your expectations
 ::
 
     flexmock(some_object).should_call('method_bar').and_raise(Exception, "some error")
+
+Check that the exception message matches a regular expression
+
+::
+
+    flexmock(some_object).should_call('method_bar').and_raise(Exception, re.compile("some error"))
 
 If either and_return() or and_raise() is provided, flexmock will
 verify that the return value matches the expected return value or
@@ -394,20 +410,32 @@ Will be matched by any of the following:
     >>> foo.method_bar('foo', 'bar')
     'bar'
 
-In addition to exact values, you can also match against the type or
-class of the argument.
+Match exactly no arguments 
+
+::
+
+    flexmock(foo).should_receive('method_bar').with_args()
 
 Match any single argument
+
 
 ::
 
     flexmock(foo).should_receive('method_bar').with_args(object)
+
+NOTE: In addition to exact values, you can match against the type or class of the argument.
 
 Match any single string argument
 
 ::
 
     flexmock(foo).should_receive('method_bar').with_args(str)
+
+Match the empty string using a compiled regular expression
+
+::
+
+    flexmock(foo).should_receive('method_bar').with_args(re.compile('^$'))
 
 Match any set of three arguments where the first one is an integer,
 second one is anything, and third is string 'foo'
