@@ -60,13 +60,13 @@
 <p>This function is used to either generate a new fake object or take
 an existing object (or class or module) and use it as a basis for
 a partial mock. In case of a partial mock, the passed in object
-is modified to support basic FlexMock class functionality making
+is modified to support basic Mock class functionality making
 it unnecessary to make successive flexmock() calls on the same
 objects to generate new expectations.</p>
 <dl class="docutils">
 <dt>Example:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">SomeClass</span><span class="p">)</span>
-<span class="go">&lt;flexmock.UnittestFlexMock object at 0xeb9b0&gt;</span>
+<span class="go">&lt;flexmock.UnittestMock object at 0xeb9b0&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SomeClass</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span>
 <span class="go">&lt;flexmock.Expectation object at 0xe16b0&gt;</span>
 </pre></div>
@@ -74,7 +74,7 @@ objects to generate new expectations.</p>
 </dd>
 </dl>
 <p>NOTE: it&#8217;s safe to call flexmock() on the same object, it will return the
-same FlexMock object each time.</p>
+same Mock object each time.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><ul class="first last simple">
@@ -84,19 +84,19 @@ same FlexMock object each time.</p>
 </dd>
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
-<li>FlexMock object, based on spec if one was provided.</li>
+<li>Mock object, based on spec if one was provided.</li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="class">
-<dt id="flexmock.FlexMock">
-<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">FlexMock</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock" title="Permalink to this definition">¶</a></dt>
+<dt id="flexmock.Mock">
+<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Mock</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fake object class returned by the flexmock() function.</p>
 <dl class="method">
-<dt id="flexmock.FlexMock.should_receive">
-<tt class="descname">should_receive</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_receive" title="Permalink to this definition">¶</a></dt>
+<dt id="flexmock.Mock.should_receive">
+<tt class="descname">should_receive</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.should_receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.should_receive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a method Expectation to the provided class or instance.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -113,8 +113,8 @@ same FlexMock object each time.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexmock.FlexMock.should_call">
-<tt class="descname">should_call</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.should_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.should_call" title="Permalink to this definition">¶</a></dt>
+<dt id="flexmock.Mock.should_call">
+<tt class="descname">should_call</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.should_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.should_call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a spy.</p>
 <p>This means that the original method will be called rather than the fake
 version. However, we can still keep track of how many times it&#8217;s called and
@@ -129,8 +129,8 @@ with what arguments, and apply expectations accordingly.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexmock.FlexMock.new_instances">
-<tt class="descname">new_instances</tt><big>(</big><em>*kargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#FlexMock.new_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.FlexMock.new_instances" title="Permalink to this definition">¶</a></dt>
+<dt id="flexmock.Mock.new_instances">
+<tt class="descname">new_instances</tt><big>(</big><em>*kargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.new_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.new_instances" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overrides __new__ method on the class to return custom objects.</p>
 <p>Alias for should_receive(&#8216;__new__&#8217;).and_return(kargs).one_by_one</p>
 <dl class="docutils">
@@ -380,13 +380,6 @@ by order of should_receive calls in the test.</p>
 <tt class="descname">mock</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.mock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the mock associated with this expectation.</p>
 <p>Since this method is a property it must be called without parentheses.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="flexmock.Expectation.and_execute">
-<tt class="descname">and_execute</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.and_execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.and_execute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a spy.</p>
-<p>DEPRECATED: will be removed in 0.7.5!</p>
 </dd></dl>
 
 </dd></dl>

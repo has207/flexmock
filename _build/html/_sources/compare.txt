@@ -1,16 +1,16 @@
 Mock Library Comparison
 =======================
 
-(Flexmock for Mox, Mock, python-mock, pMock, and Mocker users.)
+(Flexmock for Mox, Mock or Mocker users.)
 ---------------------------------------------------------------
 
 This document shows a side-by-side comparison of how to accomplish some
-basic tasks with Flexmock as well as other Python mocking libraries.
+basic tasks with Flexmock as well as other popular Python mocking libraries.
 
-This comparison is by no means complete, and there are a number of
-libraries out there that are not covered here. In addition it probably
-contains some amount of inaccuracies, so feel free to submit amendments
-or examples for additional libraries.
+A possibly more up-to-date version of this document, featuring more mocking
+libraries, is availale at:
+
+http://garybernhardt.github.com/python-mock-comparison/
 
 Simple fake object
 ~~~~~~~~~~~~~~~~~~
@@ -37,33 +37,6 @@ Simple fake object
     assertEquals("calculated value", my_mock.some_method())
     assertEquals("value", my_mock.some_attribute)
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    mymock = mock.Mock( {"some_method": "calculated value"})
-    mymock.some_attribute = "value"
-    assertEquals("calculated value", mymock.some_method())
-    assertEquals("value", mock.some_attribute)
-
-    # pMock
-    mock = pmock.Mock()
-    mock.some_attribute = "value"
-    mock.expects().some_method().will(pmock.return_value("calculated value"))
-    assertEquals("value", mock.some_method())
-    assertEquals("value", mock.some_attribute)
-
-    # Mocker
-    mock = mocker.mock()
-    mock.some_method()
-    mocker.result("calculated value")
-    mocker.replay()
-    mock.some_attribute = "value"
-    assertEquals("calculated value", mock.some_method())
-    assertEquals("value", mock.some_attribute)
 
 Simple mock
 ~~~~~~~~~~~
@@ -88,30 +61,6 @@ Simple mock
     assertEquals("value", mock.some_method())
     my_mock.some_method.assert_called_once_with()
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    mymock = mock.Mock( {"some_method" : "value"})
-    assertEquals("value", mymock.some_method())
-    mock.mockCheckCall(self, 0, "some_method")
-
-    # pMock
-    mock = pmock.Mock()
-    mock.expects(pmock.once()).some_method().will(pmock.return_value("value"))
-    assertEquals("value", mock.some_method())
-    mock.verify()
-
-    # Mocker
-    mock = mocker.mock()
-    mock.some_method()
-    mocker.result("value")
-    mocker.replay()
-    assertEquals("value", mock.some_method())
-    mocker.verify()
 
 Creating partial mocks
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -134,27 +83,6 @@ Creating partial mocks
       my_mock.some_method.return_value = "value"
       assertEquals("value", mock.some_method())
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    mock = mock.Mock({"some_method", "value"}, SomeObject)
-    assertEquals("value", mock.some_method())
-    mock.mockCheckCall(self, 0, "some_method")
-
-    # pMock
-    # Doesn't seem to have support for partial mocks
-
-    # Mocker
-    mock = mocker.mock(SomeObject)
-    mock.Get()
-    mocker.result("value")
-    mocker.replay()
-    assertEquals("value", mock.some_method())
-    mocker.verify()
 
 Ensure calls are made in specific order
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,33 +110,6 @@ Ensure calls are made in specific order
     # exercise the code
     assert mock.method_calls == [('method1',) ('method2',)]
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    # Doesn't seem to support call ordering
-
-    # pMock
-    mock = pmock.Mock()
-    mock.expects(pmock.once()).some_method().will(pmock.return_value("value"))
-    mock_db.expects(pmock.once()).method1().id("method1")
-    mock_db.expects(pmock.once()).method2().id("method2").after("method1")
-    # exercise the code
-    mock.verify()
-
-    # Mocker
-    mock = mocker.mock()
-    with mocker.order():
-      mock.method1()
-      mocker.result('first thing')
-      mock.method2()
-      mocker.result('second thing')
-      mocker.replay()
-      # exercise the code
-      mocker.verify()
 
 Raising exceptions
 ~~~~~~~~~~~~~~~~~~
@@ -232,31 +133,6 @@ Raising exceptions
     my_mock.some_method.side_effect = SomeException("message")
     assertRaises(SomeException, my_mock.some_method)
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    mock = mock.Mock()
-    mock.mockSetExpectation('some_method', expectException(SomeException))
-    assertRaises(SomeException, mock.some_method)
-    mock.mockCheckCall(self, 0, "some_method")
-
-    # pMock
-    mock = pmock.Mock()
-    mock.expects(pmock.once()).some_method().will(pmock.raise_exception(SomeException("message")))
-    assertRaises(SomeException, mock.some_method)
-    mock.verify()
-
-    # Mocker
-    mock = mocker.mock()
-    mock.some_method()
-    mocker.throw(SomeException("message"))
-    mocker.replay()
-    assertRaises(SomeException, mock.some_method)
-    mocker.verify()
 
 Override new instances of a class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -279,20 +155,6 @@ Override new instances of a class
       MockClass.return_value = some_other_object
       assert some_other_object == some_module.SomeClass()
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # python-mock
-    # (TODO)
-    
-    # pMock
-    # (TODO)
-    
-    # Mocker
-    # (TODO)
 
 Verify a method was called multiple times
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -317,20 +179,6 @@ Verify a method was called multiple times
     # exercise the code
     assert my_mock.some_method.call_count >= 2
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # Python Mock module
-    # (TODO)
-    
-    # pMock
-    # (TODO)
-    
-    # Mocker
-    # (TODO)
 
 Mock chained methods
 ~~~~~~~~~~~~~~~~~~~~
@@ -363,22 +211,57 @@ Mock chained methods
     method3.assert_called_once_with(arg1, arg2)
     assertEqual('some_value', my_mock.method1().method2().method3(arg1, arg2))
 
-    # Minimock
-    # (TODO) 
-
-    # Fudge
-    # (TODO)
-
-    # Python Mock module
-    # (TODO)
-
-    # pMock
-    # (TODO)
-
-    # Mocker
-    # (TODO)
 
 Mock context manager
 ~~~~~~~~~~~~~~~~~~~~
 
-(TODO)
+::
+
+    # Flexmock
+    my_mock = flexmock()
+    with my_mock:
+        pass
+
+    # Mock
+    my_mock = mock.MagicMock()
+    with my_mock:
+        pass
+
+    # Mox
+    my_mock = mox.MockAnything()
+    with my_mock:
+        pass
+
+
+Mocking the builtin open used as a context manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    # Flexmock
+    flexmock(__builtins__).should_receive('open').once.with_args('file_name').and_return(
+        flexmock(read=lambda: 'some data')
+    )                                                        
+    with open('file_name') as f:
+        assertEqual('some data', f.read())                    
+
+    # Mox
+    self_mox = mox.Mox()
+    mock_file = mox.MockAnything()
+    mock_file.read().AndReturn('some data')
+    self_mox.StubOutWithMock(__builtins__, 'open')           
+    __builtins__.open('file_name').AndReturn(mock_file)            
+    self_mox.ReplayAll()
+    with mock_file:
+        assertEqual('some data', mock_file.read())
+    self_mox.VerifyAll()
+
+    # Mock
+    with mock.patch('__builtin__.open') as my_mock:
+        my_mock.return_value.__enter__ = lambda s: s
+        my_mock.return_value.__exit__ = mock.Mock()
+        my_mock.return_value.read.return_value = 'some data'
+        with open('file_name') as h:
+            assertEqual('some data', h.read())
+    my_mock.assert_called_once_with('foo')
+

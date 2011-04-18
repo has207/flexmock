@@ -70,12 +70,16 @@ Example Usage
 Make a mock object
 ------------------
 
+Using the param shortcuts -- limited to specifying attribute/return value pairs
+
 ::
 
-  # using the param shortcuts -- limited to specifying attribute/return value pairs
   mock = flexmock(some_attribute="value", some_method=lambda: "another value")
 
-  # using the more verbose approach -- gives more flexibility when you need it
+Using the more verbose approach -- gives more flexibility when you need it
+
+::
+
   mock = flexmock()
   mock.should_receive("method2").with_args("foo", "bar").and_return("baz")
   mock.should_receive("method3").and_raise(Exception)
@@ -89,30 +93,43 @@ Partially mock or stub an existing object
 -----------------------------------------
 
 There are a few, basically equivalent, ways to hook into an existing
-object and overwrite its methods:
+object and overwrite its methods.
+
+Mark the object as partially mocked, allowing it to be used to create new expectations
 
 ::
 
-    # mark the object as partially mocked, allowing it to be used to create new expectations
     flexmock(some_object)
     some_object.should_receive('method1').and_return('some return value').once
     some_object.should_receive('method2').and_return('some other return value').once
 
-    # equivalent syntax assigns the object to a variable, possibly for brevity
+Equivalent syntax assigns the object to a variable
+
+::
+
     mock = flexmock(some_object)
     mock.should_receive('method1').and_return('some return value').once
     mock.should_receive('method2').and_return('some other return value').once
 
-    # or you can combine everything into one line if there is only one method to overwrite
+Or you can combine everything into one line if there is only one method to overwrite
+
+::
+
     flexmock(some_object).should_receive('method').and_return('some return value').once
 
-    # you can also return the mock object after setting the expectations
+You can also return the mock object after setting the expectations
+
+::
+
     mock = flexmock(some_object).should_receive('method').and_return('some_value').mock
 
-    # note the "mock" modifier above -- the expectation chain returns an expectation otherwise
+Note the "mock" modifier above -- the expectation chain returns an expectation otherwise
+
+::
+
     mock.should_receive('some_other_method').with_args().and_return('foo', 'bar')
 
-You can leave off with_args() to match any arguments, and leave off and_return() to return None.
+NOTE: You can leave off with_args() to match any arguments, and leave off and_return() to return None.
 
 Stub out a method for all instances of a class
 ----------------------------------------------
@@ -124,7 +141,7 @@ Stub out a method for all instances of a class
     >>> User.should_receive('method_foo').and_return('value_bar')
     >>> user = User()
     >>> user.method_foo()
-    'value_bar'``
+    'value_bar'
 
 Create automatically checked expectations
 -----------------------------------------
@@ -137,16 +154,28 @@ the test runner.
 
     mock = flexmock(some_object)
 
-    # ensure method_bar('a') gets called exactly three times
+Ensure method_bar('a') gets called exactly three times
+
+::
+
     mock.should_receive('method_bar').with_args('a').times(3)
 
-    # ensure method_bar('b') gets called at least twice
+Ensure method_bar('b') gets called at least twice
+
+::
+
     mock.should_receive('method_bar').with_args('b').at_least.twice
 
-    # ensure method_bar('c') gets called at most once
+Ensure method_bar('c') gets called at most once
+
+::
+
     mock.should_receive('method_bar').with_args('c').at_most.once
 
-    # ensure that method_bar('d') is never called
+Ensure that method_bar('d') is never called
+
+::
+
     mock.should_receive('method_bar').with_args('d').never
 
 Raise exceptions
@@ -156,8 +185,11 @@ Raise exceptions
 
     flexmock(some_object).should_receive('some_method').and_raise(YourException)
 
-    # or you can add a message to the exception being raised
-    flexmock(some_object).should_receive('some_method').and_raise(YourException('exception message'))
+Or you can add a message to the exception being raised
+
+::
+
+    flexmock(some_object).should_receive('some_method').and_raise(YourException, 'exception message')
 
 Add a spy (or proxy) to a method
 --------------------------------
@@ -167,34 +199,47 @@ Flexmock also allows you to call the original method and make
 expectations based on its return values/exceptions and the number of
 times the method is called with the given arguments.
 
+Matching specific arguments
+
 ::
 
-    # matching specific arguments
-    flexmock(some_object).should_receive('method_bar').with_args(arg1, arg2).at_least.once.and_execute
+    flexmock(some_object).should_call('method_bar').with_args(arg1, arg2).at_least.once
 
-    # matching any arguments
-    flexmock(some_object).should_receive('method_bar').twice.and_execute
+Matching any arguments
 
-    # or using the short-hand
-    flexmock(some_object).should_call('method_bar').once
+::
 
-    # matching specific return values
+    flexmock(some_object).should_call('method_bar').twice
+
+Matching specific return values
+
+::
+
     flexmock(some_object).should_call('method_bar').and_return('foo')
 
-    # or match return values by class/type
+Match return values by class/type
+
+::
+
     flexmock(some_object).should_call('method_bar').and_return(str, object, None)
 
-    # or ensuring that an appropriate exception is raised --
+Ensure that an appropriate exception is raised
+
+::
+
     flexmock(some_object).should_call('method_bar').and_raise(Exception)
 
-    # or even checking that the exception message matches your expectations --
-    flexmock(some_object).should_call('method_bar').and_raise(Exception("some error"))
+Check that the exception message matches your expectations
+
+::
+
+    flexmock(some_object).should_call('method_bar').and_raise(Exception, "some error")
 
 If either and_return() or and_raise() is provided, flexmock will
 verify that the return value matches the expected return value or
 exception.
 
-NOTE: should_call/and_execute changes the behavior of and_return()
+NOTE: should_call() changes the behavior of and_return()
 and and_raise() to specify expectations rather than generate given
 values or exceptions.
 
@@ -211,11 +256,17 @@ Return different values on successive method invocations
     >>> group.get_member()
     'user3'
 
-    # or use the short-hand form
-    >>> flexmock(group).should_receive('get_member').and_return('user1', 'user2', 'user3').one_by_one
+Or use the short-hand form
 
-    # you can also mix return values with exception raises
-    >>> flexmock(group).should_receive('get_member').and_return('user1').and_raise(Exception).and_return('user2')
+::
+
+    flexmock(group).should_receive('get_member').and_return('user1', 'user2', 'user3').one_by_one
+
+You can also mix return values with exception raises
+
+::
+
+    flexmock(group).should_receive('get_member').and_return('user1').and_raise(Exception).and_return('user2')
 
 Override "__new__" method on a class and return fake instances
 ------------------------------------------------------------------
@@ -264,7 +315,10 @@ Enforcing call order
     >>> flexmock(foo).should_receive('method_bar').with_args('bar').and_return('bar').ordered
     >>> flexmock(foo).should_receive('method_bar').with_args('foo').and_return('foo').ordered
 
-    # now calling the methods in the same order will be fine
+Now calling the methods in the same order will be fine
+
+::
+
     >>> foo.method_bar('bar')
     'bar'
     >>> foo.method_bar('foo')
@@ -329,7 +383,10 @@ arguments, including no arguments.
 
     >>> flexmock(foo).should_receive('method_bar').and_return('bar')
 
-    # will be matched by any of the following:
+Will be matched by any of the following:
+
+::
+
     >>> foo.method_bar()
     'bar'
     >>> foo.method_bar('foo')
@@ -340,17 +397,24 @@ arguments, including no arguments.
 In addition to exact values, you can also match against the type or
 class of the argument.
 
+Match any single argument
+
 ::
 
-    # match any single argument
     flexmock(foo).should_receive('method_bar').with_args(object)
 
-    # match any single string argument
+Match any single string argument
+
+::
+
     flexmock(foo).should_receive('method_bar').with_args(str)
 
-    # match any set of three arguments where the first one is an integer,
-    # second one is anything, and third is string 'foo'
-    # (matching against user defined classes is also supported in the same fashion)
+Match any set of three arguments where the first one is an integer,
+second one is anything, and third is string 'foo'
+(matching against user defined classes is also supported in the same fashion)
+
+::
+
     flexmock(foo).should_receive('method_bar').with_args(int, object, 'foo')
 
 You can also override the default match with another expectation for the
@@ -365,9 +429,12 @@ same method.
     >>> foo.method_bar('foo', 'bar')
     'bar'
 
-    # but!
+But!
+
+::
+
     >>> foo.method_bar('foo')
-    'foo'``
+    'foo'
 
 The order of the expectations being defined is significant, with later
 expectations having higher precedence than previous ones. Which means
