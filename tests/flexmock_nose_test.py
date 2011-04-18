@@ -1,5 +1,5 @@
 from flexmock import MethodNotCalled
-from flexmock import flexmock_nose as flexmock
+from flexmock import flexmock
 from flexmock import get_current_function
 from flexmock import flexmock_teardown
 from flexmock_test import assertRaises

@@ -1,5 +1,5 @@
 from flexmock import MethodNotCalled
-from flexmock import flexmock_pytest as flexmock
+from flexmock import flexmock
 from flexmock_test import assertRaises
 
 import flexmock_test
