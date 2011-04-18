@@ -45,6 +45,7 @@ html: clean
 	mv _modules modules
 	sed -i '' -e 's/\_static/static/'  {,modules/}*.html
 	sed -i '' -e 's/\_modules/modules/'  {,modules/}*.html
+	rm -f flexmock.pyc
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
