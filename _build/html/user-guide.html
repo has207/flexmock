@@ -125,10 +125,12 @@ other test runner integration and send me a patch.</p>
 <span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method3&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Flexmock mock objects support the full range of flexmock commands but
+<p>Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 assigns them new methods rather than acting on methods they already
 possess.</p>
+<p>If you do not specify the arguments then any set of arguments, including none, will be matched.
+If you do not provide a return value then None is returned by default.</p>
 </div>
 <div class="section" id="partially-mock-or-stub-an-existing-object">
 <h2>Partially mock or stub an existing object<a class="headerlink" href="#partially-mock-or-stub-an-existing-object" title="Permalink to this headline">¶</a></h2>
@@ -158,7 +160,6 @@ object and overwrite its methods.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_other_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>NOTE: You can leave off with_args() to match any arguments, and leave off and_return() to return None.</p>
 </div>
 <div class="section" id="stub-out-a-method-for-all-instances-of-a-class">
 <h2>Stub out a method for all instances of a class<a class="headerlink" href="#stub-out-a-method-for-all-instances-of-a-class" title="Permalink to this headline">¶</a></h2>
@@ -224,6 +225,10 @@ times the method is called with the given arguments.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Matching a regular expression</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^foo&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
 <p>Match return values by class/type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
 </pre></div>
@@ -234,6 +239,10 @@ times the method is called with the given arguments.</p>
 </div>
 <p>Check that the exception message matches your expectations</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="s">&quot;some error&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Check that the exception message matches a regular expression</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;some error&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>If either and_return() or and_raise() is provided, flexmock will
@@ -367,14 +376,21 @@ arguments, including no arguments.</p>
 <span class="go">&#39;bar&#39;</span>
 </pre></div>
 </div>
-<p>In addition to exact values, you can also match against the type or
-class of the argument.</p>
+<p>Match exactly no arguments</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span>
+</pre></div>
+</div>
 <p>Match any single argument</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>NOTE: In addition to exact values, you can match against the type or class of the argument.</p>
 <p>Match any single string argument</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Match the empty string using a compiled regular expression</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^$&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Match any set of three arguments where the first one is an integer,
