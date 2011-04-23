@@ -709,9 +709,12 @@ def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
     mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
-  FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
-  mock.update_teardown()
-  _attach_flexmock_methods(mock, flexmock_class, obj_or_class)
+  if not matches:
+    FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
+    mock.update_teardown()
+  if (_attach_flexmock_methods(mock, flexmock_class, obj_or_class) and
+    not inspect.isclass(mock._object)):
+    mock = mock._object
   return mock
 
 
@@ -721,7 +724,7 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
       if hasattr(obj, attr):
         if (_get_code(getattr(obj, attr)) is not
             _get_code(getattr(flexmock_class, attr))):
-          return
+          return False
     for attr in Mock.UPDATED_ATTRS:
       if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
         obj.__dict__[attr] = getattr(mock, attr)
@@ -729,6 +732,7 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
         setattr(obj, attr, getattr(mock, attr))
   except TypeError:
     raise AttemptingToMockBuiltin
+  return True
 
 
 def _get_code(func):
@@ -795,10 +799,12 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       for attr in Mock.UPDATED_ATTRS:
         if (hasattr(obj, '__dict__') and
             type(obj.__dict__) is dict and attr in obj.__dict__):
-          del obj.__dict__[attr]
+          if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+            del obj.__dict__[attr]
         elif hasattr(obj, attr):
           try:
-            delattr(obj, attr)
+            if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+              delattr(obj, attr)
           except AttributeError:
             pass
     for mock_object, expectations in saved.items():
@@ -817,7 +823,7 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
 
 
 class NoseMock(Mock):
-  def update_teardown(self, test_runner=None, teardown_method=None):
+  def update_teardown(self):
     frame = sys._getframe(2)
     this = frame.f_locals.get('self')
     if this:
@@ -832,7 +838,7 @@ class NoseMock(Mock):
 
 
 class PytestMock(Mock):
-  def update_teardown(self, test_runner=None, teardown_method=None):
+  def update_teardown(self):
     frame = sys._getframe(2)
     this = frame.f_locals.get('self')
     if this is None:
@@ -859,9 +865,10 @@ class PytestMock(Mock):
 
 
 class UnittestMock(Mock):
-  def update_teardown(self, test_runner=unittest.TestCase,
-      teardown_method='tearDown'):
-    Mock.update_teardown(self, test_runner, teardown_method)
+  def update_teardown(self):
+    frame = sys._getframe(5)
+    this = frame.f_locals.get('self')
+    Mock.update_teardown(self, this.__class__, 'tearDown')
 
 
 def flexmock(spec=None, **kwargs):

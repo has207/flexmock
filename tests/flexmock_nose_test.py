@@ -3,6 +3,7 @@ from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock_test import assertRaises
 from nose import with_setup
+import flexmock_test
 import unittest
 
 
@@ -24,9 +25,12 @@ def test_module_level_generator():
     yield mock.foo, i, i*3
 
 
-class TestRegularClass:
+class TestRegularClass(flexmock_test.RegularClass):
   def teardown(self):
     pass
+
+  def _tear_down(self):
+    return self.teardown()
 
   def test_regular(self):
     a = flexmock(a=2)
@@ -41,7 +45,7 @@ class TestRegularClass:
       yield mock.foo, i, i*3
 
 
-class TestUnittestClass(unittest.TestCase):
+class TestUnittestClass(flexmock_test.TestFlexmockUnittest):
   def tearDown(self):
     pass
 

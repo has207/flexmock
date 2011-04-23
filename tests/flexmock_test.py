@@ -425,6 +425,13 @@ class RegularClass(object):
     assert FlexmockContainer.get_flexmock_expectation(
         mock, 'method_foo', 'value_bar')
 
+  def test_flexmock_function_should_return_previously_mocked_object(self):
+    class User(object): pass
+    user = User()
+    foo = flexmock(user)
+    assert foo == user
+    assert foo == flexmock(user)
+
   def test_flexmock_should_not_return_class_object_if_mocking_instance(self):
     class User:
       def method(self): pass
@@ -1008,6 +1015,21 @@ class RegularClass(object):
     self._tear_down()
     assertEqual(foo.should_receive(), 'real')
 
+  def test_flexmock_should_not_add_class_methods_if_they_already_exist(self):
+    class Foo:
+      def should_receive(self):
+        return 'real'
+      def bar(self): pass
+    foo = Foo()
+    mock = flexmock(Foo)
+    assertEqual(foo.should_receive(), 'real')
+    assert 'should_call' not in dir(Foo)
+    assert 'new_instances' not in dir(Foo)
+    mock.should_receive('bar').and_return('baz')
+    assertEqual(foo.bar(), 'baz')
+    self._tear_down()
+    assertEqual(foo.should_receive(), 'real')
+
   def test_expectation_properties_work_with_parens(self):
     foo = flexmock().should_receive(
         'bar').at_least().once().and_return('baz').mock()
@@ -1063,8 +1085,12 @@ class RegularClass(object):
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
+  def tearDown(self):
+    pass
+
   def _tear_down(self):
-    return unittest.TestCase.tearDown(self)
+    return self.tearDown()
+
 
 if sys.version_info >= (2, 6):
   import flexmock_modern_test
