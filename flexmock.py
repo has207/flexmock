@@ -816,7 +816,55 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
     return teardown
 
 
-def flexmock_unittest(spec=None, **kwargs):
+class NoseMock(Mock):
+  def update_teardown(self, test_runner=None, teardown_method=None):
+    frame = sys._getframe(2)
+    this = frame.f_locals.get('self')
+    if this:
+      if unittest.TestCase in inspect.getmro(this.__class__):
+        Mock.update_teardown(self, this.__class__, 'tearDown')
+      else:
+        Mock.update_teardown(self, this.__class__, 'teardown')
+    else:
+      func_name = sys._getframe(2).f_code.co_name
+      this_func = sys._getframe(2).f_globals[func_name]
+      Mock.update_teardown(self, this_func, 'teardown')
+
+
+class PytestMock(Mock):
+  def update_teardown(self, test_runner=None, teardown_method=None):
+    frame = sys._getframe(2)
+    this = frame.f_locals.get('self')
+    if this is None:
+      is_method = False
+    else:
+      # the name ``self`` is in the local namespace. could be a method, but
+      # could also be a function. It's a method if its class name starts with
+      # ``Test``
+      if unittest.TestCase in inspect.getmro(this.__class__):
+        return Mock.update_teardown(self, this.__class__, 'tearDown')
+      class_name = this.__class__.__name__
+      is_method = class_name.startswith('Test')
+    if is_method:
+      # use the method teardown_method if the function is defined within a
+      # class, i.e. if it is a method
+      test_runner = this.__class__
+      teardown_method = 'teardown_method'
+    else:
+      # the function is not a method, so there is no class which belongs to it
+      # -> use the function teardown_function at module level
+      test_runner = __import__(frame.f_globals['__name__'])
+      teardown_method = 'teardown_function'
+    Mock.update_teardown(self, test_runner, teardown_method)
+
+
+class UnittestMock(Mock):
+  def update_teardown(self, test_runner=unittest.TestCase,
+      teardown_method='tearDown'):
+    Mock.update_teardown(self, test_runner, teardown_method)
+
+
+def flexmock(spec=None, **kwargs):
   """Main entry point into the flexmock API.
 
   This function is used to either generate a new fake object or take
@@ -842,54 +890,13 @@ def flexmock_unittest(spec=None, **kwargs):
   Returns:
     - Mock object, based on spec if one was provided.
   """
-  class UnittestMock(Mock):
-    def update_teardown(self, test_runner=unittest.TestCase,
-        teardown_method='tearDown'):
-      Mock.update_teardown(self, test_runner, teardown_method)
-  return generate_mock(UnittestMock, spec, **kwargs)
-
-
-def get_current_function():
-  func_name = sys._getframe().f_code.co_name
-  return sys._getframe().f_globals[func_name]
-
-
-def flexmock_nose(object_or_class=None, **kwargs):
-  class NoseMock(Mock):
-    def update_teardown(self, test_runner=None, teardown_method=None):
-      this_func = get_current_function()
-      if this_func:
-        Mock.update_teardown(self, this_func, 'teardown')
-      else:
-        Mock.update_teardown(self, unittest.TestCase, 'tearDown')
-  return generate_mock(NoseMock, object_or_class, **kwargs)
-
-
-def flexmock_pytest(object_or_class=None, **kwargs):
-  class PytestMock(Mock):
-    def update_teardown(self, test_runner=None, teardown_method=None):
-      frame = sys._getframe(2)
-      this = frame.f_locals.get('self')
-      if this is None:
-        is_method = False
-      else:
-        # the name ``self`` is in the local namespace. could be a method, but
-        # could also be a function. It's a method if its class name starts with
-        # ``Test``
-        class_name = this.__class__.__name__
-        is_method = class_name.startswith('Test')
-      if is_method:
-        # use the method teardown_method if the function is defined within a
-        # class, i.e. if it is a method
-        test_runner = this.__class__
-        teardown_method = 'teardown_method'
-      else:
-        # the function is not a method, so there is no class which belongs to it
-        # -> use the function teardown_function at module level
-        test_runner = __import__(frame.f_globals['__name__'])
-        teardown_method = 'teardown_function'
-      Mock.update_teardown(self, test_runner, teardown_method)
-  return generate_mock(PytestMock, object_or_class, **kwargs)
-
-
-flexmock = flexmock_unittest
+  klass = UnittestMock
+  pytest = [file for file in  [frame[1] for frame in inspect.stack()]
+            if file.replace('\\', '/').endswith('_pytest/runner.py')]
+  nose = [file for file in  [frame[1] for frame in inspect.stack()]
+          if file.replace('\\', '/').endswith('nose/core.py')]
+  if nose:
+    klass = NoseMock
+  elif pytest:
+    klass = PytestMock
+  return generate_mock(klass, spec, **kwargs)

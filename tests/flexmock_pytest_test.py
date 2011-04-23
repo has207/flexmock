@@ -1,12 +1,7 @@
 from flexmock import MethodNotCalled
-from flexmock import flexmock_pytest as flexmock
+from flexmock import flexmock
 from flexmock_test import assertRaises
-
-import flexmock_test
-
-
-class TestPytestUnittestClass(flexmock_test.TestFlexmockUnittest):
-  pass
+import unittest
 
 
 def test_module_level_test_for_pytest():
@@ -18,3 +13,13 @@ class TestForPytest:
   def test_class_level_test_for_pytest(self):
     flexmock(foo='bar').should_receive('foo').once
     assertRaises(MethodNotCalled, self.teardown_method)
+
+
+class TestUnittestClass(unittest.TestCase):
+  def tearDown(self):
+    pass
+
+  def test_unittest(self):
+    a = flexmock(a=2)
+    a.should_receive('a').once
+    assertRaises(MethodNotCalled, self.tearDown)

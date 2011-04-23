@@ -1,40 +1,19 @@
 from flexmock import MethodNotCalled
-from flexmock import flexmock_nose as flexmock
-from flexmock import get_current_function
+from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock_test import assertRaises
 from nose import with_setup
-
-import flexmock_test
-import sys
+import unittest
 
 
-class TestNoseUnittestClass(flexmock_test.TestFlexmockUnittest):
-  pass
-
-
-if sys.version_info >= (2, 6):
-  import flexmock_modern_test
-  class TestNoseModern(flexmock_modern_test.ModernClass):
-    pass
-
-  class TestNoseUnittestModern(flexmock_modern_test.TestFlexmockUnittestModern):
-    pass
-
-
-class TestNoseRegularClass(flexmock_test.RegularClass):
-  def _tear_down(self):
-    this_func = get_current_function()
-    return this_func.teardown()
+def test_module_level():
+  m = flexmock(mod=2)
+  m.should_receive('mod').once
+  assertRaises(MethodNotCalled, test_module_level.teardown)
 
 
 def empty_setup():
   pass
-
-
-def test_module_level_test_for_nose():
-  flexmock(foo='bar').should_receive('foo').once
-  assertRaises(MethodNotCalled, get_current_function().teardown)
 
 
 @with_setup(empty_setup, flexmock_teardown())
@@ -45,11 +24,14 @@ def test_module_level_generator():
     yield mock.foo, i, i*3
 
 
-class TestClassForNose:
-  def test_method_inside_class(self):
-    flexmock(foo='bar').should_receive('foo').once
-    this_func = get_current_function()
-    assertRaises(MethodNotCalled, this_func.teardown)
+class TestRegularClass:
+  def teardown(self):
+    pass
+
+  def test_regular(self):
+    a = flexmock(a=2)
+    a.should_receive('a').once
+    assertRaises(MethodNotCalled, self.teardown)
 
   @with_setup(empty_setup, flexmock_teardown())
   def test_class_level_generator_tests(self):
@@ -57,3 +39,14 @@ class TestClassForNose:
     mock.should_receive('bar').never  # change never to once to observe the failure
     for i in range(0, 3):
       yield mock.foo, i, i*3
+
+
+class TestUnittestClass(unittest.TestCase):
+  def tearDown(self):
+    pass
+
+  def test_unittest(self):
+    a = flexmock(a=2)
+    a.should_receive('a').once
+    assertRaises(MethodNotCalled, self.tearDown)
+
