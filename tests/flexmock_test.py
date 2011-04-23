@@ -95,9 +95,9 @@ class RegularClass(object):
   def test_flexmock_expectations_returns_named_expectation(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo')
-    assert ('method_foo' ==
-            FlexmockContainer.get_flexmock_expectation(
-                mock, 'method_foo').method)
+    assertEqual('method_foo',
+                FlexmockContainer.get_flexmock_expectation(
+                     mock, 'method_foo').method)
 
   def test_flexmock_expectations_returns_none_if_not_found(self):
     mock = flexmock(name='temp')
@@ -421,12 +421,6 @@ class RegularClass(object):
     mock.should_receive('method_foo').with_args('value_bar')
     assert FlexmockContainer.get_flexmock_expectation(
         mock, 'method_foo', 'value_bar')
-
-  def test_flexmock_function_should_return_previously_mocked_object(self):
-    class User(object): pass
-    user = User()
-    foo = flexmock(user)
-    assert foo._object == flexmock(user)
 
   def test_flexmock_should_not_return_class_object_if_mocking_instance(self):
     class User:
@@ -1050,6 +1044,19 @@ class RegularClass(object):
     flexmock(foo).should_receive('foo').with_args(
         re.compile('^arg1.*asdf$'), arg2=re.compile('a')).and_return('mocked')
     assertRaises(InvalidMethodSignature, foo.foo, 'arg1somejunkasdf', arg2='b')
+
+  def test_flexmock_class_returns_same_object_on_repeated_calls(self):
+    class Foo: pass
+    a = flexmock(Foo)
+    b = flexmock(Foo)
+    assertEqual(a, b)
+
+  def test_flexmock_object_returns_same_object_on_repeated_calls(self):
+    class Foo: pass
+    foo = Foo()
+    a = flexmock(foo)
+    b = flexmock(foo)
+    assertEqual(a, b)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

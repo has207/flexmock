@@ -696,21 +696,20 @@ def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
   if not obj_or_class:
     return flexmock_class(**kwargs)
 
-  # already mocked, return the mocked object
-  if Mock.UPDATED_ATTRS == _get_same_methods(flexmock_class, obj_or_class):
-    for method, return_value in kwargs.items():
-      obj_or_class.should_receive(method).and_return(return_value)
-    return obj_or_class
-
   return _create_partial_mock(flexmock_class, obj_or_class, **kwargs)
 
 
 def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
-  mock = flexmock_class()
-  mock._object = obj_or_class
+  matches = [x for x in FlexmockContainer.flexmock_objects
+             if x._object is obj_or_class]
+  if matches:
+    mock = matches[0]
+  else:
+    mock = flexmock_class()
+    mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
-  FlexmockContainer.add_expectation(obj_or_class, Expectation(obj_or_class))
+  FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
   mock.update_teardown()
   _attach_flexmock_methods(mock, flexmock_class, obj_or_class)
   return mock
@@ -730,16 +729,6 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
         setattr(obj, attr, getattr(mock, attr))
   except TypeError:
     raise AttemptingToMockBuiltin
-
-
-def _get_same_methods(flexmock_class, obj):
-  same_methods = []
-  for attr in Mock.UPDATED_ATTRS:
-    if hasattr(obj, '__dict__') and attr in obj.__dict__:
-      if (_get_code(getattr(flexmock_class, attr)) is
-          _get_code(obj.__dict__[attr])):
-        same_methods.append(attr)
-  return same_methods
 
 
 def _get_code(func):
@@ -799,9 +788,9 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       saved[mock_object] = expectations[:]
       for expectation in expectations:
         expectation.reset()
-    instances = [x for x in saved.keys()
-                 if not isinstance(x, Mock) and not inspect.isclass(x)]
-    classes = [x for x in saved.keys() if inspect.isclass(x)]
+    instances = [x._object for x in saved.keys()
+                 if not isinstance(x._object, Mock) and not inspect.isclass(x)]
+    classes = [x._object for x in saved.keys() if inspect.isclass(x._object)]
     for obj in set(instances + classes):
       for attr in Mock.UPDATED_ATTRS:
         if (hasattr(obj, '__dict__') and
