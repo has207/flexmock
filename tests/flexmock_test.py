@@ -476,6 +476,7 @@ class RegularClass(object):
     group = Group()
     flexmock(Group)
     assert 'should_receive' in Group.__dict__
+    assert 'should_receive' not in group.__dict__
     flexmock(group)
     assert 'should_receive' in group.__dict__
     self._tear_down()
