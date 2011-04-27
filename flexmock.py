@@ -866,9 +866,8 @@ class PytestMock(Mock):
 
 class UnittestMock(Mock):
   def update_teardown(self):
-    frame = sys._getframe(5)
-    this = frame.f_locals.get('self')
-    Mock.update_teardown(self, this.__class__, 'tearDown')
+    pass
+    #Mock.update_teardown(self, unittest.TestCase, 'tearDown')
 
 
 def flexmock(spec=None, **kwargs):
@@ -898,12 +897,57 @@ def flexmock(spec=None, **kwargs):
     - Mock object, based on spec if one was provided.
   """
   klass = UnittestMock
-  pytest = [file for file in  [frame[1] for frame in inspect.stack()]
-            if file.replace('\\', '/').endswith('_pytest/runner.py')]
-  nose = [file for file in  [frame[1] for frame in inspect.stack()]
-          if file.replace('\\', '/').endswith('nose/core.py')]
-  if nose:
-    klass = NoseMock
-  elif pytest:
-    klass = PytestMock
+  #pytest = [file for file in  [frame[1] for frame in inspect.stack()]
+  #          if file.replace('\\', '/').endswith('_pytest/runner.py')]
+  #nose = [file for file in  [frame[1] for frame in inspect.stack()]
+  #        if file.replace('\\', '/').endswith('nose/core.py')]
+  #if nose:
+  #  klass = NoseMock
+  #elif pytest:
+  #  klass = PytestMock
   return generate_mock(klass, spec, **kwargs)
+
+
+def flexmock_cleanup(verify=True):
+    saved = {}
+    for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
+      saved[mock_object] = expectations[:]
+      for expectation in expectations:
+        expectation.reset()
+    instances = [x._object for x in saved.keys()
+                 if not isinstance(x._object, Mock) and not inspect.isclass(x)]
+    classes = [x._object for x in saved.keys() if inspect.isclass(x._object)]
+    for obj in set(instances + classes):
+      for attr in Mock.UPDATED_ATTRS:
+        if (hasattr(obj, '__dict__') and
+            type(obj.__dict__) is dict and attr in obj.__dict__):
+          if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+            del obj.__dict__[attr]
+        elif hasattr(obj, attr):
+          try:
+            if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+              delattr(obj, attr)
+          except AttributeError:
+            pass
+    for mock_object, expectations in saved.items():
+      del FlexmockContainer.flexmock_objects[mock_object]
+    if verify:
+      for mock_object, expectations in saved.items():
+        for expectation in expectations:
+          expectation.verify()
+
+# hook into unittest
+run = unittest.TestCase.run
+def unittest_run(self, response=None):
+  errors = []
+  failures = []
+  if response:
+    errors = len(response.errors)
+    failures = len(response.failures)
+  run(self, response)
+  verify = True
+  if len(response.errors) > errors or len(response.failures) > failures:
+    verify = False
+  flexmock_cleanup(verify)
+    
+unittest.TestCase.run = unittest_run

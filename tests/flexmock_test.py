@@ -1,4 +1,5 @@
 #-*- coding: utf8 -*-
+from flexmock import flexmock_cleanup
 from flexmock import Mock
 from flexmock import AlreadyMocked
 from flexmock import AttemptingToMockBuiltin
@@ -1088,9 +1089,12 @@ class RegularClass(object):
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
     pass
+    #flexmock_cleanup()
+    #unittest.TestCase.tearDown(self)
 
   def _tear_down(self):
-    return self.tearDown()
+    #return self.tearDown()
+    flexmock_cleanup()
 
 
 if sys.version_info >= (2, 6):
