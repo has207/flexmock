@@ -736,9 +736,9 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
 
 
 def _get_code(func):
-  if 'func_code' in dir(func):
+  if hasattr(func, 'func_code'):
     code = 'func_code'
-  elif 'im_func' in dir(func):
+  elif hasattr(func, 'im_func'):
     func = func.im_func
     code = 'func_code'
   else:
