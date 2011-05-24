@@ -54,7 +54,7 @@ class RegularClass(object):
 
   def test_flexmock_should_create_mock_object_from_dict(self):
     mock = flexmock(foo='foo', bar='bar')
-    assertEqual('foo',  mock.foo)
+    assertEqual('foo', mock.foo)
     assertEqual('bar', mock.bar)
 
   def test_flexmock_should_add_expectations(self):
@@ -73,7 +73,7 @@ class RegularClass(object):
   def test_flexmock_should_accept_shortcuts_for_creating_mock_object(self):
     mock = flexmock(attr1='value 1', attr2=lambda: 'returning 2')
     assertEqual('value 1', mock.attr1)
-    assertEqual('returning 2',  mock.attr2())
+    assertEqual('returning 2', mock.attr2())
 
   def test_flexmock_should_accept_shortcuts_for_creating_expectations(self):
     class Foo:
@@ -313,8 +313,8 @@ class RegularClass(object):
     group = User()
     saved1 = user.get_name
     saved2 = group.get_name
-    flexmock(user).should_receive('get_name').and_return('john').once
-    flexmock(group).should_receive('get_name').and_return('john').once
+    flexmock(user).should_receive('get_name').and_return('john').once()
+    flexmock(group).should_receive('get_name').and_return('john').once()
     assert saved1 != user.get_name
     assert saved2 != group.get_name
     assertEqual('john', user.get_name())
@@ -344,7 +344,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_least_when_called_less_than_requested(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('bar').at_least.twice
+    mock.should_receive('method_foo').and_return('bar').at_least().twice()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_LEAST, expectation.modifier)
     mock.method_foo()
@@ -352,7 +352,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_least_when_called_requested_number(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').at_least.once
+    mock.should_receive('method_foo').and_return('value_bar').at_least().once()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_LEAST, expectation.modifier)
     mock.method_foo()
@@ -360,7 +360,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_least_when_called_more_than_requested(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').at_least.once
+    mock.should_receive('method_foo').and_return('value_bar').at_least().once()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_LEAST, expectation.modifier)
     mock.method_foo()
@@ -369,7 +369,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_most_when_called_less_than_requested(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('bar').at_most.twice
+    mock.should_receive('method_foo').and_return('bar').at_most().twice()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_MOST, expectation.modifier)
     mock.method_foo()
@@ -377,7 +377,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_most_when_called_requested_number(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').at_most.once
+    mock.should_receive('method_foo').and_return('value_bar').at_most().once()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_MOST, expectation.modifier)
     mock.method_foo()
@@ -385,7 +385,7 @@ class RegularClass(object):
 
   def test_flexmock_respects_at_most_when_called_more_than_requested(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').at_most.once
+    mock.should_receive('method_foo').and_return('value_bar').at_most().once()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(Expectation.AT_MOST, expectation.modifier)
     mock.method_foo()
@@ -394,31 +394,31 @@ class RegularClass(object):
 
   def test_flexmock_treats_once_as_times_one(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').once
+    mock.should_receive('method_foo').and_return('value_bar').once()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(1, expectation.expected_calls)
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_treats_twice_as_times_two(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').twice.and_return('value_bar')
+    mock.should_receive('method_foo').twice().and_return('value_bar')
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(2, expectation.expected_calls)
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_works_with_never_when_true(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').never
+    mock.should_receive('method_foo').and_return('value_bar').never()
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
     assertEqual(0, expectation.expected_calls)
     self._tear_down()
 
   def test_flexmock_works_with_never_when_false(self):
     mock = flexmock(name='temp')
-    mock.should_receive('method_foo').and_return('value_bar').never
+    mock.should_receive('method_foo').and_return('value_bar').never()
     mock.method_foo()
     assertRaises(MethodNotCalled, self._tear_down)
-  
+
   def test_flexmock_get_flexmock_expectation_should_work_with_args(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').with_args('value_bar')
@@ -491,8 +491,8 @@ class RegularClass(object):
       def method1(self): pass
     flexmock(Group)
     flexmock(User)
-    Group.should_receive('method1').once
-    User.should_receive('method2').once
+    Group.should_receive('method1').once()
+    User.should_receive('method2').once()
     assertRaises(MethodNotCalled, self._tear_down)
     for method in Mock.UPDATED_ATTRS:
       assert method not in dir(Group)
@@ -506,10 +506,10 @@ class RegularClass(object):
       def method2(self, arg):
         return arg
     group = Group()
-    flexmock(group).should_call('method1').twice
+    flexmock(group).should_call('method1').twice()
     assertEqual('a:c', group.method1('a', arg2='c'))
     assertEqual('a:b', group.method1('a'))
-    group.should_call('method2').once.with_args('c')
+    group.should_call('method2').once().with_args('c')
     assertEqual('c', group.method2('c'))
     self._tear_down()
 
@@ -519,10 +519,10 @@ class RegularClass(object):
         return '%s:%s' % (arg1, arg2)
       def method2(self): pass
     group = Group()
-    flexmock(group).should_call('method1').at_least.once
+    flexmock(group).should_call('method1').at_least().once()
     assertRaises(MethodNotCalled, self._tear_down)
     flexmock(group)
-    group.should_call('method2').with_args('a').once
+    group.should_call('method2').with_args('a').once()
     group.should_receive('method2').with_args('not a')
     group.method2('not a')
     assertRaises(MethodNotCalled, self._tear_down)
@@ -534,9 +534,9 @@ class RegularClass(object):
       def bar(self): pass
       def baz(self): pass
     flexmock(Foo).should_receive('foo')
-    flexmock(Foo).should_receive('method1').with_args('a').ordered
+    flexmock(Foo).should_receive('method1').with_args('a').ordered()
     flexmock(Foo).should_receive('bar')
-    flexmock(Foo).should_receive('method1').with_args('b').ordered
+    flexmock(Foo).should_receive('method1').with_args('b').ordered()
     flexmock(Foo).should_receive('baz')
     Foo.bar()
     Foo.method1('a')
@@ -552,9 +552,9 @@ class RegularClass(object):
       def baz(self): pass
     flexmock(Foo)
     Foo.should_receive('foo')
-    Foo.should_receive('method1').with_args('a').ordered
+    Foo.should_receive('method1').with_args('a').ordered()
     Foo.should_receive('bar')
-    Foo.should_receive('method1').with_args('b').ordered
+    Foo.should_receive('method1').with_args('b').ordered()
     Foo.should_receive('baz')
     Foo.bar()
     Foo.bar()
@@ -575,7 +575,7 @@ class RegularClass(object):
     class Foo:
       def method1(self): pass
     foo = Foo()
-    flexmock(foo).should_receive('method1').and_return(1, 2).one_by_one
+    flexmock(foo).should_receive('method1').and_return(1, 2).one_by_one()
     assertEqual(1, foo.method1())
     assertEqual(2, foo.method1())
     assertEqual(1, foo.method1())
@@ -630,7 +630,7 @@ class RegularClass(object):
     class Foo:
       def method1(self): pass
     foo = Foo()
-    flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice
+    flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice()
     foo.method1(1, arg2=2, arg3=3)
     foo.method1(1, arg3=3, arg2=2)
     self._tear_down()
@@ -644,7 +644,7 @@ class RegularClass(object):
       def method1(self, arg1, arg2=None, arg3=None):
         return '%s%s%s' % (arg1, arg2, arg3)
     foo = Foo()
-    flexmock(foo).should_call('method1').with_args(1, arg3=3, arg2=2).once
+    flexmock(foo).should_call('method1').with_args(1, arg3=3, arg2=2).once()
     assertEqual('123', foo.method1(1, arg2=2, arg3=3))
 
   def test_flexmock_should_mock_private_methods(self):
@@ -791,7 +791,7 @@ class RegularClass(object):
     else:
       mod = sys.modules['__main__']
     flexmock(mod).should_receive('module_level_function')
-    assertEqual(None,  module_level_function(1, 2))
+    assertEqual(None, module_level_function(1, 2))
     self._tear_down()
     assertEqual('1, 2', module_level_function(1, 2))
 
@@ -832,7 +832,7 @@ class RegularClass(object):
       def get_stuff(self):
         return 'yay'
     foo = Foo()
-    flexmock(foo).should_call('get_stuff').and_return('yay').once
+    flexmock(foo).should_call('get_stuff').and_return('yay').once()
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_should_fail_mocking_nonexistent_methods(self):
@@ -874,14 +874,14 @@ class RegularClass(object):
     obj.should_call('method')
     obj.method()
     assertEqual(obj.n, 1)
-  
+
   def test_should_call_works_for_same_method_with_different_args(self):
     class Foo:
       def method(self, arg):
         pass
     foo = Foo()
-    flexmock(foo).should_call('method').with_args('foo').once
-    flexmock(foo).should_call('method').with_args('bar').once
+    flexmock(foo).should_call('method').with_args('foo').once()
+    flexmock(foo).should_call('method').with_args('bar').once()
     foo.method('foo')
     foo.method('bar')
     self._tear_down()
@@ -891,8 +891,8 @@ class RegularClass(object):
       def method(self, arg):
         pass
     foo = Foo()
-    flexmock(foo).should_call('method').with_args('foo').once
-    flexmock(foo).should_call('method').with_args('bar').once
+    flexmock(foo).should_call('method').with_args('foo').once()
+    flexmock(foo).should_call('method').with_args('bar').once()
     foo.method('foo')
     assertRaises(MethodNotCalled, self._tear_down)
 
@@ -921,11 +921,11 @@ class RegularClass(object):
     foo = Bar()
     assertEqual('foo', foo.method1().method2('foo'))
     flexmock(foo).should_receive('method1.method2').with_args(
-        'foo').and_return('bar').once
+        'foo').and_return('bar').once()
     assertEqual('bar', foo.method1().method2('foo'))
     self._tear_down()
     flexmock(foo).should_receive('method1.method2').with_args(
-        'foo').and_return('bar').once
+        'foo').and_return('bar').once()
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_mock_chained_method_calls_works_with_more_than_one_level(self):
@@ -1033,7 +1033,7 @@ class RegularClass(object):
 
   def test_expectation_properties_work_with_parens(self):
     foo = flexmock().should_receive(
-        'bar').at_least().once().and_return('baz').mock()
+        'bar').at_least()().once()().and_return('baz').mock()
     assertEqual('baz', foo.bar())
 
   def test_mocking_down_the_inheritance_chain_class_to_class(self):

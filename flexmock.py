@@ -227,7 +227,6 @@ class Expectation(object):
     self.expected_calls = number
     return self
 
-  @property
   def one_by_one(self):
     """Modifies the return value to be treated as a list of return values.
 
@@ -250,7 +249,6 @@ class Expectation(object):
           self.return_values.append(value)
     return self
 
-  @property
   def once(self):
     """Alias for times(1).
 
@@ -261,7 +259,6 @@ class Expectation(object):
     """
     return self.times(1)
 
-  @property
   def twice(self):
     """Alias for times(2).
 
@@ -272,7 +269,6 @@ class Expectation(object):
     """
     return self.times(2)
 
-  @property
   def never(self):
     """Alias for times(0).
 
@@ -283,7 +279,6 @@ class Expectation(object):
     """
     return self.times(0)
 
-  @property
   def at_least(self):
     """Modifies the associated times() expectation.
 
@@ -298,7 +293,6 @@ class Expectation(object):
     self.modifier = self.AT_LEAST
     return self
 
-  @property
   def at_most(self):
     """Modifies the associated "times" expectation.
 
@@ -313,7 +307,6 @@ class Expectation(object):
     self.modifier = self.AT_MOST
     return self
 
-  @property
   def and_execute(self):
     """Creates a spy.
 
@@ -331,7 +324,6 @@ class Expectation(object):
     self._pass_thru = True
     return self
 
-  @property
   def ordered(self):
     """Makes the expectation respect the order of should_receive statements.
 
@@ -509,7 +501,7 @@ class Mock(object):
   def new_instances(self, *kargs):
     """Overrides __new__ method on the class to return custom objects.
 
-    Alias for should_receive('__new__').and_return(kargs).one_by_one
+    Alias for should_receive('__new__').and_return(kargs).one_by_one()
 
     Args:
       - kargs: objects to return on each successive call to __new__
@@ -518,7 +510,7 @@ class Mock(object):
       - Expectation object
     """
     if inspect.isclass(self._object):
-      return self.should_receive('__new__').and_return(kargs).one_by_one
+      return self.should_receive('__new__').and_return(kargs).one_by_one()
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
