@@ -1,4 +1,4 @@
-#-*- coding: utf8 -*-
+# -*- coding: utf8 -*-
 from flexmock import Mock
 from flexmock import AlreadyMocked
 from flexmock import AttemptingToMockBuiltin
