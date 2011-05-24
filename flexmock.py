@@ -684,28 +684,35 @@ def _format_args(method, arguments):
   return '%s(%s)' % (method, args)
 
 
-def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
+def generate_mock(flexmock_class, obj_or_class=None, context=None, **kwargs):
   """Factory function for creating Mock objects.
 
   Args:
     - flexmock_class: class inheriting from Mock, used to differentiate
                     different test runners
     - object_or_class: object or class to mock
+    - context: The caller's frame
     - kwargs: dict of attribute/value pairs used to initialize the mock object
   """
   if not obj_or_class:
-    return flexmock_class(**kwargs)
+    if context is None:
+      return flexmock_class(**kwargs)
+    else:
+      return flexmock_class(context, **kwargs)
 
-  return _create_partial_mock(flexmock_class, obj_or_class, **kwargs)
+  return _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs)
 
 
-def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
+def _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs):
   matches = [x for x in FlexmockContainer.flexmock_objects
              if x._object is obj_or_class]
   if matches:
     mock = matches[0]
   else:
-    mock = flexmock_class()
+    if context is None:
+      mock = flexmock_class()
+    else:
+      mock = flexmock_class(context)
     mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
@@ -823,17 +830,20 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
 
 
 class NoseMock(Mock):
+  def __init__(self, context, **kwargs):
+    super(NoseMock, self).__init__(**kwargs)
+    self._context = context
+
   def update_teardown(self):
-    frame = sys._getframe(2)
-    this = frame.f_locals.get('self')
+    this = self._context.f_locals.get('self')
     if this:
       if unittest.TestCase in inspect.getmro(this.__class__):
         Mock.update_teardown(self, this.__class__, 'tearDown')
       else:
         Mock.update_teardown(self, this.__class__, 'teardown')
     else:
-      func_name = sys._getframe(2).f_code.co_name
-      this_func = sys._getframe(2).f_globals[func_name]
+      func_name = self._context.f_code.co_name
+      this_func = self._context.f_globals[func_name]
       Mock.update_teardown(self, this_func, 'teardown')
 
 
@@ -902,8 +912,10 @@ def flexmock(spec=None, **kwargs):
             if file.replace('\\', '/').endswith('_pytest/runner.py')]
   nose = [file for file in  [frame[1] for frame in inspect.stack()]
           if file.replace('\\', '/').endswith('nose/core.py')]
+  context = None
   if nose:
     klass = NoseMock
+    context = sys._getframe(1)
   elif pytest:
     klass = PytestMock
-  return generate_mock(klass, spec, **kwargs)
+  return generate_mock(klass, spec, context, **kwargs)
