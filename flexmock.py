@@ -227,7 +227,6 @@ class Expectation(object):
     self.expected_calls = number
     return self
 
-  @property
   def one_by_one(self):
     """Modifies the return value to be treated as a list of return values.
 
@@ -250,7 +249,6 @@ class Expectation(object):
           self.return_values.append(value)
     return self
 
-  @property
   def once(self):
     """Alias for times(1).
 
@@ -261,7 +259,6 @@ class Expectation(object):
     """
     return self.times(1)
 
-  @property
   def twice(self):
     """Alias for times(2).
 
@@ -272,7 +269,6 @@ class Expectation(object):
     """
     return self.times(2)
 
-  @property
   def never(self):
     """Alias for times(0).
 
@@ -283,7 +279,6 @@ class Expectation(object):
     """
     return self.times(0)
 
-  @property
   def at_least(self):
     """Modifies the associated times() expectation.
 
@@ -298,7 +293,6 @@ class Expectation(object):
     self.modifier = self.AT_LEAST
     return self
 
-  @property
   def at_most(self):
     """Modifies the associated "times" expectation.
 
@@ -313,7 +307,6 @@ class Expectation(object):
     self.modifier = self.AT_MOST
     return self
 
-  @property
   def and_execute(self):
     """Creates a spy.
 
@@ -331,7 +324,6 @@ class Expectation(object):
     self._pass_thru = True
     return self
 
-  @property
   def ordered(self):
     """Makes the expectation respect the order of should_receive statements.
 
@@ -509,7 +501,7 @@ class Mock(object):
   def new_instances(self, *kargs):
     """Overrides __new__ method on the class to return custom objects.
 
-    Alias for should_receive('__new__').and_return(kargs).one_by_one
+    Alias for should_receive('__new__').and_return(kargs).one_by_one()
 
     Args:
       - kargs: objects to return on each successive call to __new__
@@ -518,7 +510,7 @@ class Mock(object):
       - Expectation object
     """
     if inspect.isclass(self._object):
-      return self.should_receive('__new__').and_return(kargs).one_by_one
+      return self.should_receive('__new__').and_return(kargs).one_by_one()
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
@@ -684,28 +676,35 @@ def _format_args(method, arguments):
   return '%s(%s)' % (method, args)
 
 
-def generate_mock(flexmock_class, obj_or_class=None, **kwargs):
+def generate_mock(flexmock_class, obj_or_class=None, context=None, **kwargs):
   """Factory function for creating Mock objects.
 
   Args:
     - flexmock_class: class inheriting from Mock, used to differentiate
                     different test runners
     - object_or_class: object or class to mock
+    - context: The caller's frame
     - kwargs: dict of attribute/value pairs used to initialize the mock object
   """
   if not obj_or_class:
-    return flexmock_class(**kwargs)
+    if context is None:
+      return flexmock_class(**kwargs)
+    else:
+      return flexmock_class(context, **kwargs)
 
-  return _create_partial_mock(flexmock_class, obj_or_class, **kwargs)
+  return _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs)
 
 
-def _create_partial_mock(flexmock_class, obj_or_class, **kwargs):
+def _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs):
   matches = [x for x in FlexmockContainer.flexmock_objects
              if x._object is obj_or_class]
   if matches:
     mock = matches[0]
   else:
-    mock = flexmock_class()
+    if context is None:
+      mock = flexmock_class()
+    else:
+      mock = flexmock_class(context)
     mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
@@ -823,17 +822,20 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
 
 
 class NoseMock(Mock):
+  def __init__(self, context, **kwargs):
+    super(NoseMock, self).__init__(**kwargs)
+    self._context = context
+
   def update_teardown(self):
-    frame = sys._getframe(2)
-    this = frame.f_locals.get('self')
+    this = self._context.f_locals.get('self')
     if this:
       if unittest.TestCase in inspect.getmro(this.__class__):
         Mock.update_teardown(self, this.__class__, 'tearDown')
       else:
         Mock.update_teardown(self, this.__class__, 'teardown')
     else:
-      func_name = sys._getframe(2).f_code.co_name
-      this_func = sys._getframe(2).f_globals[func_name]
+      func_name = self._context.f_code.co_name
+      this_func = self._context.f_globals[func_name]
       Mock.update_teardown(self, this_func, 'teardown')
 
 
@@ -902,8 +904,10 @@ def flexmock(spec=None, **kwargs):
             if file.replace('\\', '/').endswith('_pytest/runner.py')]
   nose = [file for file in  [frame[1] for frame in inspect.stack()]
           if file.replace('\\', '/').endswith('nose/core.py')]
+  context = None
   if nose:
     klass = NoseMock
+    context = sys._getframe(1)
   elif pytest:
     klass = PytestMock
-  return generate_mock(klass, spec, **kwargs)
+  return generate_mock(klass, spec, context, **kwargs)

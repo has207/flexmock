@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PYTHON_VERSIONS=${PYTHON_VERSIONS:-"2.4 2.5 2.6 2.7 3.1 3.2"}
 RUNNERS=${RUNNERS:-"unittest nose pytest"}
