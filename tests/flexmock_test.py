@@ -179,10 +179,17 @@ class RegularClass(object):
     assertEqual('bar', mock.method_foo('foo', 'bar'))
     assertEqual('baz', mock.method_foo('baz'))
 
-  def test_flexmock_should_match_exactly_no_args_when_calling_with_args_without_args(self):
+  def test_flexmock_should_fail_to_match_exactly_no_args_when_calling_with_args(self):
     mock = flexmock()
     mock.should_receive('method_foo').with_args()
     assertRaises(InvalidMethodSignature, mock.method_foo, 'baz')
+
+  def test_flexmock_should_match_exactly_no_args(self):
+    class Foo:
+      def bar(self): pass
+    foo = Foo()
+    flexmock(foo).should_receive('bar').with_args().and_return('baz')
+    assertEqual('baz', foo.bar())
 
   def test_expectation_dot_mock_should_return_mock(self):
     mock = flexmock(name='temp')
