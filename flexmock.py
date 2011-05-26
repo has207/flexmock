@@ -754,8 +754,7 @@ def _get_code(func):
 
 
 def _match_args(given_args, expected_args):
-  if (given_args == expected_args or expected_args is None or
-      expected_args == {'kargs': (), 'kwargs': {}}):
+  if (given_args == expected_args or expected_args is None):
     return True
   if (len(given_args['kargs']) != len(expected_args['kargs']) or
       len(given_args['kwargs']) != len(expected_args['kwargs']) or
