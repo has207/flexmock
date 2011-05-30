@@ -866,8 +866,34 @@ class PytestMock(Mock):
 
 class UnittestMock(Mock):
   def update_teardown(self):
-    pass
-    #Mock.update_teardown(self, unittest.TestCase, 'tearDown')
+    try:
+      import unittest
+      try:
+        from unittest import TextTestResult as TestResult
+      except ImportError:
+        from unittest import _TextTestResult as TestResult
+    except ImportError:
+      return
+
+    saved_stopTest = TestResult.stopTest
+    saved_addSuccess = TestResult.addSuccess
+    def stopTest(self, test):
+      success = True
+      try:
+        flexmock_teardown()()
+      except Exception:
+        self.addError(test, sys.exc_info())
+        success = False
+      if success and hasattr(self, '_pre_flexmock_success'):
+        saved_addSuccess(self, test)
+      return saved_stopTest(self, test)
+
+    TestResult.stopTest = stopTest
+
+    def addSuccess(self, test):
+      self._pre_flexmock_success = True
+
+    TestResult.addSuccess = addSuccess
 
 
 def flexmock(spec=None, **kwargs):

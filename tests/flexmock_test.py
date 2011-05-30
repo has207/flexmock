@@ -14,6 +14,7 @@ from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
 from flexmock import ReturnValue
 from flexmock import flexmock
+from flexmock import flexmock_teardown
 from flexmock import _format_args
 import re
 import sys
@@ -1089,12 +1090,9 @@ class RegularClass(object):
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
     pass
-    #flexmock_cleanup()
-    #unittest.TestCase.tearDown(self)
 
   def _tear_down(self):
-    #return self.tearDown()
-    flexmock_cleanup()
+    return flexmock_teardown()()
 
 
 if sys.version_info >= (2, 6):
