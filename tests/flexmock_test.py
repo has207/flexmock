@@ -1096,6 +1096,13 @@ class RegularClass(object):
     b = flexmock(foo)
     assertEqual(a, b)
 
+  def test_flexmock_ordered_worked_after_default_stub(self):
+    foo = flexmock()
+    foo.should_receive('bar')
+    foo.should_receive('bar').with_args('a').ordered
+    foo.should_receive('bar').with_args('b').ordered
+    assertRaises(MethodCalledOutOfOrder, foo.bar, 'b')
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):

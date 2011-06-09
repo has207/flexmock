@@ -115,7 +115,9 @@ class FlexmockContainer(object):
             '%s called before %s' %
             (_format_args(e.method, e.args),
              _format_args(exp.method, exp.args)))
-      if exp.method == name and _match_args(args, exp.args):
+      if (exp.method == name and
+          args and exp.args and  # ignore default stub case
+          _match_args(args, exp.args)):
         break
 
   @classmethod
