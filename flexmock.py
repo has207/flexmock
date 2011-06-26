@@ -786,9 +786,9 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       saved_teardown(*kargs, **kwargs)
 
   if saved_teardown and _get_code(saved_teardown) is _get_code(teardown):
-    return saved_teardown
+    return saved_teardown()
   else:
-    return teardown
+    return teardown()
 
 
 def flexmock(spec=None, **kwargs):
@@ -823,31 +823,43 @@ def flexmock(spec=None, **kwargs):
     return Mock(**kwargs)
 
 
-
-# Hook into unittest
-try:
-  import unittest
-  try:
-    from unittest import TextTestResult as TestResult
-  except ImportError:
-    from unittest import _TextTestResult as TestResult
-  saved_stopTest = TestResult.stopTest
-  saved_addSuccess = TestResult.addSuccess
+def _update_unittest(klass):
+  saved_stopTest = klass.stopTest
+  saved_addSuccess = klass.addSuccess
   def stopTest(self, test):
     success = True
     try:
-      flexmock_teardown()()
+      flexmock_teardown()
     except Exception:
       self.addError(test, sys.exc_info())
       success = False
     if success and hasattr(self, '_pre_flexmock_success'):
       saved_addSuccess(self, test)
     return saved_stopTest(self, test)
-  TestResult.stopTest = stopTest
+  klass.stopTest = stopTest
 
   def addSuccess(self, test):
     self._pre_flexmock_success = True
-  TestResult.addSuccess = addSuccess
+  klass.addSuccess = addSuccess
+
+
+# Hook into the test runners
+try:
+  import unittest
+  try:
+    from unittest import TextTestResult as TestResult
+  except ImportError:
+    from unittest import _TextTestResult as TestResult
+  classes = [TestResult]
+
+  try:
+    from _pytest.unittest import TestCaseFunction
+    classes += [TestCaseFunction]
+  except ImportError:
+    pass
+
+  for klass in classes:
+    _update_unittest(klass)
 
 except ImportError:
   pass
