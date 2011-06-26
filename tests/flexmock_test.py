@@ -1,4 +1,4 @@
-#-*- coding: utf8 -*-
+# -*- coding: utf8 -*-
 from flexmock import Mock
 from flexmock import AlreadyMocked
 from flexmock import AttemptingToMockBuiltin
@@ -178,6 +178,18 @@ class RegularClass(object):
     assertEqual('bar', mock.method_foo(1))
     assertEqual('bar', mock.method_foo('foo', 'bar'))
     assertEqual('baz', mock.method_foo('baz'))
+
+  def test_flexmock_should_fail_to_match_exactly_no_args_when_calling_with_args(self):
+    mock = flexmock()
+    mock.should_receive('method_foo').with_args()
+    assertRaises(InvalidMethodSignature, mock.method_foo, 'baz')
+
+  def test_flexmock_should_match_exactly_no_args(self):
+    class Foo:
+      def bar(self): pass
+    foo = Foo()
+    flexmock(foo).should_receive('bar').with_args().and_return('baz')
+    assertEqual('baz', foo.bar())
 
   def test_expectation_dot_mock_should_return_mock(self):
     mock = flexmock(name='temp')
@@ -1083,6 +1095,13 @@ class RegularClass(object):
     a = flexmock(foo)
     b = flexmock(foo)
     assertEqual(a, b)
+
+  def test_flexmock_ordered_worked_after_default_stub(self):
+    foo = flexmock()
+    foo.should_receive('bar')
+    foo.should_receive('bar').with_args('a').ordered
+    foo.should_receive('bar').with_args('b').ordered
+    assertRaises(MethodCalledOutOfOrder, foo.bar, 'b')
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

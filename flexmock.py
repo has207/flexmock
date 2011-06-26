@@ -115,7 +115,9 @@ class FlexmockContainer(object):
             '%s called before %s' %
             (_format_args(e.method, e.args),
              _format_args(exp.method, exp.args)))
-      if exp.method == name and _match_args(args, exp.args):
+      if (exp.method == name and
+          args and exp.args and  # ignore default stub case
+          _match_args(args, exp.args)):
         break
 
   @classmethod
@@ -715,8 +717,7 @@ def _get_code(func):
 
 
 def _match_args(given_args, expected_args):
-  if (given_args == expected_args or expected_args is None or
-      expected_args == {'kargs': (), 'kwargs': {}}):
+  if (given_args == expected_args or expected_args is None):
     return True
   if (len(given_args['kargs']) != len(expected_args['kargs']) or
       len(given_args['kwargs']) != len(expected_args['kwargs']) or
