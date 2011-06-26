@@ -316,24 +316,6 @@ class Expectation(object):
     return self
 
   @property
-  def and_execute(self):
-    """Creates a spy.
-
-    DEPRECATED: will be removed in 0.7.5!
-
-    """
-    warnings.warn('and_execute property is deprecated. '
-                  'It will be removed in Flexmock version 0.7.5 '
-                  'You need to switch to using the should_call method call',
-                  PendingDeprecationWarning)
-    if self._replace_with:
-      raise FlexmockError('replace_with cannot be mixed with and_execute')
-    if inspect.isclass(self._mock):
-      raise FlexmockError('and_execute not supported for class mocks')
-    self._pass_thru = True
-    return self
-
-  @property
   def ordered(self):
     """Makes the expectation respect the order of should_receive statements.
 
