@@ -1,5 +1,4 @@
 #-*- coding: utf8 -*-
-from flexmock import flexmock_cleanup
 from flexmock import Mock
 from flexmock import AlreadyMocked
 from flexmock import AttemptingToMockBuiltin
@@ -47,8 +46,7 @@ def assertEqual(expected, received, msg=''):
 class RegularClass(object):
 
   def _tear_down(self):
-    """Override this in the subclasses."""
-    pass
+    return flexmock_teardown()()
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
