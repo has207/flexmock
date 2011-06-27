@@ -805,6 +805,9 @@ def flexmock(spec=None, **kwargs):
     return Mock(**kwargs)
 
 
+# RUNNER INTEGRATION
+
+
 def _update_unittest(klass):
   saved_stopTest = klass.stopTest
   saved_addSuccess = klass.addSuccess
@@ -825,23 +828,29 @@ def _update_unittest(klass):
   klass.addSuccess = addSuccess
 
 
-# Hook into the test runners
+# Hook into py.test
+try:
+  from _pytest import runner
+  saved = runner.call_runtest_hook
+  def call_runtest_hook(item, when):
+    ret = saved(item, when)
+    if when == 'call' and not ret.excinfo:
+      return runner.CallInfo(flexmock_teardown, when=when)
+    return ret
+  runner.call_runtest_hook = call_runtest_hook
+
+except ImportError:
+  pass
+
+
+# Hook into unittest based test runners (including nose)
 try:
   import unittest
   try:
     from unittest import TextTestResult as TestResult
   except ImportError:
     from unittest import _TextTestResult as TestResult
-  classes = [TestResult]
-
-  try:
-    from _pytest.unittest import TestCaseFunction
-    classes += [TestCaseFunction]
-  except ImportError:
-    pass
-
-  for klass in classes:
-    _update_unittest(klass)
+  _update_unittest(TestResult)
 
 except ImportError:
   pass
