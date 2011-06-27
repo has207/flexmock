@@ -828,29 +828,44 @@ def _update_unittest(klass):
   klass.addSuccess = addSuccess
 
 
-# Hook into py.test
-try:
-  from _pytest import runner
-  saved = runner.call_runtest_hook
-  def call_runtest_hook(item, when):
-    ret = saved(item, when)
-    if when == 'call' and not ret.excinfo:
-      return runner.CallInfo(flexmock_teardown, when=when)
-    return ret
-  runner.call_runtest_hook = call_runtest_hook
-
-except ImportError:
-  pass
-
-
-# Hook into unittest based test runners (including nose)
-try:
-  import unittest
+def _hook_into_pytest():
   try:
-    from unittest import TextTestResult as TestResult
-  except ImportError:
-    from unittest import _TextTestResult as TestResult
-  _update_unittest(TestResult)
+    from _pytest import runner
+    saved = runner.call_runtest_hook
+    def call_runtest_hook(item, when):
+      ret = saved(item, when)
+      if when == 'call' and not ret.excinfo:
+        return runner.CallInfo(flexmock_teardown, when=when)
+      return ret
+    runner.call_runtest_hook = call_runtest_hook
 
-except ImportError:
-  pass
+  except ImportError:
+    pass
+_hook_into_pytest()
+
+
+def _hook_into_doctest():
+  try:
+    from doctest import DocTestRunner
+    saved = DocTestRunner.run
+    def run(self, test, compileflags=None, out=None, clear_globs=True):
+      ret = saved(self, test, compileflags, out, clear_globs)
+      flexmock_teardown()
+      return ret
+    DocTestRunner.run = run
+  except ImportError:
+    pass
+_hook_into_doctest()
+
+
+def _hook_into_unittest():
+  try:
+    import unittest
+    try:
+      from unittest import TextTestResult as TestResult
+    except ImportError:
+      from unittest import _TextTestResult as TestResult
+    _update_unittest(TestResult)
+  except ImportError:
+    pass
+_hook_into_unittest()
