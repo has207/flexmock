@@ -98,7 +98,7 @@ class FlexmockContainer(object):
       args = {'kargs': args, 'kwargs': {}}
     if not isinstance(args['kargs'], tuple):
       args['kargs'] = (args['kargs'],)
-    if name:
+    if name and obj in cls.flexmock_objects:
       for e in reversed(cls.flexmock_objects[obj]):
         if e.method == name and _match_args(args, e.args):
           if e._ordered:
@@ -471,7 +471,6 @@ class Mock(object):
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
       self._update_method(expectation, method)
-      self.update_teardown()
     if chained_methods:
       return chained_expectation
     else:
@@ -505,21 +504,6 @@ class Mock(object):
       return self.should_receive('__new__').and_return(kargs).one_by_one
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
-
-  def update_teardown(self, test_runner=unittest.TestCase,
-                      teardown_method='tearDown'):
-    """Should be implemented by classes inheriting from Mock.
-
-    This is used for test runner integration and should not be accessed
-    from tests.
-    """
-    if (not FlexmockContainer.teardown_updated or
-        self not in FlexmockContainer.teardown_updated):
-      saved_teardown = None
-      if hasattr(test_runner, teardown_method):
-        saved_teardown = getattr(test_runner, teardown_method)
-      setattr(test_runner, teardown_method, flexmock_teardown(saved_teardown))
-      FlexmockContainer.teardown_updated.append(self)
 
   def _retrieve_or_create_expectation(self, method, return_value=None):
     if method in [x.method for x in FlexmockContainer.flexmock_objects[self]]:
@@ -668,42 +652,19 @@ def _format_args(method, arguments):
   return '%s(%s)' % (method, args)
 
 
-def generate_mock(flexmock_class, obj_or_class=None, context=None, **kwargs):
-  """Factory function for creating Mock objects.
-
-  Args:
-    - flexmock_class: class inheriting from Mock, used to differentiate
-                    different test runners
-    - object_or_class: object or class to mock
-    - context: The caller's frame
-    - kwargs: dict of attribute/value pairs used to initialize the mock object
-  """
-  if not obj_or_class:
-    if context is None:
-      return flexmock_class(**kwargs)
-    else:
-      return flexmock_class(context, **kwargs)
-
-  return _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs)
-
-
-def _create_partial_mock(flexmock_class, obj_or_class, context, **kwargs):
+def _create_partial_mock(obj_or_class, **kwargs):
   matches = [x for x in FlexmockContainer.flexmock_objects
              if x._object is obj_or_class]
   if matches:
     mock = matches[0]
   else:
-    if context is None:
-      mock = flexmock_class()
-    else:
-      mock = flexmock_class(context)
+    mock = Mock()
     mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
   if not matches:
     FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
-    mock.update_teardown()
-  if (_attach_flexmock_methods(mock, flexmock_class, obj_or_class) and
+  if (_attach_flexmock_methods(mock, Mock, obj_or_class) and
     not inspect.isclass(mock._object)):
     mock = mock._object
   return mock
@@ -807,61 +768,9 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       saved_teardown(*kargs, **kwargs)
 
   if saved_teardown and _get_code(saved_teardown) is _get_code(teardown):
-    return saved_teardown
+    return saved_teardown()
   else:
-    return teardown
-
-
-class NoseMock(Mock):
-  def __init__(self, context, **kwargs):
-    super(NoseMock, self).__init__(**kwargs)
-    self._context = context
-
-  def update_teardown(self):
-    this = self._context.f_locals.get('self')
-    if this:
-      if unittest.TestCase in inspect.getmro(this.__class__):
-        Mock.update_teardown(self, this.__class__, 'tearDown')
-      else:
-        Mock.update_teardown(self, this.__class__, 'teardown')
-    else:
-      func_name = self._context.f_code.co_name
-      this_func = self._context.f_globals[func_name]
-      Mock.update_teardown(self, this_func, 'teardown')
-
-
-class PytestMock(Mock):
-  def update_teardown(self):
-    frame = sys._getframe(2)
-    this = frame.f_locals.get('self')
-    if this is None:
-      is_method = False
-    else:
-      # the name ``self`` is in the local namespace. could be a method, but
-      # could also be a function. It's a method if its class name starts with
-      # ``Test``
-      if unittest.TestCase in inspect.getmro(this.__class__):
-        return Mock.update_teardown(self, this.__class__, 'tearDown')
-      class_name = this.__class__.__name__
-      is_method = class_name.startswith('Test')
-    if is_method:
-      # use the method teardown_method if the function is defined within a
-      # class, i.e. if it is a method
-      test_runner = this.__class__
-      teardown_method = 'teardown_method'
-    else:
-      # the function is not a method, so there is no class which belongs to it
-      # -> use the function teardown_function at module level
-      test_runner = __import__(frame.f_globals['__name__'])
-      teardown_method = 'teardown_function'
-    Mock.update_teardown(self, test_runner, teardown_method)
-
-
-class UnittestMock(Mock):
-  def update_teardown(self):
-    frame = sys._getframe(5)
-    this = frame.f_locals.get('self')
-    Mock.update_teardown(self, this.__class__, 'tearDown')
+    return teardown()
 
 
 def flexmock(spec=None, **kwargs):
@@ -890,15 +799,49 @@ def flexmock(spec=None, **kwargs):
   Returns:
     - Mock object, based on spec if one was provided.
   """
-  klass = UnittestMock
-  pytest = [file for file in  [frame[1] for frame in inspect.stack()]
-            if file.replace('\\', '/').endswith('_pytest/runner.py')]
-  nose = [file for file in  [frame[1] for frame in inspect.stack()]
-          if file.replace('\\', '/').endswith('nose/core.py')]
-  context = None
-  if nose:
-    klass = NoseMock
-    context = sys._getframe(1)
-  elif pytest:
-    klass = PytestMock
-  return generate_mock(klass, spec, context, **kwargs)
+  if spec:
+    return _create_partial_mock(spec, **kwargs)
+  else:
+    return Mock(**kwargs)
+
+
+def _update_unittest(klass):
+  saved_stopTest = klass.stopTest
+  saved_addSuccess = klass.addSuccess
+  def stopTest(self, test):
+    success = True
+    try:
+      flexmock_teardown()
+    except Exception:
+      self.addError(test, sys.exc_info())
+      success = False
+    if success and hasattr(self, '_pre_flexmock_success'):
+      saved_addSuccess(self, test)
+    return saved_stopTest(self, test)
+  klass.stopTest = stopTest
+
+  def addSuccess(self, test):
+    self._pre_flexmock_success = True
+  klass.addSuccess = addSuccess
+
+
+# Hook into the test runners
+try:
+  import unittest
+  try:
+    from unittest import TextTestResult as TestResult
+  except ImportError:
+    from unittest import _TextTestResult as TestResult
+  classes = [TestResult]
+
+  try:
+    from _pytest.unittest import TestCaseFunction
+    classes += [TestCaseFunction]
+  except ImportError:
+    pass
+
+  for klass in classes:
+    _update_unittest(klass)
+
+except ImportError:
+  pass
