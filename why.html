@@ -53,151 +53,92 @@
             
   <div class="section" id="why-flexmock">
 <h1>Why Flexmock?<a class="headerlink" href="#why-flexmock" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="food-for-thought">
-<h2>Food For Thought<a class="headerlink" href="#food-for-thought" title="Permalink to this headline">¶</a></h2>
-<p>While it&#8217;s easy to write tests for brand new code that you specifically
-craft to fit in with the testing metaphors permitted by a given mocking
-library, it is much more difficult to take untested legacy code and add
-unit tests. Due to various restrictions in the tools or the language
-itself, it is often (always?) necessary to refactor legacy code to bring
-it under test. This creates a chicken-egg problem of not being able to
-refactor safely without tests and being unable to write tests without
-refactoring. Dealing with this problem is non-trivial in practice and
-having the right tools makes a huge difference both in speed and
-ultimate success rate.</p>
-</div>
-<div class="section" id="what-we-have-now">
-<h2>What We Have Now<a class="headerlink" href="#what-we-have-now" title="Permalink to this headline">¶</a></h2>
-<p>Existing Python mocking libraries fall into two categories. The first
-group (mox, mocker, pymock) follows the record/replay approach that
-generally goes something along the lines of:</p>
-<div class="highlight-python"><pre>- setting up a mock
-- specifying the methods you'll be replacing, along with return values, exceptions raised, etc
-- replaying the replacement version
-- exercising your code
-- finally doing verification/unsetting the mocked methods</pre>
-</div>
-<p>As you can imagine this approach requires a lot of manual effort to
-write every single test, and for every single method you mock. In
-addition, it is difficult to factor out common actions between tests as
-you have to perform the replay step manually before the code is
-exercised and then verify the mocks at the end, often also manually.</p>
-<p>The second group of mocking libraries (pmock, mock, fudge) take a
-somewhat more sensible approach:</p>
-<div class="highlight-python"><pre>- setting up a mock
-- specifying the methods to replace, along with return values, exceptions raised, etc
-- exercising the code
-- doing the verification/cleanup</pre>
-</div>
-<p>While these libraries allow you to skip the &#8220;replay&#8221; step, they still
-have the same issues of verification at the end. Some of them provide
-additional syntax, in the form of decorators or &#8220;teardown&#8221; methods you
-can explicitly declare to help with some of the setup/verification
-tedium. However, all they basically accomplish is shift the logic to a
-different place, not free you from worrying about it altogether.</p>
-</div>
-<div class="section" id="the-alternative">
-<h2>The Alternative<a class="headerlink" href="#the-alternative" title="Permalink to this headline">¶</a></h2>
-<p>Flexmock provides a third alternative &#8211; integration with the test
-runner that takes care of the verification and cleanup steps, leaving
-you with:</p>
-<div class="highlight-python"><pre>- creating the mock
-- specifying expectations
-- exercising the code</pre>
-</div>
-<p><em>(The first two steps can usually be combined into a single line of
-code, reducing it to essentially one step.)</em></p>
-<p>It goes without saying that this is a lot less code, which makes writing
-tests easier, faster, and less error-prone. But the fact that the entire
-setup/verification logic of the mock can be generated before the code
-under test is exercised offers another, less obvious, advantage. Namely,
-you can factor out the mock code into helper functions and share them
-across tests. Since Flexmock allows you to specify both the behavior of
-the fake object along with any expectations, it makes it extremely
-simple to generate helper functions that ensure that certain behavior is
-verified across a number of different tests.</p>
-</div>
-<div class="section" id="let-s-look-at-some-code">
-<h2>Let&#8217;s Look At Some Code<a class="headerlink" href="#let-s-look-at-some-code" title="Permalink to this headline">¶</a></h2>
-<p>As a quick example to bring this concept home, let&#8217;s take a look at a
-very simple servlet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">UserServlet</span><span class="p">:</span>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-    <span class="k">pass</span>  <span class="c"># expensive authentication lookup</span>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">authenticate</span><span class="p">():</span>
-      <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">redirect_login</span><span class="p">()</span>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">authenticate</span><span class="p">():</span>
-      <span class="n">User</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">redirect_login</span><span class="p">()</span>
+<p>So what does Flexmock actually help you do?</p>
+<div class="section" id="creating-fake-objects-on-the-fly">
+<h2>Creating fake objects on the fly<a class="headerlink" href="#creating-fake-objects-on-the-fly" title="Permalink to this headline">¶</a></h2>
+<p>Making a new object in Python requires either defining a new class with all the
+fake methods you&#8217;re interested in emulating and then instantiating it. Or,
+creating an instance of &#8220;object&#8221; and directly assigning it member values.</p>
+<p>Both of these approaches are a bit kludgy and feel awkward when writing tests.
+Flexmock provides a simple way to generate a fake object on the fly using the flexmock()
+function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">operational</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">model</span><span class="o">=</span><span class="s">&quot;MIG-21&quot;</span><span class="p">,</span>
+                 <span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><em>(I&#8217;m using class methods to avoid having to instantiate the UserServlet
-in the following tests. In reality Flexmock handles both classes and
-instances in the same manner, so this is only to simplify the example
-while keeping it somewhat realistic.)</em></p>
-<p>And here is a test that ensures that the servlet properly authenticates
-the request before performing the creation and deletion steps:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
-<span class="kn">from</span> <span class="nn">user_servlet</span> <span class="kn">import</span> <span class="n">UserServlet</span>
-<span class="kn">from</span> <span class="nn">user_logic</span> <span class="kn">import</span> <span class="n">User</span>
-<span class="kn">import</span> <span class="nn">unittest</span>
-
-<span class="k">class</span> <span class="nc">TestUserServlet</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">_ensure_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">flexmock</span><span class="p">(</span><span class="n">UserServlet</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;authenticate&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">ordered</span>
-
-  <span class="k">def</span> <span class="nf">test_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_authenticated</span><span class="p">()</span>
-    <span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;eve&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
-    <span class="n">UserServlet</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;eve&#39;</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">test_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_authenticated</span><span class="p">()</span>
-    <span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;delete&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="mi">1231</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
-    <span class="n">UserServlet</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">1231</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-  <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+<p>The above quickly generates a plane object with just the methods and attributes
+that the code under test is going to touch.</p>
+</div>
+<div class="section" id="replacing-parts-of-existing-objects-and-classes-stubs">
+<h2>Replacing parts of existing objects and classes (stubs)<a class="headerlink" href="#replacing-parts-of-existing-objects-and-classes-stubs" title="Permalink to this headline">¶</a></h2>
+<p>While creating fake objects from scratch is often sufficient, many times it is easier
+to take an existing object and simply stub out certain methods or replace them with
+fake ones. Flexmock makes this easy as well:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">,</span>
+         <span class="n">get_destination</span><span class="o">=</span><span class="s">&quot;Tokyo&quot;</span><span class="p">,</span>
+         <span class="n">get_speed</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>I intentionally added the imports and &#8220;main&#8221; call into the example test
-to demonstrate that this is the <strong>entire</strong> test. Unlike other mocking
-libraries, Flexmock does not require any extra magic in order to create
-expectations or verify them, there is no hidden &#8220;teardown&#8221; method you
-need to add to the test class, or decorators you need to hang on the
-test methods.</p>
-<p>This is the entire test, and it ensures that when UserServlet receives a
-<em>create</em> or <em>delete</em> request, it first authenticates the user, then
-performs the creation/deletion logic. Both the authentication function
-and the database logic are mocked out and verified to have been called
-in the correct order, with the correct arguments. This seems like an
-extremely simple concept, but all other available mocking libraries seem
-to make it rather awkward to implement.</p>
+<p>By passing a real object or class into the flexmock() function as the first argument
+it is possible to modify that object in place and provide default return values for
+any of its existing methods.</p>
+<p>In addition to simply stubbing out return values, it can be useful to be able to call
+an entirely different method and substitute return values based on test-specific conditions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_route&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">custom_get_route</span><span class="p">())</span>
+</pre></div>
 </div>
-<div class="section" id="to-sum-up">
-<h2>To Sum Up<a class="headerlink" href="#to-sum-up" title="Permalink to this headline">¶</a></h2>
-<p>The above example is extremely simple, and only showcases a fraction of
-what Flexmock can do. In addition to the rather straightforward ability
-to mock out methods and generate expectations, Flexmock features
-powerful argument matching, based not just on values but on both
-built-in and user-defined types or classes. It allows you to &#8220;spy&#8221; on
-methods rather than stubbing them, calling the original method and
-checking its return value or raised exceptions, as well as verify the
-amount of times the method has been called. It can mock generators and
-requires no special syntax for dealing with private and static methods,
-module level functions, class level and instance methods. It also makes
-it easy to override new instances of classes with custom objects.</p>
+</div>
+<div class="section" id="creating-and-checking-expectations-mocks">
+<h2>Creating and checking expectations (mocks)<a class="headerlink" href="#creating-and-checking-expectations-mocks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic">
+<h3>Basic<a class="headerlink" href="#basic" title="Permalink to this headline">¶</a></h3>
+<p>Expectations take many flavors, and Flexmock has many different facilities and modes to generate them.
+The first and simplest is ensuring that a certain method is called:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+</pre></div>
+</div>
+<p>The .once modifier ensures that Train.get_destination() is called at some point during the test and
+will raise an exception if this does not happen.</p>
+<p>Of course, it is also possible to provide a default return value:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;Tokyo&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or check that a method is called with specific arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;set_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&quot;Tokyo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example we used .times(1) instead of .once and added the .at_least modifier
+to demonstate that it is easy to match any number of calls, including 0 calls or a variable amount of
+calls.</p>
+</div>
+<div class="section" id="spies">
+<h3>Spies<a class="headerlink" href="#spies" title="Permalink to this headline">¶</a></h3>
+<p>While replacing method calls with canned return values or checking that they are called with
+specific arguments is quite useful, there are also times when you want to execute the actual method
+and simply find out how many times it was called. Flexmock uses should_call() to generate this
+sort of expectations instead of should_receive():</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+</pre></div>
+</div>
+<p>In the above case the real get_destination() method will be executed, but Flexmock will raise
+an exception unless it is executed exactly once. All the modifiers allowed with should_receive()
+can also be used with should_call() so it is possible to tweak the allowed arguments, return
+values and call times.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&quot;set_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^Tok&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^No such dest.*&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The above example introduces a couple of new capabilities &#8211; raising exceptions and regex
+matching on string return values and arguments.</p>
+<p>Flexmock has a number of other features and capabilities, but hopefully the above overview has
+given you enough of the flavor for the kind of things that it makes possible. It is also important
+to note that Flexmock features smooth integration with the test runner,
+be it unittest, nose, py.test or doctest, so no special setup is necessary. Simply
+importing flexmock into your test module is sufficient to get started with any of the above
+examples.</p>
+</div>
 </div>
 </div>
 
@@ -210,11 +151,13 @@ it easy to override new instances of classes with custom objects.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Why Flexmock?</a><ul>
-<li><a class="reference internal" href="#food-for-thought">Food For Thought</a></li>
-<li><a class="reference internal" href="#what-we-have-now">What We Have Now</a></li>
-<li><a class="reference internal" href="#the-alternative">The Alternative</a></li>
-<li><a class="reference internal" href="#let-s-look-at-some-code">Let&#8217;s Look At Some Code</a></li>
-<li><a class="reference internal" href="#to-sum-up">To Sum Up</a></li>
+<li><a class="reference internal" href="#creating-fake-objects-on-the-fly">Creating fake objects on the fly</a></li>
+<li><a class="reference internal" href="#replacing-parts-of-existing-objects-and-classes-stubs">Replacing parts of existing objects and classes (stubs)</a></li>
+<li><a class="reference internal" href="#creating-and-checking-expectations-mocks">Creating and checking expectations (mocks)</a><ul>
+<li><a class="reference internal" href="#basic">Basic</a></li>
+<li><a class="reference internal" href="#spies">Spies</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

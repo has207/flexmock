@@ -1,170 +1,130 @@
 Why Flexmock?
 =============
 
-Food For Thought
-----------------
 
-While it's easy to write tests for brand new code that you specifically
-craft to fit in with the testing metaphors permitted by a given mocking
-library, it is much more difficult to take untested legacy code and add
-unit tests. Due to various restrictions in the tools or the language
-itself, it is often (always?) necessary to refactor legacy code to bring
-it under test. This creates a chicken-egg problem of not being able to
-refactor safely without tests and being unable to write tests without
-refactoring. Dealing with this problem is non-trivial in practice and
-having the right tools makes a huge difference both in speed and
-ultimate success rate.
+So what does Flexmock actually help you do?
 
-What We Have Now
-----------------
 
-Existing Python mocking libraries fall into two categories. The first
-group (mox, mocker, pymock) follows the record/replay approach that
-generally goes something along the lines of:
+Creating fake objects on the fly
+--------------------------------
+
+
+Making a new object in Python requires either defining a new class with all the
+fake methods you're interested in emulating and then instantiating it. Or,
+creating an instance of "object" and directly assigning it member values.
+
+Both of these approaches are a bit kludgy and feel awkward when writing tests.
+Flexmock provides a simple way to generate a fake object on the fly using the flexmock()
+function:
 
 ::
 
-- setting up a mock
-- specifying the methods you'll be replacing, along with return values, exceptions raised, etc
-- replaying the replacement version
-- exercising your code
-- finally doing verification/unsetting the mocked methods
+  plane = flexmock(operational=True,
+                   model="MIG-21",
+                   fly=lambda: None)
 
-As you can imagine this approach requires a lot of manual effort to
-write every single test, and for every single method you mock. In
-addition, it is difficult to factor out common actions between tests as
-you have to perform the replay step manually before the code is
-exercised and then verify the mocks at the end, often also manually.
 
-The second group of mocking libraries (pmock, mock, fudge) take a
-somewhat more sensible approach:
+The above quickly generates a plane object with just the methods and attributes
+that the code under test is going to touch.
 
-::
 
-- setting up a mock
-- specifying the methods to replace, along with return values, exceptions raised, etc
-- exercising the code
-- doing the verification/cleanup
+Replacing parts of existing objects and classes (stubs)
+-------------------------------------------------------
 
-While these libraries allow you to skip the "replay" step, they still
-have the same issues of verification at the end. Some of them provide
-additional syntax, in the form of decorators or "teardown" methods you
-can explicitly declare to help with some of the setup/verification
-tedium. However, all they basically accomplish is shift the logic to a
-different place, not free you from worrying about it altogether.
 
-The Alternative
----------------
-
-Flexmock provides a third alternative -- integration with the test
-runner that takes care of the verification and cleanup steps, leaving
-you with:
+While creating fake objects from scratch is often sufficient, many times it is easier
+to take an existing object and simply stub out certain methods or replace them with
+fake ones. Flexmock makes this easy as well:
 
 ::
 
-- creating the mock
-- specifying expectations
-- exercising the code
+  flexmock(Train,
+           get_destination="Tokyo",
+           get_speed=200)
 
-*(The first two steps can usually be combined into a single line of
-code, reducing it to essentially one step.)*
 
-It goes without saying that this is a lot less code, which makes writing
-tests easier, faster, and less error-prone. But the fact that the entire
-setup/verification logic of the mock can be generated before the code
-under test is exercised offers another, less obvious, advantage. Namely,
-you can factor out the mock code into helper functions and share them
-across tests. Since Flexmock allows you to specify both the behavior of
-the fake object along with any expectations, it makes it extremely
-simple to generate helper functions that ensure that certain behavior is
-verified across a number of different tests.
+By passing a real object or class into the flexmock() function as the first argument
+it is possible to modify that object in place and provide default return values for
+any of its existing methods.
 
-Let's Look At Some Code
------------------------
-
-As a quick example to bring this concept home, let's take a look at a
-very simple servlet:
+In addition to simply stubbing out return values, it can be useful to be able to call
+an entirely different method and substitute return values based on test-specific conditions:
 
 ::
 
-    class UserServlet:
+  flexmock(Train).should_receive("get_route").replace_with(
+      lambda x: custom_get_route())
+      
 
-      @classmethod
-      def authenticate(cls):
-        pass  # expensive authentication lookup
+Creating and checking expectations (mocks)
+------------------------------------------
 
-      @classmethod
-      def create(cls, attrs):
-        if cls.authenticate():
-          User.create(attr)
-        else:
-          redirect_login()
 
-      @classmethod
-      def delete(cls, id):
-        if cls.authenticate():
-          User.delete(id)
-        else:
-          redirect_login()
+Basic
+~~~~~
 
-*(I'm using class methods to avoid having to instantiate the UserServlet
-in the following tests. In reality Flexmock handles both classes and
-instances in the same manner, so this is only to simplify the example
-while keeping it somewhat realistic.)*
 
-And here is a test that ensures that the servlet properly authenticates
-the request before performing the creation and deletion steps:
+Expectations take many flavors, and Flexmock has many different facilities and modes to generate them.
+The first and simplest is ensuring that a certain method is called:
 
 ::
 
-    from flexmock import flexmock
-    from user_servlet import UserServlet
-    from user_logic import User
-    import unittest
+  flexmock(Train).should_receive("get_destination").once
 
-    class TestUserServlet(unittest.TestCase):
-      def _ensure_authenticated(self):
-        flexmock(UserServlet).should_receive('authenticate').once.ordered
 
-      def test_create(self):
-        self._ensure_authenticated()
-        flexmock(User).should_receive('create').once.with_args(name='eve').ordered
-        UserServlet.create(name='eve')
+The .once modifier ensures that Train.get_destination() is called at some point during the test and
+will raise an exception if this does not happen.
 
-      def test_delete(self):
-        self._ensure_authenticated()
-        flexmock(User).should_receive('delete').once.with_args(1231).ordered
-        UserServlet.delete(1231)
+Of course, it is also possible to provide a default return value:
 
-    if __name__ == '__main__':
-      unittest.main()
+::
 
-I intentionally added the imports and "main" call into the example test
-to demonstrate that this is the **entire** test. Unlike other mocking
-libraries, Flexmock does not require any extra magic in order to create
-expectations or verify them, there is no hidden "teardown" method you
-need to add to the test class, or decorators you need to hang on the
-test methods.
+  flexmock(Train).should_receive("get_destination").once.and_return("Tokyo")
 
-This is the entire test, and it ensures that when UserServlet receives a
-*create* or *delete* request, it first authenticates the user, then
-performs the creation/deletion logic. Both the authentication function
-and the database logic are mocked out and verified to have been called
-in the correct order, with the correct arguments. This seems like an
-extremely simple concept, but all other available mocking libraries seem
-to make it rather awkward to implement.
 
-To Sum Up
----------
+Or check that a method is called with specific arguments:
 
-The above example is extremely simple, and only showcases a fraction of
-what Flexmock can do. In addition to the rather straightforward ability
-to mock out methods and generate expectations, Flexmock features
-powerful argument matching, based not just on values but on both
-built-in and user-defined types or classes. It allows you to "spy" on
-methods rather than stubbing them, calling the original method and
-checking its return value or raised exceptions, as well as verify the
-amount of times the method has been called. It can mock generators and
-requires no special syntax for dealing with private and static methods,
-module level functions, class level and instance methods. It also makes
-it easy to override new instances of classes with custom objects.
+::
+
+  flexmock(Train).should_receive("set_destination").with_args("Tokyo").at_least.times(1)
+
+
+In this example we used .times(1) instead of .once and added the .at_least modifier
+to demonstate that it is easy to match any number of calls, including 0 calls or a variable amount of
+calls.
+
+
+Spies
+~~~~~
+
+
+While replacing method calls with canned return values or checking that they are called with
+specific arguments is quite useful, there are also times when you want to execute the actual method
+and simply find out how many times it was called. Flexmock uses should_call() to generate this
+sort of expectations instead of should_receive():
+
+::
+
+  flexmock(Train).should_call("get_destination").once
+
+
+In the above case the real get_destination() method will be executed, but Flexmock will raise
+an exception unless it is executed exactly once. All the modifiers allowed with should_receive()
+can also be used with should_call() so it is possible to tweak the allowed arguments, return
+values and call times.
+
+::
+
+  flexmock(Train).should_call("set_destination").once.with_args(
+      re.compile("^Tok")).and_raise(Exception, re.compile("^No such dest.*"))
+
+
+The above example introduces a couple of new capabilities -- raising exceptions and regex
+matching on string return values and arguments.
+
+Flexmock has a number of other features and capabilities, but hopefully the above overview has
+given you enough of the flavor for the kind of things that it makes possible. It is also important
+to note that Flexmock features smooth integration with the test runner,
+be it unittest, nose, py.test or doctest, so no special setup is necessary. Simply
+importing flexmock into your test module is sufficient to get started with any of the above
+examples.

@@ -785,7 +785,7 @@ def flexmock(spec=None, **kwargs):
 
   Example:
     >>> flexmock(SomeClass)
-    <flexmock.UnittestMock object at 0xeb9b0>
+    <flexmock.Mock object at 0xeb9b0>
     >>> SomeClass.should_receive('some_method')
     <flexmock.Expectation object at 0xe16b0>
 
