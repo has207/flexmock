@@ -21,74 +21,65 @@ Compatibility
 Test runner integration
 -----------------------
 
-unittest / unittest2
-~~~~~~~~~~~~~~~~~~~~
+unittest
+~~~~~~~~
 
-Flexmock, by default, assumes your tests are in a class that inherits
-from unittest.TestCase, so if that's the case then all you need to do
-is:
-
-::
-
-    from flexmock import flexmock
+Fully supported.
 
 Nose
 ~~~~
 
-For normal nose tests, including those at module level, inside
-unittest.TestCase classes or in other classes that nose recognizes:
-
-::
-
-    from flexmock import flexmock_nose as flexmock
-
-Generator tests must be decorated by @with_setup(setup_func, flexmock_teardown()). The teardown for these tests is non-trivial to hook into -- if you can figure out a better way, please let me know.
+Fully supported, with one caveat that "generator" tests do not interact well with Flexmock's expectation checking code.
+Current recommendation is to only use Flexmock's stubbing and fake object facilities in generator tests.
 
 Py.test
 ~~~~~~~
 
-::
+Fully supported, with same caveat about "generator" tests as nose.
 
-  from flexmock import flexmock_pytest as flexmock
+Doctest
+~~~~~~~
 
-*(Should also work fine when running nose style tests or straight
-unittest.TestCase tests)*
+Not yet extensively tested but provisionally supported, including automatic expectation checking.
 
 Other test runners
 ~~~~~~~~~~~~~~~~~~
 
-As far as I can tell most test runners out there support
-unittest.TestCase so as long as your tests are in a class that inherits
-from unittest.TestCase flexmock will just work, otherwise have a look at
-other test runner integration and send me a patch.
+As far as I can tell most test runners out there are based on unittest to some degree
+so chances are they will simply just work without any special effort on Flexmock's side, as is the case with Nose.
 
 
 Example Usage
 =============
 
 
-Make a mock object
+Import Flexmock
+---------------
+
+::
+
+  from flexmock import flexmock
+
+Make a fake object
 ------------------
+
+::
+
+  mock = flexmock()
 
 Using the param shortcuts -- limited to specifying attribute/return value pairs
 
 ::
 
-  mock = flexmock(some_attribute="value", some_method=lambda: "another value")
-
-Using the more verbose approach -- gives more flexibility when you need it
-
-::
-
-  mock = flexmock()
-  mock.should_receive("method2").with_args("foo", "bar").and_return("baz")
-  mock.should_receive("method3").and_raise(Exception)
+  mock = flexmock(
+      some_attribute="value",
+      some_method=lambda: "another value")
 
  
 Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
-assigns them new methods rather than acting on methods they already
-possess.
+can assign them new methods rather than being limited to acting on methods
+they already possess.
 
 If you do not specify the arguments then any set of arguments, including none, will be matched.
 If you do not provide a return value then None is returned by default.
@@ -298,6 +289,19 @@ being instantiated. Flexmock makes it easy and painless.
     >>> Group().name == 'fake'
     True
 
+It is also possible to return different fake objects in a sequence.
+
+::
+
+    >>> class Group(object): pass
+    >>> mock_group1 = flexmock(name='fake')
+    >>> mock_group2 = flexmock(name='real')
+    >>> flexmock(Group).new_instances(mock_group1, mock_group2)
+    >>> Group().name == 'fake'
+    True
+    >>> Group().name == 'real'
+    True
+
 Overriding new instances of old-style classes is currently not supported
 directly, you should make the class inherit from "object" in your code
 first. Luckily, multiple inheritance should make this pretty painless.
@@ -317,7 +321,7 @@ Create a mock generator
 Private methods
 ---------------
 
-One of the small pains of writing unit tests is that it's a bit
+One of the small pains of writing unit tests is that it can be
 difficult to get at the private methods since Python "conveniently"
 renames them when you try to access them from outside the object. With
 Flexmock there is nothing special you need to do to -- mocking private
@@ -357,7 +361,7 @@ You could use Flexmock to mock each of these method calls individually:
 ::
 
     mock = flexmock()
-    flexmock(HTTP, new_instances=mock)
+    flexmock(HTTP).new_instances(mock)
     mock.should_receive('get_url').and_return(
         flexmock().should_receive('parse_html').and_return(
             flexmock().should_receive('retrieve_results').and_return([]).mock
@@ -370,7 +374,7 @@ reading. Here's a better way:
 ::
 
     mock = flexmock()
-    flexmock(HTTP, new_instances=mock)
+    flexmock(HTTP).new_instances(mock)
     mock.should_receive('get_url.parse_html.retrieve_results').and_return([])
 
 When using this short-hand, Flexmock will create intermediate objects

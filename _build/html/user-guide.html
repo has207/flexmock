@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Documentation &mdash; Flexmock v0.7.4 documentation</title>
+    <title>Usage Documentation &mdash; Flexmock v0.8.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.7.4',
+        VERSION:     '0.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.7.4 documentation" href="index.html" />
+    <link rel="top" title="Flexmock v0.8.0 documentation" href="index.html" />
     <link rel="next" title="Flexmock API" href="api.html" />
     <link rel="prev" title="Flexmock - Mocking Library" href="index.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="index.html" title="Flexmock - Mocking Library"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -76,59 +76,53 @@ following terms.</p>
 <h1>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="test-runner-integration">
 <h2>Test runner integration<a class="headerlink" href="#test-runner-integration" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="unittest-unittest2">
-<h3>unittest / unittest2<a class="headerlink" href="#unittest-unittest2" title="Permalink to this headline">¶</a></h3>
-<p>Flexmock, by default, assumes your tests are in a class that inherits
-from unittest.TestCase, so if that&#8217;s the case then all you need to do
-is:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
-</pre></div>
-</div>
+<div class="section" id="unittest">
+<h3>unittest<a class="headerlink" href="#unittest" title="Permalink to this headline">¶</a></h3>
+<p>Fully supported.</p>
 </div>
 <div class="section" id="nose">
 <h3>Nose<a class="headerlink" href="#nose" title="Permalink to this headline">¶</a></h3>
-<p>For normal nose tests, including those at module level, inside
-unittest.TestCase classes or in other classes that nose recognizes:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_nose</span> <span class="k">as</span> <span class="n">flexmock</span>
-</pre></div>
-</div>
-<p>Generator tests must be decorated by &#64;with_setup(setup_func, flexmock_teardown()). The teardown for these tests is non-trivial to hook into &#8211; if you can figure out a better way, please let me know.</p>
+<p>Fully supported, with one caveat that &#8220;generator&#8221; tests do not interact well with Flexmock&#8217;s expectation checking code.
+Current recommendation is to only use Flexmock&#8217;s stubbing and fake object facilities in generator tests.</p>
 </div>
 <div class="section" id="py-test">
 <h3>Py.test<a class="headerlink" href="#py-test" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock_pytest</span> <span class="k">as</span> <span class="n">flexmock</span>
-</pre></div>
+<p>Fully supported, with same caveat about &#8220;generator&#8221; tests as nose.</p>
 </div>
-<p><em>(Should also work fine when running nose style tests or straight
-unittest.TestCase tests)</em></p>
+<div class="section" id="doctest">
+<h3>Doctest<a class="headerlink" href="#doctest" title="Permalink to this headline">¶</a></h3>
+<p>Not yet extensively tested but provisionally supported, including automatic expectation checking.</p>
 </div>
 <div class="section" id="other-test-runners">
 <h3>Other test runners<a class="headerlink" href="#other-test-runners" title="Permalink to this headline">¶</a></h3>
-<p>As far as I can tell most test runners out there support
-unittest.TestCase so as long as your tests are in a class that inherits
-from unittest.TestCase flexmock will just work, otherwise have a look at
-other test runner integration and send me a patch.</p>
+<p>As far as I can tell most test runners out there are based on unittest to some degree
+so chances are they will simply just work without any special effort on Flexmock&#8217;s side, as is the case with Nose.</p>
 </div>
 </div>
 </div>
 <div class="section" id="example-usage">
 <h1>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="make-a-mock-object">
-<h2>Make a mock object<a class="headerlink" href="#make-a-mock-object" title="Permalink to this headline">¶</a></h2>
-<p>Using the param shortcuts &#8211; limited to specifying attribute/return value pairs</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
+<div class="section" id="import-flexmock">
+<h2>Import Flexmock<a class="headerlink" href="#import-flexmock" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flexmock</span> <span class="kn">import</span> <span class="n">flexmock</span>
 </pre></div>
 </div>
-<p>Using the more verbose approach &#8211; gives more flexibility when you need it</p>
+</div>
+<div class="section" id="make-a-fake-object">
+<h2>Make a fake object<a class="headerlink" href="#make-a-fake-object" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;baz&quot;</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;method3&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using the param shortcuts &#8211; limited to specifying attribute/return value pairs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
+    <span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span>
+    <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
-assigns them new methods rather than acting on methods they already
-possess.</p>
+can assign them new methods rather than being limited to acting on methods
+they already possess.</p>
 <p>If you do not specify the arguments then any set of arguments, including none, will be matched.
 If you do not provide a return value then None is returned by default.</p>
 </div>
@@ -283,6 +277,17 @@ being instantiated. Flexmock makes it easy and painless.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
+<p>It is also possible to return different fake objects in a sequence.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group1</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group2</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;real&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock_group1</span><span class="p">,</span> <span class="n">mock_group2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;fake&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;real&#39;</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 <p>Overriding new instances of old-style classes is currently not supported
 directly, you should make the class inherit from &#8220;object&#8221; in your code
 first. Luckily, multiple inheritance should make this pretty painless.</p>
@@ -300,7 +305,7 @@ first. Luckily, multiple inheritance should make this pretty painless.</p>
 </div>
 <div class="section" id="private-methods">
 <h2>Private methods<a class="headerlink" href="#private-methods" title="Permalink to this headline">¶</a></h2>
-<p>One of the small pains of writing unit tests is that it&#8217;s a bit
+<p>One of the small pains of writing unit tests is that it can be
 difficult to get at the private methods since Python &#8220;conveniently&#8221;
 renames them when you try to access them from outside the object. With
 Flexmock there is nothing special you need to do to &#8211; mocking private
@@ -330,7 +335,7 @@ methods is exactly the same as any other methods.</p>
 </div>
 <p>You could use Flexmock to mock each of these method calls individually:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
 <span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_url&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
     <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;parse_html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
         <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;retrieve_results&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">([])</span><span class="o">.</span><span class="n">mock</span>
@@ -341,7 +346,7 @@ methods is exactly the same as any other methods.</p>
 <p>But that looks really error prone and quite difficult to parse when
 reading. Here&#8217;s a better way:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">,</span> <span class="n">new_instances</span><span class="o">=</span><span class="n">mock</span><span class="p">)</span>
+<span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
 <span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_url.parse_html.retrieve_results&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">([])</span>
 </pre></div>
 </div>
@@ -434,16 +439,18 @@ more specific expectation would never be matched.</p>
 </li>
 <li><a class="reference internal" href="#compatibility">Compatibility</a><ul>
 <li><a class="reference internal" href="#test-runner-integration">Test runner integration</a><ul>
-<li><a class="reference internal" href="#unittest-unittest2">unittest / unittest2</a></li>
+<li><a class="reference internal" href="#unittest">unittest</a></li>
 <li><a class="reference internal" href="#nose">Nose</a></li>
 <li><a class="reference internal" href="#py-test">Py.test</a></li>
+<li><a class="reference internal" href="#doctest">Doctest</a></li>
 <li><a class="reference internal" href="#other-test-runners">Other test runners</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#example-usage">Example Usage</a><ul>
-<li><a class="reference internal" href="#make-a-mock-object">Make a mock object</a></li>
+<li><a class="reference internal" href="#import-flexmock">Import Flexmock</a></li>
+<li><a class="reference internal" href="#make-a-fake-object">Make a fake object</a></li>
 <li><a class="reference internal" href="#partially-mock-or-stub-an-existing-object">Partially mock or stub an existing object</a></li>
 <li><a class="reference internal" href="#stub-out-a-method-for-all-instances-of-a-class">Stub out a method for all instances of a class</a></li>
 <li><a class="reference internal" href="#create-automatically-checked-expectations">Create automatically checked expectations</a></li>
@@ -504,7 +511,7 @@ more specific expectation would never be matched.</p>
         <li class="right" >
           <a href="index.html" title="Flexmock - Mocking Library"
              >previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.7.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
