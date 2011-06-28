@@ -1,3 +1,12 @@
+Release 0.8.0
+- big changes in runner integration support (no more stack examination or sketchy teardown replacement)
+- doctest integration
+- fixing ordering verification when the method has a default stub
+- fixing calling with_args() without arguments to match exactly no arguments (thanks jerico-dev!)
+- 20% performance improvement
+- make sure to return object itself when partial mocking instances unless the object already has some of the methods
+- ensure consecutive calls return same mock object 
+
 Release 0.7.4.2
 - adding regex support for arg matching and spy return values
 - enabling replace_with for class mocks
