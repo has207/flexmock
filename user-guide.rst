@@ -67,7 +67,7 @@ Make a fake object
 
   mock = flexmock()
 
-Using the param shortcuts -- limited to specifying attribute/return value pairs
+Specify attribute/return value pairs
 
 ::
 
