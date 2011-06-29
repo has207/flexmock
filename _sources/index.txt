@@ -59,6 +59,12 @@ Tested to work with:
 - python 3.1.2
 - python 3.2.1rc2
 
+Start Here
+==========
+
+.. toctree::
+
+   why
 
 User Guide
 ===================
@@ -73,13 +79,6 @@ API
 .. toctree::
 
    api
-
-Why Flexmock?
-=============
-
-.. toctree::
-
-   why
 
 Comparison
 ==========

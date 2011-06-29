@@ -1,5 +1,5 @@
-Why Flexmock?
-=============
+Start Here
+==========
 
 
 So what does Flexmock actually help you do?
