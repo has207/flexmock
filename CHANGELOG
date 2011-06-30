@@ -1,3 +1,7 @@
+Release 0.8.1
+- fixing pytest and doctest integration to always call flexmock_teardown
+- fixing flexmock_teardown to return a function as before so it can be used as a decorator
+
 Release 0.8.0
 - big changes in runner integration support (no more stack examination or sketchy teardown replacement)
 - doctest integration
