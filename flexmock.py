@@ -730,7 +730,6 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
   """Generates flexmock-specific teardown function.
 
   Args:
-    - saved_teardown: additional function to call on teardown
     - kargs: passed to saved_teardown
     - kwargs: passed to saved_teardown
 
@@ -768,9 +767,9 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       saved_teardown(*kargs, **kwargs)
 
   if saved_teardown and _get_code(saved_teardown) is _get_code(teardown):
-    return saved_teardown()
+    return saved_teardown
   else:
-    return teardown()
+    return teardown
 
 
 def flexmock(spec=None, **kwargs):
@@ -814,7 +813,7 @@ def _update_unittest(klass):
   def stopTest(self, test):
     success = True
     try:
-      flexmock_teardown()
+      flexmock_teardown()()
     except Exception:
       self.addError(test, sys.exc_info())
       success = False
@@ -834,9 +833,11 @@ def _hook_into_pytest():
     saved = runner.call_runtest_hook
     def call_runtest_hook(item, when):
       ret = saved(item, when)
+      teardown = runner.CallInfo(flexmock_teardown(), when=when)
       if when == 'call' and not ret.excinfo:
-        return runner.CallInfo(flexmock_teardown, when=when)
-      return ret
+        return teardown
+      else:
+        return ret
     runner.call_runtest_hook = call_runtest_hook
 
   except ImportError:
@@ -849,9 +850,10 @@ def _hook_into_doctest():
     from doctest import DocTestRunner
     saved = DocTestRunner.run
     def run(self, test, compileflags=None, out=None, clear_globs=True):
-      ret = saved(self, test, compileflags, out, clear_globs)
-      flexmock_teardown()
-      return ret
+      try:
+        return saved(self, test, compileflags, out, clear_globs)
+      finally:
+        flexmock_teardown()()
     DocTestRunner.run = run
   except ImportError:
     pass

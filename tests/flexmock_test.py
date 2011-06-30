@@ -46,7 +46,7 @@ def assertEqual(expected, received, msg=''):
 class RegularClass(object):
 
   def _tear_down(self):
-    return flexmock_teardown()
+    return flexmock_teardown()()
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
@@ -1109,7 +1109,7 @@ class TestFlexmockUnittest(RegularClass, unittest.TestCase):
     pass
 
   def _tear_down(self):
-    return flexmock_teardown()
+    return flexmock_teardown()()
 
 
 if sys.version_info >= (2, 6):
