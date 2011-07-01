@@ -669,6 +669,26 @@ class RegularClass(object):
     flexmock(foo).should_receive('__private_method').and_return('bar')
     assertEqual('bar', foo.public_method())
 
+  def test_flexmock_should_mock_private_special_methods(self):
+    class Foo:
+      def __private_special_method__(self):
+        return 'foo'
+      def public_method(self):
+        return self.__private_special_method__()
+    foo = Foo()
+    flexmock(foo).should_receive('__private_special_method__').and_return('bar')
+    assertEqual('bar', foo.public_method())
+
+  def test_flexmock_should_mock_double_underscore_method(self):
+    class Foo:
+      def __(self):
+        return 'foo'
+      def public_method(self):
+        return self.__()
+    foo = Foo()
+    flexmock(foo).should_receive('__').and_return('bar')
+    assertEqual('bar', foo.public_method())
+
   def test_flexmock_should_mock_private_class_methods(self):
     class Foo:
       def __iter__(self): pass
