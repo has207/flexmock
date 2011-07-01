@@ -8,6 +8,7 @@ from flexmock import FlexmockError
 from flexmock import InvalidMethodSignature
 from flexmock import InvalidExceptionClass
 from flexmock import InvalidExceptionMessage
+from flexmock import InvalidState
 from flexmock import MethodDoesNotExist
 from flexmock import MethodNotCalled
 from flexmock import MethodCalledOutOfOrder
@@ -1126,6 +1127,38 @@ class RegularClass(object):
   def test_fake_object_takes_any_attribute(self):
     foo = flexmock()
     assertEqual(foo, foo.bar)
+
+  def test_partial_mock_doesnt_takes_arbitrary_attribute(self):
+    class Foo: pass
+    foo = flexmock(Foo)
+    try:
+      foo.bar
+      raise Exception('partial mocks should not take arbitrary attributes')
+    except AttributeError:
+      pass
+    except Exception:
+      raise
+
+  def test_state_machine(self):
+    class Radio:
+      def __init__(self): self.is_on = False
+      def switch_on(self): self.is_on = True
+      def switch_off(self): self.is_on = False
+      def select_channel(self): return None
+      def adjust_volume(self, num): self.volume = num
+
+    radio = Radio()
+    flexmock(radio)
+    radio.should_receive('select_channel').once.when(
+        lambda: radio.is_on)
+    radio.should_call('adjust_volume').once.with_args(5).when(
+        lambda: radio.is_on)
+
+    assertRaises(InvalidState, radio.select_channel)
+    assertRaises(InvalidState, radio.adjust_volume, 5)
+    radio.is_on = True
+    radio.select_channel()
+    radio.adjust_volume(5)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

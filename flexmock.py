@@ -53,6 +53,10 @@ class InvalidExceptionMessage(FlexmockError):
   pass
 
 
+class InvalidState(FlexmockError):
+  pass
+
+
 class MethodNotCalled(FlexmockError):
   pass
 
@@ -152,6 +156,7 @@ class Expectation(object):
     self.yield_values = []
     self.times_called = 0
     self.expected_calls = None
+    self.runnable = lambda: True
     self._mock = mock
     self._pass_thru = False
     self._ordered = False
@@ -330,6 +335,18 @@ class Expectation(object):
     self._ordered = True
     return self
 
+  def when(self, func):
+    """Sets an outside resource to be checked before executing the method.
+
+    Args:
+      - func: function to call to check if the method should be executed
+
+    Returns:
+      - self, i.e. can be chained with other Expectation methods
+    """
+    self.runnable = func
+    return self
+
   def and_raise(self, exception, *kargs, **kwargs):
     """Specifies the exception to be raised when this expectation is met.
 
@@ -426,6 +443,7 @@ class Mock(object):
       - kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._object = self
+    self._access_stack = []
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
@@ -435,11 +453,17 @@ class Mock(object):
   def __exit__(self, type, value, traceback):
     return self
 
-  def __call__(self):
+  def __call__(self, *kargs, **kwargs):
+    self._access_stack[-1]['kargs'] = kargs
+    self._access_stack[-1]['kwargs'] = kwargs
     return self
 
   def __getattr__(self, name):
-    return self
+    if self._object != self:
+      raise AttributeError(name)
+    else:
+      self._access_stack.append({'name': name})
+      return self
 
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
@@ -599,6 +623,9 @@ class Mock(object):
       expectation = FlexmockContainer.get_flexmock_expectation(
           self, method, arguments)
       if expectation:
+        if not expectation.runnable():
+          raise InvalidState('%s expected to be called when %s is True' %
+                             (method, expectation.runnable))
         expectation.times_called += 1
         if expectation._pass_thru:
           return pass_thru(expectation, *kargs, **kwargs)
