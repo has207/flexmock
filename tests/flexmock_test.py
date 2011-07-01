@@ -409,21 +409,21 @@ class RegularClass(object):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').once
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
-    assertEqual(1, expectation.expected_calls)
+    assertEqual(1, expectation.expected_calls[expectation.EXACTLY])
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_treats_twice_as_times_two(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').twice.and_return('value_bar')
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
-    assertEqual(2, expectation.expected_calls)
+    assertEqual(2, expectation.expected_calls[expectation.EXACTLY])
     assertRaises(MethodNotCalled, self._tear_down)
 
   def test_flexmock_works_with_never_when_true(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     expectation = FlexmockContainer.get_flexmock_expectation(mock, 'method_foo')
-    assertEqual(0, expectation.expected_calls)
+    assertEqual(0, expectation.expected_calls[expectation.EXACTLY])
     self._tear_down()
 
   def test_flexmock_works_with_never_when_false(self):
@@ -1159,6 +1159,81 @@ class RegularClass(object):
     radio.is_on = True
     radio.select_channel()
     radio.adjust_volume(5)
+
+  def test_support_at_least_and_at_most_together(self):
+    class Foo:
+      def bar(self): pass
+
+    foo = Foo()
+    flexmock(foo).should_call('bar').at_least.once.at_most.twice
+    assertRaises(MethodNotCalled, self._tear_down)
+
+    flexmock(foo).should_call('bar').at_least.once.at_most.twice
+    foo.bar()
+    foo.bar()
+    foo.bar()
+    assertRaises(MethodNotCalled, self._tear_down)
+
+    flexmock(foo).should_call('bar').at_least.once.at_most.twice
+    foo.bar()
+    self._tear_down()
+
+    flexmock(foo).should_call('bar').at_least.once.at_most.twice
+    foo.bar()
+    foo.bar()
+    self._tear_down()
+
+  def test_at_least_cannot_be_used_twice(self):
+    class Foo:
+      def bar(self): pass
+
+    expectation = flexmock(Foo).should_receive('bar')
+    try:
+      expectation.at_least.at_least
+      raise Exception('should not be able to specify at_least twice')
+    except FlexmockError:
+      pass
+    except Exception:
+      raise
+
+  def test_at_most_cannot_be_used_twice(self):
+    class Foo:
+      def bar(self): pass
+
+    expectation = flexmock(Foo).should_receive('bar')
+    try:
+      expectation.at_most.at_most
+      raise Exception('should not be able to specify at_most twice')
+    except FlexmockError:
+      pass
+    except Exception:
+      raise
+
+  def test_at_least_cannot_be_specified_until_at_most_is_set(self):
+    class Foo:
+      def bar(self): pass
+
+    expectation = flexmock(Foo).should_receive('bar')
+    try:
+      expectation.at_least.at_most
+      raise Exception('should not be able to specify at_most if at_least unset')
+    except FlexmockError:
+      pass
+    except Exception:
+      raise
+
+  def test_at_most_cannot_be_specified_until_at_least_is_set(self):
+    class Foo:
+      def bar(self): pass
+
+    expectation = flexmock(Foo).should_receive('bar')
+    try:
+      expectation.at_most.at_least
+      raise Exception('should not be able to specify at_least if at_most unset')
+    except FlexmockError:
+      pass
+    except Exception:
+      raise
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

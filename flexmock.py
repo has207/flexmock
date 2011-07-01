@@ -140,12 +140,13 @@ class Expectation(object):
   raise.
   """
 
-  AT_LEAST = 'at least '
-  AT_MOST = 'at most '
+  AT_LEAST = 'at least'
+  AT_MOST = 'at most'
+  EXACTLY = 'exactly'
 
   def __init__(self, mock, name=None, return_value=None, original_method=None):
     self.method = name
-    self.modifier = ''
+    self.modifier = self.EXACTLY
     self.original_method = original_method
     self.args = None
     value = ReturnValue(return_value)
@@ -155,7 +156,10 @@ class Expectation(object):
       self.return_values.append(value)
     self.yield_values = []
     self.times_called = 0
-    self.expected_calls = None
+    self.expected_calls = {
+        self.EXACTLY: None,
+        self.AT_LEAST: None,
+        self.AT_MOST: None}
     self.runnable = lambda: True
     self._mock = mock
     self._pass_thru = False
@@ -231,7 +235,7 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
-    self.expected_calls = number
+    self.expected_calls[self.modifier] = number
     return self
 
   @property
@@ -302,6 +306,12 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if (self.expected_calls[self.AT_LEAST] is not None or
+        self.modifier == self.AT_LEAST):
+      raise FlexmockError('cannot use at_least modifier twice')
+    if (self.modifier == self.AT_MOST and
+        self.expected_calls[self.AT_MOST] is None):
+      raise FlexmockError('cannot use at_least with at_most unset')
     self.modifier = self.AT_LEAST
     return self
 
@@ -317,6 +327,12 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if (self.expected_calls[self.AT_MOST] is not None or
+        self.modifier == self.AT_MOST):
+      raise FlexmockError('cannot use at_most modifier twice')
+    if (self.modifier == self.AT_LEAST and
+        self.expected_calls[self.AT_LEAST] is None):
+      raise FlexmockError('cannot use at_most with at_least unset')
     self.modifier = self.AT_MOST
     return self
 
@@ -396,25 +412,29 @@ class Expectation(object):
     Raises:
       MethodNotCalled Exception
     """
-    if self.expected_calls is None:
-      return
     failed = False
-    if not self.modifier:
-      if self.times_called != self.expected_calls:
+    message = ''
+    if self.expected_calls[self.EXACTLY] is not None:
+      message = 'exactly %s' % self.expected_calls[self.EXACTLY]
+      if self.times_called != self.expected_calls[self.EXACTLY]:
         failed = True
-    elif self.modifier == self.AT_LEAST:
-      if self.times_called < self.expected_calls:
-        failed = True
-    elif self.modifier == self.AT_MOST:
-      if self.times_called > self.expected_calls:
-        failed = True
+    else:
+      if self.expected_calls[self.AT_LEAST] is not None:
+        message = 'at least %s' % self.expected_calls[self.AT_LEAST]
+        if self.times_called < self.expected_calls[self.AT_LEAST]:
+          failed = True
+      if self.expected_calls[self.AT_MOST] is not None:
+        if message:
+          message += ' and '
+        message += 'at most %s' % self.expected_calls[self.AT_MOST]
+        if self.times_called > self.expected_calls[self.AT_MOST]:
+          failed = True
     if not failed:
       return
     else:
       raise MethodNotCalled(
-          '%s expected to be called %s%s times, called %s times' %
-          (_format_args(self.method, self.args), self.modifier,
-           self.expected_calls, self.times_called))
+          '%s expected to be called %s times, called %s times' %
+          (_format_args(self.method, self.args), message, self.times_called))
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
