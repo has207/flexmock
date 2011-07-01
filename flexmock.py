@@ -501,7 +501,6 @@ class Mock(object):
     if '.' in method:
       method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and not method.endswith('__') and
-        not method == '__' and 
         (not inspect.isclass(self._object) and
         not inspect.ismodule(self._object))):
       method = ('_%s__%s' % (self._object.__class__.__name__,
