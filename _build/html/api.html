@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Flexmock API &mdash; Flexmock v0.8.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.8.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flexmock v0.8.0 documentation" href="index.html" />
+    <link rel="next" title="Mock Library Comparison" href="compare.html" />
+    <link rel="prev" title="Usage Documentation" href="user-guide.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="compare.html" title="Mock Library Comparison"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="user-guide.html" title="Usage Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-flexmock">
+<span id="flexmock-api"></span><h1>Flexmock API<a class="headerlink" href="#module-flexmock" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="flexmock.flexmock">
+<tt class="descclassname">flexmock.</tt><tt class="descname">flexmock</tt><big>(</big><em>spec=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#flexmock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.flexmock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main entry point into the flexmock API.</p>
+<p>This function is used to either generate a new fake object or take
+an existing object (or class or module) and use it as a basis for
+a partial mock. In case of a partial mock, the passed in object
+is modified to support basic Mock class functionality making
+it unnecessary to make successive flexmock() calls on the same
+objects to generate new expectations.</p>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">SomeClass</span><span class="p">)</span>
+<span class="go">&lt;flexmock.Mock object at 0xeb9b0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SomeClass</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span>
+<span class="go">&lt;flexmock.Expectation object at 0xe16b0&gt;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>NOTE: it&#8217;s safe to call flexmock() on the same object, it will return the
+same Mock object each time.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>spec: object (or class or module) to mock</li>
+<li>kwargs: method/return_value pairs to attach to the object</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>Mock object, based on spec if one was provided.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="flexmock.Mock">
+<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Mock</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fake object class returned by the flexmock() function.</p>
+<dl class="method">
+<dt id="flexmock.Mock.should_receive">
+<tt class="descname">should_receive</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.should_receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.should_receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a method Expectation to the provided class or instance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>method: string name of the method to add</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>Expectation object</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Mock.should_call">
+<tt class="descname">should_call</tt><big>(</big><em>method</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.should_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.should_call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a spy.</p>
+<p>This means that the original method will be called rather than the fake
+version. However, we can still keep track of how many times it&#8217;s called and
+with what arguments, and apply expectations accordingly.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>Expectation object</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Mock.new_instances">
+<tt class="descname">new_instances</tt><big>(</big><em>*kargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Mock.new_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Mock.new_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides __new__ method on the class to return custom objects.</p>
+<p>Alias for should_receive(&#8216;__new__&#8217;).and_return(kargs).one_by_one</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>kargs: objects to return on each successive call to __new__</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>Expectation object</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flexmock.Expectation">
+<em class="property">class </em><tt class="descclassname">flexmock.</tt><tt class="descname">Expectation</tt><big>(</big><em>mock</em>, <em>name=None</em>, <em>return_value=None</em>, <em>original_method=None</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds expectations about methods.</p>
+<p>The information contained in the Expectation object includes method name,
+its argument list, return values, and any exceptions that the method might
+raise.</p>
+<dl class="method">
+<dt id="flexmock.Expectation.with_args">
+<tt class="descname">with_args</tt><big>(</big><em>*kargs</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.with_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the arguments used to match this expectation&#8217;s method.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>kargs: optional keyword arguments</li>
+<li>kwargs: optional named arguments</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Expectation.and_return">
+<tt class="descname">and_return</tt><big>(</big><em>*values</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.and_return"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.and_return" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the return value of this expectation&#8217;s method.</p>
+<p>When and_return is given multiple times, each value provided is returned
+on successive invocations of the method. It is also possible to mix
+and_return with and_raise in the same manner to alternate between returning
+a value and raising and exception on different method invocations.</p>
+<p>When combined with the one_by_one property, value is treated as a list of
+values to be returned in the order specified by successive calls to this
+method rather than a single list to be returned each time.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>values: optional list of return values, defaults to None if not given</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Expectation.and_raise">
+<tt class="descname">and_raise</tt><big>(</big><em>exception</em>, <em>*kargs</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.and_raise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.and_raise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies the exception to be raised when this expectation is met.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>exception: class or instance of the exception</li>
+<li>kargs: optional keyword arguments to pass to the exception</li>
+<li>kwargs: optional named arguments to pass to the exception</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Expectation.replace_with">
+<tt class="descname">replace_with</tt><big>(</big><em>function</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.replace_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.replace_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a function to run instead of the mocked out one.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>function: callable</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Expectation.and_yield">
+<tt class="descname">and_yield</tt><big>(</big><em>*kargs</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.and_yield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.and_yield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies the list of items to be yielded on successive method calls.</p>
+<p>In effect, the mocked object becomes a generator.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flexmock.Expectation.times">
+<tt class="descname">times</tt><big>(</big><em>number</em><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of times this expectation&#8217;s method is expected to be called.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>number: int</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.at_least">
+<tt class="descname">at_least</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.at_least"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.at_least" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the associated times() expectation.</p>
+<p>When given, an exception will only be raised if the method is called less
+than times() specified. Does nothing if times() is not given.</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.at_most">
+<tt class="descname">at_most</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.at_most"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.at_most" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the associated &#8220;times&#8221; expectation.</p>
+<p>When given, an exception will only be raised if the method is called more
+than times() specified. Does nothing if times() is not given.</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.once">
+<tt class="descname">once</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.once"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.once" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for times(1).</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.twice">
+<tt class="descname">twice</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.twice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.twice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for times(2).</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.never">
+<tt class="descname">never</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.never"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.never" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for times(0).</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.ordered">
+<tt class="descname">ordered</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.ordered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.ordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the expectation respect the order of should_receive statements.</p>
+<p>An exception will be raised if methods are called out of order, determined
+by order of should_receive calls in the test.</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.one_by_one">
+<tt class="descname">one_by_one</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.one_by_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.one_by_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the return value to be treated as a list of return values.</p>
+<p>Each value in the list is returned on successive invocations of the method.</p>
+<p>This is a property method so must be called without parentheses.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li>self, i.e. can be chained with other Expectation methods</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flexmock.Expectation.mock">
+<tt class="descname">mock</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.mock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the mock associated with this expectation.</p>
+<p>Since this method is a property it must be called without parentheses.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="user-guide.html"
+                        title="previous chapter">Usage Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="compare.html"
+                        title="next chapter">Mock Library Comparison</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="compare.html" title="Mock Library Comparison"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="user-guide.html" title="Usage Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Herman Sheremetyev.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

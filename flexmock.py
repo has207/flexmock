@@ -730,6 +730,7 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
   """Generates flexmock-specific teardown function.
 
   Args:
+    - saved_teardown: additional function to call on teardown
     - kargs: passed to saved_teardown
     - kwargs: passed to saved_teardown
 
