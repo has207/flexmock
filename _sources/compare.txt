@@ -7,35 +7,50 @@ Mock Library Comparison
 This document shows a side-by-side comparison of how to accomplish some
 basic tasks with Flexmock as well as other popular Python mocking libraries.
 
-A possibly more up-to-date version of this document, featuring more mocking
-libraries, is availale at:
-
-http://garybernhardt.github.com/python-mock-comparison/
-
-Simple fake object
-~~~~~~~~~~~~~~~~~~
+Simple fake object (attributes only)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
     # Flexmock
-    mock = flexmock(some_method=lambda: "calculated value", some_attribute="value")
-    assertEquals("calculated value", mock.some_method())
+    mock = flexmock(some_attribute="value", some_other_attribute="value2")
     assertEquals("value", mock.some_attribute)
+    assertEquals("value2", mock.some_other_attribute)
+
+    # Mox
+    mock = mox.MockAnything()
+    mock.some_attribute = "value"
+    mock.some_other_attribute = "value2"
+    assertEquals("value", mock.some_attribute)
+    assertEquals("value2", mock.some_other_attribute)
+
+    # Mock
+    my_mock = mock.Mock()
+    my_mock.some_attribute = "value"
+    my_mock.some_other_attribute = "value2"
+    assertEquals("value", my_mock.some_attribute)
+    assertEquals("value2", my_mock.some_other_attribute)
+
+
+Simple fake object (with methods)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    # Flexmock
+    mock = flexmock(some_method=lambda: "calculated value")
+    assertEquals("calculated value", mock.some_method())
 
     # Mox
     mock = mox.MockAnything()
     mock.some_method().AndReturn("calculated value")
-    mock.some_attribute = "value"
     mox.Replay(mock)
     assertEquals("calculated value", mock.some_method())
-    assertEquals("value", mock.some_attribute)
 
     # Mock
     my_mock = mock.Mock()
     my_mock.some_method.return_value = "calculated value"
-    my_mock.some_attribute = "value"
     assertEquals("calculated value", my_mock.some_method())
-    assertEquals("value", my_mock.some_attribute)
 
 
 Simple mock
@@ -264,4 +279,10 @@ Mocking the builtin open used as a context manager
         with open('file_name') as h:
             assertEqual('some data', h.read())
     my_mock.assert_called_once_with('foo')
+
+
+A possibly more up-to-date version of this document, featuring more mocking
+libraries, is availale at:
+
+http://garybernhardt.github.com/python-mock-comparison/
 

@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>flexmock &mdash; Flexmock v0.8.0 documentation</title>
+    <title>flexmock &mdash; Flexmock v0.8.1 documentation</title>
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.8.0 documentation" href="../index.html" />
+    <link rel="top" title="Flexmock v0.8.1 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Flexmock v0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Flexmock v0.8.1 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -778,7 +778,6 @@
   <span class="sd">&quot;&quot;&quot;Generates flexmock-specific teardown function.</span>
 
 <span class="sd">  Args:</span>
-<span class="sd">    - saved_teardown: additional function to call on teardown</span>
 <span class="sd">    - kargs: passed to saved_teardown</span>
 <span class="sd">    - kwargs: passed to saved_teardown</span>
 
@@ -816,9 +815,9 @@
       <span class="n">saved_teardown</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">saved_teardown</span> <span class="ow">and</span> <span class="n">_get_code</span><span class="p">(</span><span class="n">saved_teardown</span><span class="p">)</span> <span class="ow">is</span> <span class="n">_get_code</span><span class="p">(</span><span class="n">teardown</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">saved_teardown</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">saved_teardown</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">teardown</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">teardown</span>
 
 
 <div class="viewcode-block" id="flexmock"><a class="viewcode-back" href="../api.html#flexmock.flexmock">[docs]</a><span class="k">def</span> <span class="nf">flexmock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -862,7 +861,7 @@
   <span class="k">def</span> <span class="nf">stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
     <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">flexmock_teardown</span><span class="p">()</span>
+      <span class="n">flexmock_teardown</span><span class="p">()()</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">addError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
       <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
@@ -882,9 +881,11 @@
     <span class="n">saved</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">call_runtest_hook</span>
     <span class="k">def</span> <span class="nf">call_runtest_hook</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">when</span><span class="p">):</span>
       <span class="n">ret</span> <span class="o">=</span> <span class="n">saved</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">when</span><span class="p">)</span>
+      <span class="n">teardown</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">CallInfo</span><span class="p">(</span><span class="n">flexmock_teardown</span><span class="p">(),</span> <span class="n">when</span><span class="o">=</span><span class="n">when</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">when</span> <span class="o">==</span> <span class="s">&#39;call&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">excinfo</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">CallInfo</span><span class="p">(</span><span class="n">flexmock_teardown</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">when</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">teardown</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ret</span>
     <span class="n">runner</span><span class="o">.</span><span class="n">call_runtest_hook</span> <span class="o">=</span> <span class="n">call_runtest_hook</span>
 
   <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -897,9 +898,10 @@
     <span class="kn">from</span> <span class="nn">doctest</span> <span class="kn">import</span> <span class="n">DocTestRunner</span>
     <span class="n">saved</span> <span class="o">=</span> <span class="n">DocTestRunner</span><span class="o">.</span><span class="n">run</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">compileflags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">clear_globs</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-      <span class="n">ret</span> <span class="o">=</span> <span class="n">saved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">compileflags</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">clear_globs</span><span class="p">)</span>
-      <span class="n">flexmock_teardown</span><span class="p">()</span>
-      <span class="k">return</span> <span class="n">ret</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">saved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">compileflags</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">clear_globs</span><span class="p">)</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="n">flexmock_teardown</span><span class="p">()()</span>
     <span class="n">DocTestRunner</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">run</span>
   <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
@@ -950,7 +952,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Flexmock v0.8.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Flexmock v0.8.1 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

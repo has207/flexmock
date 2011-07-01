@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Documentation &mdash; Flexmock v0.8.0 documentation</title>
+    <title>Usage Documentation &mdash; Flexmock v0.8.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.8.0 documentation" href="index.html" />
+    <link rel="top" title="Flexmock v0.8.1 documentation" href="index.html" />
     <link rel="next" title="Flexmock API" href="api.html" />
     <link rel="prev" title="Start Here" href="why.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="why.html" title="Start Here"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -116,15 +116,24 @@ so chances are they will simply just work without any special effort on Flexmock
 <p>Specify attribute/return value pairs</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
     <span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span>
-    <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
+    <span class="n">some_other_attribute</span><span class="o">=</span><span class="s">&quot;another value&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Specify methods/return value pairs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
+    <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">,</span>
+    <span class="n">some_other_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can mix method and non-method attributes by making the return value a lambda for callable attributes.</p>
 <p>Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 can assign them new methods rather than being limited to acting on methods
 they already possess.</p>
-<p>If you do not specify the arguments then any set of arguments, including none, will be matched.
-If you do not provide a return value then None is returned by default.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;some_other_method&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;another value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="partially-mock-or-stub-an-existing-object">
 <h2>Partially mock or stub an existing object<a class="headerlink" href="#partially-mock-or-stub-an-existing-object" title="Permalink to this headline">¶</a></h2>
@@ -154,6 +163,16 @@ object and overwrite its methods.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_other_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">NOTE:</th><td class="field-body">If you do not specify the arguments then any set of arguments, including none, will be matched.</td>
+</tr>
+<tr class="field"><th class="field-name">NOTE:</th><td class="field-body">If you do not provide a return value then None is returned by default.</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="stub-out-a-method-for-all-instances-of-a-class">
 <h2>Stub out a method for all instances of a class<a class="headerlink" href="#stub-out-a-method-for-all-instances-of-a-class" title="Permalink to this headline">¶</a></h2>
@@ -424,6 +443,27 @@ expectations having higher precedence than previous ones. Which means
 that if you reversed the order of the example expectations above the
 more specific expectation would never be matched.</p>
 </div>
+<div class="section" id="style">
+<h1>Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h1>
+<p>While the order of modifiers is unimportant to Flexmock, there is a preferred convention
+that will make your tests more readable.</p>
+<p>If using with_arg(), place it before should_return():</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If using the times() modifier (or its aliases: once, twice, never), place them at
+the end of the flexmock statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+</pre></div>
+</div>
+<p>It is acceptable to have the times() modifier show up in the middle of the modifier chain if
+the chain splits multiple lines and you want to ensure it shows up on the first line:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some_really_long_return_value&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some_other_really_long_return_value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">one_by_one</span>
+</pre></div>
+</div>
+</div>
 
 
           </div>
@@ -466,6 +506,7 @@ more specific expectation would never be matched.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#expectation-matching">Expectation Matching</a></li>
+<li><a class="reference internal" href="#style">Style</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -511,7 +552,7 @@ more specific expectation would never be matched.</p>
         <li class="right" >
           <a href="why.html" title="Start Here"
              >previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

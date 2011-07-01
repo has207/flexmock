@@ -73,17 +73,28 @@ Specify attribute/return value pairs
 
   mock = flexmock(
       some_attribute="value",
-      some_method=lambda: "another value")
+      some_other_attribute="another value")
 
+Specify methods/return value pairs
+
+::
+
+  mock = flexmock(
+      some_method=lambda: "value",
+      some_other_method=lambda: "another value")
  
+You can mix method and non-method attributes by making the return value a lambda for callable attributes.
+
 Flexmock Mock objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 can assign them new methods rather than being limited to acting on methods
 they already possess.
 
-If you do not specify the arguments then any set of arguments, including none, will be matched.
-If you do not provide a return value then None is returned by default.
+::
 
+  mock = flexmock(some_method=lambda: "value")
+  mock.should_receive("some_other_method").and_return("another value")
+ 
 
 Partially mock or stub an existing object
 -----------------------------------------
@@ -124,6 +135,11 @@ Note the "mock" modifier above -- the expectation chain returns an expectation o
 ::
 
     mock.should_receive('some_other_method').with_args().and_return('foo', 'bar')
+
+
+:NOTE: If you do not specify the arguments then any set of arguments, including none, will be matched.
+
+:NOTE: If you do not provide a return value then None is returned by default.
 
 
 Stub out a method for all instances of a class
@@ -472,3 +488,32 @@ The order of the expectations being defined is significant, with later
 expectations having higher precedence than previous ones. Which means
 that if you reversed the order of the example expectations above the
 more specific expectation would never be matched.
+
+
+Style
+=====
+
+While the order of modifiers is unimportant to Flexmock, there is a preferred convention
+that will make your tests more readable.
+
+If using with_arg(), place it before should_return():
+
+::
+
+    >>> flexmock(foo).should_receive('method_bar').with_args(1, 2).and_return('bar')
+
+If using the times() modifier (or its aliases: once, twice, never), place them at
+the end of the flexmock statement:
+
+::
+
+    >>> flexmock(foo).should_receive('method_bar').and_return('bar').once
+
+It is acceptable to have the times() modifier show up in the middle of the modifier chain if
+the chain splits multiple lines and you want to ensure it shows up on the first line:
+
+::
+
+    >>> flexmock(foo).should_receive('method_bar').times(2).and_return(
+    >>>     'some_really_long_return_value',
+    >>>     'some_other_really_long_return_value').one_by_one

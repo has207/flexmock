@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Mock Library Comparison &mdash; Flexmock v0.8.0 documentation</title>
+    <title>Mock Library Comparison &mdash; Flexmock v0.8.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.8.0',
+        VERSION:     '0.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.8.0 documentation" href="index.html" />
+    <link rel="top" title="Flexmock v0.8.1 documentation" href="index.html" />
     <link rel="prev" title="Flexmock API" href="api.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="api.html" title="Flexmock API"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,30 +53,45 @@
 <h2>(Flexmock for Mox, Mock or Mocker users.)<a class="headerlink" href="#flexmock-for-mox-mock-or-mocker-users" title="Permalink to this headline">¶</a></h2>
 <p>This document shows a side-by-side comparison of how to accomplish some
 basic tasks with Flexmock as well as other popular Python mocking libraries.</p>
-<p>A possibly more up-to-date version of this document, featuring more mocking
-libraries, is availale at:</p>
-<p><a class="reference external" href="http://garybernhardt.github.com/python-mock-comparison/">http://garybernhardt.github.com/python-mock-comparison/</a></p>
-<div class="section" id="simple-fake-object">
-<h3>Simple fake object<a class="headerlink" href="#simple-fake-object" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="simple-fake-object-attributes-only">
+<h3>Simple fake object (attributes only)<a class="headerlink" href="#simple-fake-object-attributes-only" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
-<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">)</span>
-<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">some_other_attribute</span><span class="o">=</span><span class="s">&quot;value2&quot;</span><span class="p">)</span>
 <span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value2&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_other_attribute</span><span class="p">)</span>
+
+<span class="c"># Mox</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">some_other_attribute</span> <span class="o">=</span> <span class="s">&quot;value2&quot;</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value2&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_other_attribute</span><span class="p">)</span>
+
+<span class="c"># Mock</span>
+<span class="n">my_mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+<span class="n">my_mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
+<span class="n">my_mock</span><span class="o">.</span><span class="n">some_other_attribute</span> <span class="o">=</span> <span class="s">&quot;value2&quot;</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">my_mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value2&quot;</span><span class="p">,</span> <span class="n">my_mock</span><span class="o">.</span><span class="n">some_other_attribute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-fake-object-with-methods">
+<h3>Simple fake object (with methods)<a class="headerlink" href="#simple-fake-object-with-methods" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;calculated value&quot;</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
 
 <span class="c"># Mox</span>
 <span class="n">mock</span> <span class="o">=</span> <span class="n">mox</span><span class="o">.</span><span class="n">MockAnything</span><span class="p">()</span>
 <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span><span class="o">.</span><span class="n">AndReturn</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
 <span class="n">mox</span><span class="o">.</span><span class="n">Replay</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
 <span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
-<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
 
 <span class="c"># Mock</span>
 <span class="n">my_mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
 <span class="n">my_mock</span><span class="o">.</span><span class="n">some_method</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s">&quot;calculated value&quot;</span>
-<span class="n">my_mock</span><span class="o">.</span><span class="n">some_attribute</span> <span class="o">=</span> <span class="s">&quot;value&quot;</span>
 <span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;calculated value&quot;</span><span class="p">,</span> <span class="n">my_mock</span><span class="o">.</span><span class="n">some_method</span><span class="p">())</span>
-<span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="n">my_mock</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -289,6 +304,9 @@ libraries, is availale at:</p>
 <span class="n">my_mock</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>A possibly more up-to-date version of this document, featuring more mocking
+libraries, is availale at:</p>
+<p><a class="reference external" href="http://garybernhardt.github.com/python-mock-comparison/">http://garybernhardt.github.com/python-mock-comparison/</a></p>
 </div>
 </div>
 </div>
@@ -303,7 +321,8 @@ libraries, is availale at:</p>
   <ul>
 <li><a class="reference internal" href="#">Mock Library Comparison</a><ul>
 <li><a class="reference internal" href="#flexmock-for-mox-mock-or-mocker-users">(Flexmock for Mox, Mock or Mocker users.)</a><ul>
-<li><a class="reference internal" href="#simple-fake-object">Simple fake object</a></li>
+<li><a class="reference internal" href="#simple-fake-object-attributes-only">Simple fake object (attributes only)</a></li>
+<li><a class="reference internal" href="#simple-fake-object-with-methods">Simple fake object (with methods)</a></li>
 <li><a class="reference internal" href="#simple-mock">Simple mock</a></li>
 <li><a class="reference internal" href="#creating-partial-mocks">Creating partial mocks</a></li>
 <li><a class="reference internal" href="#ensure-calls-are-made-in-specific-order">Ensure calls are made in specific order</a></li>
@@ -356,7 +375,7 @@ libraries, is availale at:</p>
         <li class="right" >
           <a href="api.html" title="Flexmock API"
              >previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
