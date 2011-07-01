@@ -747,7 +747,8 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       for expectation in expectations:
         expectation.reset()
     instances = [x._object for x in saved.keys()
-                 if not isinstance(x._object, Mock) and not inspect.isclass(x)]
+                 if not isinstance(x._object, Mock) and
+                 not inspect.isclass(x._object)]
     classes = [x._object for x in saved.keys() if inspect.isclass(x._object)]
     for obj in set(instances + classes):
       for attr in Mock.UPDATED_ATTRS:
@@ -763,7 +764,7 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
             pass
     for mock_object, expectations in saved.items():
       del FlexmockContainer.flexmock_objects[mock_object]
-    #if not sys.exc_info()[0]:
+
     for mock_object, expectations in saved.items():
       for expectation in expectations:
         expectation.verify()
@@ -819,11 +820,10 @@ def _update_unittest(klass):
     success = True
     try:
       flexmock_teardown()()
-    except Exception:
-      self.addError(test, sys.exc_info())
-      success = False
-    if success and hasattr(self, '_pre_flexmock_success'):
       saved_addSuccess(self, test)
+    except:
+      if hasattr(self, '_pre_flexmock_success'):
+        self.addError(test, sys.exc_info())
     return saved_stopTest(self, test)
   klass.stopTest = stopTest
 
@@ -840,6 +840,7 @@ def _hook_into_pytest():
       ret = saved(item, when)
       teardown = runner.CallInfo(flexmock_teardown(), when=when)
       if when == 'call' and not ret.excinfo:
+        teardown.result = None
         return teardown
       else:
         return ret
