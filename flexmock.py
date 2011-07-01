@@ -438,6 +438,9 @@ class Mock(object):
   def __call__(self):
     return self
 
+  def __getattr__(self, name):
+    return self
+
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 
@@ -760,10 +763,11 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
             pass
     for mock_object, expectations in saved.items():
       del FlexmockContainer.flexmock_objects[mock_object]
-    if not sys.exc_info()[0]:
-      for mock_object, expectations in saved.items():
-        for expectation in expectations:
-          expectation.verify()
+    #if not sys.exc_info()[0]:
+    for mock_object, expectations in saved.items():
+      for expectation in expectations:
+        expectation.verify()
+
     if saved_teardown:
       saved_teardown(*kargs, **kwargs)
 

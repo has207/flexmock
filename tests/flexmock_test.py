@@ -1123,6 +1123,10 @@ class RegularClass(object):
     foo.should_receive('bar').with_args('b').ordered
     assertRaises(MethodCalledOutOfOrder, foo.bar, 'b')
 
+  def test_fake_object_takes_any_attribute(self):
+    foo = flexmock()
+    assertEqual(foo, foo.bar)
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
