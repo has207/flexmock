@@ -474,15 +474,17 @@ class Mock(object):
     return self
 
   def __call__(self, *kargs, **kwargs):
-    self.__calls__[-1]['kargs'] = kargs
-    self.__calls__[-1]['kwargs'] = kwargs
-    self.__calls__[-1]['returned'] = self
+    if self.__calls__:
+      call = self.__calls__[-1]
+      call['kargs'] = kargs
+      call['kwargs'] = kwargs
+      call['returned'] = self
     return self
 
   def __getattribute__(self, name):
     attr = object.__getattribute__(self, name)
     calls = object.__getattribute__(self, '__calls__')
-    if name not in ('__calls__', '__object__', '_recordable'):
+    if name not in ORIGINAL_MOCK_ATTRS:
       calls.append({'name': name, 'returned': attr})
     return attr
 
@@ -492,15 +494,20 @@ class Mock(object):
 
   def _recordable(self, func):
     def inner(*kargs, **kwargs):
-      self.__calls__[-1]['kargs'] = kargs
-      self.__calls__[-1]['kwargs'] = kwargs
-      try:
-        ret = func(*kargs, **kwargs)
-        self.__calls__[-1]['returned'] = ret
-        return ret
-      except:
-        self.__calls__[-1]['raised'] = sys.exc_info()
-        raise
+      if not self.__calls__:
+        return func(*kargs, **kwargs)
+      else:
+        call = self.__calls__[-1]
+        call['kargs'] = kargs
+        call['kwargs'] = kwargs
+        try:
+          ret = func(*kargs, **kwargs)
+          call['returned'] = ret
+          return ret
+        except:
+          call['raised'] = sys.exc_info()
+          del call['returned']
+          raise
     return inner
 
   def should_receive(self, method):
@@ -512,6 +519,7 @@ class Mock(object):
     Returns:
       - Expectation object
     """
+    saved_length = len(self.__calls__)
     if method in Mock.UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
@@ -536,6 +544,7 @@ class Mock(object):
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
       self._update_method(expectation, method)
+    self.__calls__ = self.__calls__[:saved_length]
     if chained_methods:
       return chained_expectation
     else:
@@ -687,7 +696,31 @@ class Mock(object):
           return return_value.value
       else:
         raise InvalidMethodSignature(_format_args(method, arguments))
-    return mock_method
+
+    def mock_method_recordable_wrapper(runtime_self, *kargs, **kwargs):
+      mock_list = [o for o in FlexmockContainer.flexmock_objects
+                   if o.__object__ == runtime_self]
+      if mock_list:
+        mock_object = mock_list[0]
+        if not mock_object.__calls__:
+          return mock_method(runtime_self, *kargs, **kwargs)
+        else:
+          call = mock_object.__calls__[-1]
+          try:
+            ret = mock_method(runtime_self, *kargs, **kwargs)
+            call['kargs'] = kargs
+            call['kwargs'] = kwargs
+            call['returned'] = ret
+            return ret
+          except:
+            mock_object.__calls__[-1]['raised'] = sys.exc_info()
+            del mock_object.__calls__[-1]['returned']
+            raise
+
+    return mock_method_recordable_wrapper
+
+
+ORIGINAL_MOCK_ATTRS = dir(Mock) + ['__calls__', '__object__']
 
 
 def _arg_to_str(arg):
