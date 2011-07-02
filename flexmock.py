@@ -53,6 +53,10 @@ class InvalidExceptionMessage(FlexmockError):
   pass
 
 
+class InvalidState(FlexmockError):
+  pass
+
+
 class MethodNotCalled(FlexmockError):
   pass
 
@@ -136,12 +140,13 @@ class Expectation(object):
   raise.
   """
 
-  AT_LEAST = 'at least '
-  AT_MOST = 'at most '
+  AT_LEAST = 'at least'
+  AT_MOST = 'at most'
+  EXACTLY = 'exactly'
 
   def __init__(self, mock, name=None, return_value=None, original_method=None):
     self.method = name
-    self.modifier = ''
+    self.modifier = self.EXACTLY
     self.original_method = original_method
     self.args = None
     value = ReturnValue(return_value)
@@ -151,7 +156,11 @@ class Expectation(object):
       self.return_values.append(value)
     self.yield_values = []
     self.times_called = 0
-    self.expected_calls = None
+    self.expected_calls = {
+        self.EXACTLY: None,
+        self.AT_LEAST: None,
+        self.AT_MOST: None}
+    self.runnable = lambda: True
     self._mock = mock
     self._pass_thru = False
     self._ordered = False
@@ -226,7 +235,7 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
-    self.expected_calls = number
+    self.expected_calls[self.modifier] = number
     return self
 
   @property
@@ -297,6 +306,12 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if (self.expected_calls[self.AT_LEAST] is not None or
+        self.modifier == self.AT_LEAST):
+      raise FlexmockError('cannot use at_least modifier twice')
+    if (self.modifier == self.AT_MOST and
+        self.expected_calls[self.AT_MOST] is None):
+      raise FlexmockError('cannot use at_least with at_most unset')
     self.modifier = self.AT_LEAST
     return self
 
@@ -312,6 +327,12 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if (self.expected_calls[self.AT_MOST] is not None or
+        self.modifier == self.AT_MOST):
+      raise FlexmockError('cannot use at_most modifier twice')
+    if (self.modifier == self.AT_LEAST and
+        self.expected_calls[self.AT_LEAST] is None):
+      raise FlexmockError('cannot use at_most with at_least unset')
     self.modifier = self.AT_MOST
     return self
 
@@ -328,6 +349,18 @@ class Expectation(object):
       - self, i.e. can be chained with other Expectation methods
     """
     self._ordered = True
+    return self
+
+  def when(self, func):
+    """Sets an outside resource to be checked before executing the method.
+
+    Args:
+      - func: function to call to check if the method should be executed
+
+    Returns:
+      - self, i.e. can be chained with other Expectation methods
+    """
+    self.runnable = func
     return self
 
   def and_raise(self, exception, *kargs, **kwargs):
@@ -379,25 +412,29 @@ class Expectation(object):
     Raises:
       MethodNotCalled Exception
     """
-    if self.expected_calls is None:
-      return
     failed = False
-    if not self.modifier:
-      if self.times_called != self.expected_calls:
+    message = ''
+    if self.expected_calls[self.EXACTLY] is not None:
+      message = 'exactly %s' % self.expected_calls[self.EXACTLY]
+      if self.times_called != self.expected_calls[self.EXACTLY]:
         failed = True
-    elif self.modifier == self.AT_LEAST:
-      if self.times_called < self.expected_calls:
-        failed = True
-    elif self.modifier == self.AT_MOST:
-      if self.times_called > self.expected_calls:
-        failed = True
+    else:
+      if self.expected_calls[self.AT_LEAST] is not None:
+        message = 'at least %s' % self.expected_calls[self.AT_LEAST]
+        if self.times_called < self.expected_calls[self.AT_LEAST]:
+          failed = True
+      if self.expected_calls[self.AT_MOST] is not None:
+        if message:
+          message += ' and '
+        message += 'at most %s' % self.expected_calls[self.AT_MOST]
+        if self.times_called > self.expected_calls[self.AT_MOST]:
+          failed = True
     if not failed:
       return
     else:
       raise MethodNotCalled(
-          '%s expected to be called %s%s times, called %s times' %
-          (_format_args(self.method, self.args), self.modifier,
-           self.expected_calls, self.times_called))
+          '%s expected to be called %s times, called %s times' %
+          (_format_args(self.method, self.args), message, self.times_called))
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
@@ -426,6 +463,7 @@ class Mock(object):
       - kwargs: dict of attribute/value pairs used to initialize the mock object
     """
     self._object = self
+    self._access_stack = []
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
@@ -435,8 +473,17 @@ class Mock(object):
   def __exit__(self, type, value, traceback):
     return self
 
-  def __call__(self):
+  def __call__(self, *kargs, **kwargs):
+    self._access_stack[-1]['kargs'] = kargs
+    self._access_stack[-1]['kwargs'] = kwargs
     return self
+
+  def __getattr__(self, name):
+    if self._object != self:
+      raise AttributeError(name)
+    else:
+      self._access_stack.append({'name': name})
+      return self
 
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
@@ -453,7 +500,7 @@ class Mock(object):
     return_value = None
     if '.' in method:
       method, chained_methods = method.split('.', 1)
-    if (method.startswith('__') and
+    if (method.startswith('__') and not method.endswith('__') and
         (not inspect.isclass(self._object) and
         not inspect.ismodule(self._object))):
       method = ('_%s__%s' % (self._object.__class__.__name__,
@@ -595,6 +642,9 @@ class Mock(object):
       expectation = FlexmockContainer.get_flexmock_expectation(
           self, method, arguments)
       if expectation:
+        if not expectation.runnable():
+          raise InvalidState('%s expected to be called when %s is True' %
+                             (method, expectation.runnable))
         expectation.times_called += 1
         if expectation._pass_thru:
           return pass_thru(expectation, *kargs, **kwargs)
@@ -743,7 +793,8 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
       for expectation in expectations:
         expectation.reset()
     instances = [x._object for x in saved.keys()
-                 if not isinstance(x._object, Mock) and not inspect.isclass(x)]
+                 if not isinstance(x._object, Mock) and
+                 not inspect.isclass(x._object)]
     classes = [x._object for x in saved.keys() if inspect.isclass(x._object)]
     for obj in set(instances + classes):
       for attr in Mock.UPDATED_ATTRS:
@@ -759,10 +810,11 @@ def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
             pass
     for mock_object, expectations in saved.items():
       del FlexmockContainer.flexmock_objects[mock_object]
-    if not sys.exc_info()[0]:
-      for mock_object, expectations in saved.items():
-        for expectation in expectations:
-          expectation.verify()
+
+    for mock_object, expectations in saved.items():
+      for expectation in expectations:
+        expectation.verify()
+
     if saved_teardown:
       saved_teardown(*kargs, **kwargs)
 
@@ -807,26 +859,6 @@ def flexmock(spec=None, **kwargs):
 # RUNNER INTEGRATION
 
 
-def _update_unittest(klass):
-  saved_stopTest = klass.stopTest
-  saved_addSuccess = klass.addSuccess
-  def stopTest(self, test):
-    success = True
-    try:
-      flexmock_teardown()()
-    except Exception:
-      self.addError(test, sys.exc_info())
-      success = False
-    if success and hasattr(self, '_pre_flexmock_success'):
-      saved_addSuccess(self, test)
-    return saved_stopTest(self, test)
-  klass.stopTest = stopTest
-
-  def addSuccess(self, test):
-    self._pre_flexmock_success = True
-  klass.addSuccess = addSuccess
-
-
 def _hook_into_pytest():
   try:
     from _pytest import runner
@@ -835,6 +867,7 @@ def _hook_into_pytest():
       ret = saved(item, when)
       teardown = runner.CallInfo(flexmock_teardown(), when=when)
       if when == 'call' and not ret.excinfo:
+        teardown.result = None
         return teardown
       else:
         return ret
@@ -858,6 +891,24 @@ def _hook_into_doctest():
   except ImportError:
     pass
 _hook_into_doctest()
+
+
+def _update_unittest(klass):
+  saved_stopTest = klass.stopTest
+  saved_addSuccess = klass.addSuccess
+  def stopTest(self, test):
+    try:
+      flexmock_teardown()()
+      saved_addSuccess(self, test)
+    except:
+      if hasattr(self, '_pre_flexmock_success'):
+        self.addError(test, sys.exc_info())
+    return saved_stopTest(self, test)
+  klass.stopTest = stopTest
+
+  def addSuccess(self, test):
+    self._pre_flexmock_success = True
+  klass.addSuccess = addSuccess
 
 
 def _hook_into_unittest():
