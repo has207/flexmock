@@ -35,10 +35,7 @@ class FlexmockError(Exception):
 
 
 class AttemptingToMockBuiltin(Exception):
-  def __str__(self):
-    out = 'Python does not allow you to mock builtin modules. '
-    out += 'Consider wrapping it in a class you can mock instead'
-    return out
+  pass
 
 
 class InvalidMethodSignature(FlexmockError):
@@ -733,7 +730,13 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
       else:
         setattr(obj, attr, getattr(mock, attr))
   except TypeError:
-    raise AttemptingToMockBuiltin
+    raise AttemptingToMockBuiltin(
+        'Python does not allow you to mock builtin objects or modules. '
+        'Consider wrapping it in a class you can mock instead')
+  except AttributeError:
+    raise AttemptingToMockBuiltin(
+        'Python does not allow you to mock instances of builtin objects. '
+        'Consider wrapping it in a class you can mock instead')
   return True
 
 

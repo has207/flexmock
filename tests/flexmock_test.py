@@ -929,8 +929,11 @@ class RegularClass(object):
     foo.method('foo')
     assertRaises(MethodNotCalled, self._tear_down)
 
-  def test_flexmock_should_give_reasonable_error_for_builtins(self):
+  def test_should_give_reasonable_error_for_builtins(self):
     assertRaises(AttemptingToMockBuiltin, flexmock, object)
+
+  def test_should_give_reasonable_error_for_instances_of_builtins(self):
+    assertRaises(AttemptingToMockBuiltin, flexmock, object())
 
   def test_mock_chained_method_calls_works_with_one_level(self):
     class Foo:
