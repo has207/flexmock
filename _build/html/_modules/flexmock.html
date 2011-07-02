@@ -101,6 +101,10 @@
   <span class="k">pass</span>
 
 
+<span class="k">class</span> <span class="nc">InvalidState</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+  <span class="k">pass</span>
+
+
 <span class="k">class</span> <span class="nc">MethodNotCalled</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
@@ -184,12 +188,13 @@
 <span class="sd">  raise.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">AT_LEAST</span> <span class="o">=</span> <span class="s">&#39;at least &#39;</span>
-  <span class="n">AT_MOST</span> <span class="o">=</span> <span class="s">&#39;at most &#39;</span>
+  <span class="n">AT_LEAST</span> <span class="o">=</span> <span class="s">&#39;at least&#39;</span>
+  <span class="n">AT_MOST</span> <span class="o">=</span> <span class="s">&#39;at most&#39;</span>
+  <span class="n">EXACTLY</span> <span class="o">=</span> <span class="s">&#39;exactly&#39;</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">original_method</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXACTLY</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">original_method</span> <span class="o">=</span> <span class="n">original_method</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">ReturnValue</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span>
@@ -199,7 +204,11 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">return_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">yield_values</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">EXACTLY</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">runnable</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">True</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_mock</span> <span class="o">=</span> <span class="n">mock</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_pass_thru</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_ordered</span> <span class="o">=</span> <span class="bp">False</span>
@@ -274,7 +283,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span> <span class="o">=</span> <span class="n">number</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">modifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">number</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
   <span class="nd">@property</span>
@@ -345,6 +354,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;cannot use at_least modifier twice&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span> <span class="ow">and</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;cannot use at_least with at_most unset&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
@@ -360,6 +375,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;cannot use at_most modifier twice&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span> <span class="ow">and</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;cannot use at_most with at_least unset&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
@@ -378,6 +399,18 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_ordered</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
+  <span class="k">def</span> <span class="nf">when</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets an outside resource to be checked before executing the method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      - func: function to call to check if the method should be executed</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">runnable</span> <span class="o">=</span> <span class="n">func</span>
+    <span class="k">return</span> <span class="bp">self</span>
+
 <div class="viewcode-block" id="Expectation.and_raise"><a class="viewcode-back" href="../api.html#flexmock.Expectation.and_raise">[docs]</a>  <span class="k">def</span> <span class="nf">and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Specifies the exception to be raised when this expectation is met.</span>
 
@@ -427,25 +460,29 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      MethodNotCalled Exception</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span>
     <span class="n">failed</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">:</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EXACTLY</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;exactly </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EXACTLY</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EXACTLY</span><span class="p">]:</span>
         <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">:</span>
-        <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">:</span>
-        <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;at least </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">]:</span>
+          <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+          <span class="n">message</span> <span class="o">+=</span> <span class="s">&#39; and &#39;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s">&#39;at most </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">]:</span>
+          <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">failed</span><span class="p">:</span>
       <span class="k">return</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">MethodNotCalled</span><span class="p">(</span>
-          <span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called </span><span class="si">%s%s</span><span class="s"> times, called </span><span class="si">%s</span><span class="s"> times&#39;</span> <span class="o">%</span>
-          <span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">modifier</span><span class="p">,</span>
-           <span class="bp">self</span><span class="o">.</span><span class="n">expected_calls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span><span class="p">))</span>
+          <span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called </span><span class="si">%s</span><span class="s"> times, called </span><span class="si">%s</span><span class="s"> times&#39;</span> <span class="o">%</span>
+          <span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="n">message</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">times_called</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the methods overriden by this expectation to their originals.&quot;&quot;&quot;</span>
@@ -474,6 +511,7 @@
 <span class="sd">      - kwargs: dict of attribute/value pairs used to initialize the mock object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_access_stack</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
@@ -483,8 +521,17 @@
   <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_access_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;kargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_access_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="k">return</span> <span class="bp">self</span>
+
+  <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_access_stack</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+      <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="Mock.should_receive"><a class="viewcode-back" href="../api.html#flexmock.Mock.should_receive">[docs]</a>  <span class="k">def</span> <span class="nf">should_receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds a method Expectation to the provided class or instance.</span>
@@ -501,7 +548,7 @@
     <span class="n">return_value</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">method</span><span class="p">:</span>
       <span class="n">method</span><span class="p">,</span> <span class="n">chained_methods</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">method</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span>
         <span class="p">(</span><span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">)</span> <span class="ow">and</span>
         <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismodule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">))):</span>
       <span class="n">method</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;_</span><span class="si">%s</span><span class="s">__</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
@@ -643,6 +690,9 @@
       <span class="n">expectation</span> <span class="o">=</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">get_flexmock_expectation</span><span class="p">(</span>
           <span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">expectation</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">():</span>
+          <span class="k">raise</span> <span class="n">InvalidState</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called when </span><span class="si">%s</span><span class="s"> is True&#39;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">))</span>
         <span class="n">expectation</span><span class="o">.</span><span class="n">times_called</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">expectation</span><span class="o">.</span><span class="n">_pass_thru</span><span class="p">:</span>
           <span class="k">return</span> <span class="n">pass_thru</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -791,7 +841,8 @@
       <span class="k">for</span> <span class="n">expectation</span> <span class="ow">in</span> <span class="n">expectations</span><span class="p">:</span>
         <span class="n">expectation</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="n">instances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span>
+                 <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span><span class="p">)]</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_object</span><span class="p">)]</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">instances</span> <span class="o">+</span> <span class="n">classes</span><span class="p">):</span>
       <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">Mock</span><span class="o">.</span><span class="n">UPDATED_ATTRS</span><span class="p">:</span>
@@ -807,10 +858,11 @@
             <span class="k">pass</span>
     <span class="k">for</span> <span class="n">mock_object</span><span class="p">,</span> <span class="n">expectations</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="k">del</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="n">mock_object</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
-      <span class="k">for</span> <span class="n">mock_object</span><span class="p">,</span> <span class="n">expectations</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">expectation</span> <span class="ow">in</span> <span class="n">expectations</span><span class="p">:</span>
-          <span class="n">expectation</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">mock_object</span><span class="p">,</span> <span class="n">expectations</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">for</span> <span class="n">expectation</span> <span class="ow">in</span> <span class="n">expectations</span><span class="p">:</span>
+        <span class="n">expectation</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">saved_teardown</span><span class="p">:</span>
       <span class="n">saved_teardown</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -855,26 +907,6 @@
 <span class="c"># RUNNER INTEGRATION</span>
 
 </div>
-<span class="k">def</span> <span class="nf">_update_unittest</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
-  <span class="n">saved_stopTest</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span>
-  <span class="n">saved_addSuccess</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span>
-  <span class="k">def</span> <span class="nf">stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
-    <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">flexmock_teardown</span><span class="p">()()</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">addError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
-      <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="n">success</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_pre_flexmock_success&#39;</span><span class="p">):</span>
-      <span class="n">saved_addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">saved_stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
-  <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span> <span class="o">=</span> <span class="n">stopTest</span>
-
-  <span class="k">def</span> <span class="nf">addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_pre_flexmock_success</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span> <span class="o">=</span> <span class="n">addSuccess</span>
-
-
 <span class="k">def</span> <span class="nf">_hook_into_pytest</span><span class="p">():</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">_pytest</span> <span class="kn">import</span> <span class="n">runner</span>
@@ -883,6 +915,7 @@
       <span class="n">ret</span> <span class="o">=</span> <span class="n">saved</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">when</span><span class="p">)</span>
       <span class="n">teardown</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">CallInfo</span><span class="p">(</span><span class="n">flexmock_teardown</span><span class="p">(),</span> <span class="n">when</span><span class="o">=</span><span class="n">when</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">when</span> <span class="o">==</span> <span class="s">&#39;call&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">excinfo</span><span class="p">:</span>
+        <span class="n">teardown</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="n">teardown</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -906,6 +939,24 @@
   <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 <span class="n">_hook_into_doctest</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_update_unittest</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+  <span class="n">saved_stopTest</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span>
+  <span class="n">saved_addSuccess</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span>
+  <span class="k">def</span> <span class="nf">stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">flexmock_teardown</span><span class="p">()()</span>
+      <span class="n">saved_addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_pre_flexmock_success&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">saved_stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+  <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span> <span class="o">=</span> <span class="n">stopTest</span>
+
+  <span class="k">def</span> <span class="nf">addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pre_flexmock_success</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span> <span class="o">=</span> <span class="n">addSuccess</span>
 
 
 <span class="k">def</span> <span class="nf">_hook_into_unittest</span><span class="p">():</span>

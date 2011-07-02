@@ -9,23 +9,34 @@ Creating fake objects on the fly
 --------------------------------
 
 
-Making a new object in Python requires either defining a new class with all the
-fake methods you're interested in emulating and then instantiating it. Or,
-creating an instance of "object" and directly assigning it member values.
+Making a new object in Python requires defining a new class with all the
+fake methods you're interested in emulating and then instantiating it.
 
-Both of these approaches are a bit kludgy and feel awkward when writing tests.
+::
+
+  class FakePlane(object):
+      operational = True
+      model = "MIG-21"
+
+  plane = FakePlane()
+
+Doing this sort of thing quickly becomes extremely cumbersome when writing tests.
 Flexmock provides a simple way to generate a fake object on the fly using the flexmock()
 function:
+
+::
+
+  plane = flexmock(operational=True, model="MIG-21")
+
+
+It is also possible to add methods to this object using the same notation and Python's handy
+lambda keyword:
 
 ::
 
   plane = flexmock(operational=True,
                    model="MIG-21",
                    fly=lambda: None)
-
-
-The above quickly generates a plane object with just the methods and attributes
-that the code under test is going to touch.
 
 
 Replacing parts of existing objects and classes (stubs)
