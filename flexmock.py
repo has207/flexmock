@@ -859,25 +859,6 @@ def flexmock(spec=None, **kwargs):
 # RUNNER INTEGRATION
 
 
-def _update_unittest(klass):
-  saved_stopTest = klass.stopTest
-  saved_addSuccess = klass.addSuccess
-  def stopTest(self, test):
-    success = True
-    try:
-      flexmock_teardown()()
-      saved_addSuccess(self, test)
-    except:
-      if hasattr(self, '_pre_flexmock_success'):
-        self.addError(test, sys.exc_info())
-    return saved_stopTest(self, test)
-  klass.stopTest = stopTest
-
-  def addSuccess(self, test):
-    self._pre_flexmock_success = True
-  klass.addSuccess = addSuccess
-
-
 def _hook_into_pytest():
   try:
     from _pytest import runner
@@ -910,6 +891,24 @@ def _hook_into_doctest():
   except ImportError:
     pass
 _hook_into_doctest()
+
+
+def _update_unittest(klass):
+  saved_stopTest = klass.stopTest
+  saved_addSuccess = klass.addSuccess
+  def stopTest(self, test):
+    try:
+      flexmock_teardown()()
+      saved_addSuccess(self, test)
+    except:
+      if hasattr(self, '_pre_flexmock_success'):
+        self.addError(test, sys.exc_info())
+    return saved_stopTest(self, test)
+  klass.stopTest = stopTest
+
+  def addSuccess(self, test):
+    self._pre_flexmock_success = True
+  klass.addSuccess = addSuccess
 
 
 def _hook_into_unittest():
