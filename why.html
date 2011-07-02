@@ -57,10 +57,11 @@
 <div class="section" id="creating-fake-objects-on-the-fly">
 <h2>Creating fake objects on the fly<a class="headerlink" href="#creating-fake-objects-on-the-fly" title="Permalink to this headline">¶</a></h2>
 <p>Making a new object in Python requires defining a new class with all the
-fake methods you&#8217;re interested in emulating and then instantiating it.</p>
+fake methods and attributes you&#8217;re interested in emulating and then instantiating it.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FakePlane</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">operational</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">model</span> <span class="o">=</span> <span class="s">&quot;MIG-21&quot;</span>
+    <span class="k">def</span> <span class="nf">fly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
 
 <span class="n">plane</span> <span class="o">=</span> <span class="n">FakePlane</span><span class="p">()</span>
 </pre></div>
@@ -72,7 +73,7 @@ function:</p>
 </pre></div>
 </div>
 <p>It is also possible to add methods to this object using the same notation and Python&#8217;s handy
-lambda keyword:</p>
+lambda keyword to generate an inline function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">operational</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                  <span class="n">model</span><span class="o">=</span><span class="s">&quot;MIG-21&quot;</span><span class="p">,</span>
                  <span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span>

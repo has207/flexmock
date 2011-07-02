@@ -10,13 +10,14 @@ Creating fake objects on the fly
 
 
 Making a new object in Python requires defining a new class with all the
-fake methods you're interested in emulating and then instantiating it.
+fake methods and attributes you're interested in emulating and then instantiating it.
 
 ::
 
   class FakePlane(object):
       operational = True
       model = "MIG-21"
+      def fly(self): pass
 
   plane = FakePlane()
 
@@ -30,7 +31,7 @@ function:
 
 
 It is also possible to add methods to this object using the same notation and Python's handy
-lambda keyword:
+lambda keyword to generate an inline function:
 
 ::
 
