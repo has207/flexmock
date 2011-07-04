@@ -47,7 +47,7 @@ def assertEqual(expected, received, msg=''):
 class RegularClass(object):
 
   def _tear_down(self):
-    return flexmock_teardown()()
+    return flexmock_teardown()
 
   def test_flexmock_should_create_mock_object(self):
     mock = flexmock()
@@ -458,12 +458,11 @@ class RegularClass(object):
     assertEqual('instance', user.method())
     assertEqual('class', user2.method())
 
-  def test_flexmock_should_not_blow_up_on_should_call_for_class_mock(self):
+  def test_flexmock_should_blow_up_on_should_call_for_class_mock(self):
     class User:
       def foo(self):
         return 'class'
-    flexmock(User).should_call('foo')
-    self._tear_down()
+    assertRaises(FlexmockError, flexmock(User).should_call, 'foo')
 
   def test_flexmock_should_mock_new_instances_with_multiple_params(self):
     class User(object): pass
@@ -1247,12 +1246,13 @@ class RegularClass(object):
                  {'name': 'hjkl', 'kargs': (), 'kwargs': {}, 'returned': foo}],
                 foo.__calls__)
 
+
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
     pass
 
   def _tear_down(self):
-    return flexmock_teardown()()
+    return flexmock_teardown()
 
 
 if sys.version_info >= (2, 6):

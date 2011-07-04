@@ -23,6 +23,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 import inspect
+import os
 import re
 import sys
 import types
@@ -527,10 +528,12 @@ class Mock(object):
     if '.' in method:
       method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and not method.endswith('__') and
-        (not inspect.isclass(self.__object__) and
-        not inspect.ismodule(self.__object__))):
-      method = ('_%s__%s' % (self.__object__.__class__.__name__,
-                             method.lstrip('_')))
+        not inspect.ismodule(self.__object__)):
+      if inspect.isclass(self.__object__):
+        name = self.__object__.__name__
+      else:
+        name = self.__object__.__class__.__name__
+      method = '_%s__%s' % (name, method.lstrip('_'))
     if (not isinstance(self.__object__, Mock) and
         not hasattr(self.__object__, method)):
       raise MethodDoesNotExist('%s does not have method %s' %
@@ -557,9 +560,14 @@ class Mock(object):
     version. However, we can still keep track of how many times it's called and
     with what arguments, and apply expectations accordingly.
 
+    should_call is meaningless/not allowed for partial class mocks.
+
     Returns:
       - Expectation object
     """
+    if (inspect.isclass(self.__object__) and
+        not isinstance(self.__object__, Mock)):  # isclass is confused by Mock
+      raise FlexmockError('should_call cannot be called on a class mock')
     expectation = self.should_receive(method)
     return expectation.replace_with(expectation.original_method)
 
@@ -662,7 +670,7 @@ class Mock(object):
           not match_return_values(expectation.return_values[0].value,
                                   return_values)):
         raise (InvalidMethodSignature('expected to return %s, returned %s' %
-               (expectation.return_values[0], return_values)))
+               (expectation.return_values[0].value, return_values)))
       return return_values
 
     def mock_method(runtime_self, *kargs, **kwargs):
@@ -721,6 +729,23 @@ class Mock(object):
 
 
 ORIGINAL_MOCK_ATTRS = dir(Mock) + ['__calls__', '__object__']
+
+
+def __should_call_connected(self, method):
+  if inspect.isclass(self.__object__):
+    return Expectation(self)
+
+  expectation = self.should_receive(method)
+  return expectation.replace_with(expectation.original_method)
+
+
+def __should_receive_connected(self, method):
+  return __should_call_connected(self, method)
+
+
+if os.environ.get('FLEXMOCK_MODE', '').lower() == 'connected':
+  Mock.should_call = __should_call_connected
+  Mock.should_receive = __should_receive_connected
 
 
 def _arg_to_str(arg):
@@ -834,53 +859,37 @@ def _arguments_match(arg, expected_arg):
     return False
 
 
-def flexmock_teardown(saved_teardown=None, *kargs, **kwargs):
-  """Generates flexmock-specific teardown function.
+def flexmock_teardown():
+  """Performs lexmock-specific teardown tasks."""
 
-  Args:
-    - kargs: passed to saved_teardown
-    - kwargs: passed to saved_teardown
-
-  Returns:
-    - function
-  """
-  def teardown(*kargs, **kwargs):
-    saved = {}
-    for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
-      saved[mock_object] = expectations[:]
-      for expectation in expectations:
-        expectation.reset()
-    instances = [x.__object__ for x in saved.keys()
-                 if not isinstance(x.__object__, Mock) and
-                 not inspect.isclass(x.__object__)]
-    classes = [x.__object__ for x in saved.keys()
-               if inspect.isclass(x.__object__)]
-    for obj in set(instances + classes):
-      for attr in Mock.UPDATED_ATTRS:
-        if (hasattr(obj, '__dict__') and
-            type(obj.__dict__) is dict and attr in obj.__dict__):
+  saved = {}
+  for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
+    saved[mock_object] = expectations[:]
+    for expectation in expectations:
+      expectation.reset()
+  instances = [x.__object__ for x in saved.keys()
+               if not isinstance(x.__object__, Mock) and
+               not inspect.isclass(x.__object__)]
+  classes = [x.__object__ for x in saved.keys()
+             if inspect.isclass(x.__object__)]
+  for obj in set(instances + classes):
+    for attr in Mock.UPDATED_ATTRS:
+      if (hasattr(obj, '__dict__') and
+          type(obj.__dict__) is dict and attr in obj.__dict__):
+        if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+          del obj.__dict__[attr]
+      elif hasattr(obj, attr):
+        try:
           if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
-            del obj.__dict__[attr]
-        elif hasattr(obj, attr):
-          try:
-            if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
-              delattr(obj, attr)
-          except AttributeError:
-            pass
-    for mock_object, expectations in saved.items():
-      del FlexmockContainer.flexmock_objects[mock_object]
+            delattr(obj, attr)
+        except AttributeError:
+          pass
+  for mock_object, expectations in saved.items():
+    del FlexmockContainer.flexmock_objects[mock_object]
 
-    for mock_object, expectations in saved.items():
-      for expectation in expectations:
-        expectation.verify()
-
-    if saved_teardown:
-      saved_teardown(*kargs, **kwargs)
-
-  if saved_teardown and _get_code(saved_teardown) is _get_code(teardown):
-    return saved_teardown
-  else:
-    return teardown
+  for mock_object, expectations in saved.items():
+    for expectation in expectations:
+      expectation.verify()
 
 
 def flexmock(spec=None, **kwargs):
@@ -893,21 +902,19 @@ def flexmock(spec=None, **kwargs):
   it unnecessary to make successive flexmock() calls on the same
   objects to generate new expectations.
 
-  Example:
+  Examples:
     >>> flexmock(SomeClass)
-    <flexmock.Mock object at 0xeb9b0>
     >>> SomeClass.should_receive('some_method')
-    <flexmock.Expectation object at 0xe16b0>
 
-  NOTE: it's safe to call flexmock() on the same object, it will return the
-  same Mock object each time.
+  NOTE: it's safe to call flexmock() on the same object, it will detect
+  when an object has already been partially mocked and return it each time.
 
   Args:
     - spec: object (or class or module) to mock
     - kwargs: method/return_value pairs to attach to the object
 
   Returns:
-    - Mock object, based on spec if one was provided.
+    Mock object if no spec is provided. Otherwise return the spec object.
   """
   if spec:
     return _create_partial_mock(spec, **kwargs)
@@ -924,7 +931,7 @@ def _hook_into_pytest():
     saved = runner.call_runtest_hook
     def call_runtest_hook(item, when):
       ret = saved(item, when)
-      teardown = runner.CallInfo(flexmock_teardown(), when=when)
+      teardown = runner.CallInfo(flexmock_teardown, when=when)
       if when == 'call' and not ret.excinfo:
         teardown.result = None
         return teardown
@@ -945,7 +952,7 @@ def _hook_into_doctest():
       try:
         return saved(self, test, compileflags, out, clear_globs)
       finally:
-        flexmock_teardown()()
+        flexmock_teardown()
     DocTestRunner.run = run
   except ImportError:
     pass
@@ -957,7 +964,7 @@ def _update_unittest(klass):
   saved_addSuccess = klass.addSuccess
   def stopTest(self, test):
     try:
-      flexmock_teardown()()
+      flexmock_teardown()
       saved_addSuccess(self, test)
     except:
       if hasattr(self, '_pre_flexmock_success'):
