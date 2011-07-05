@@ -483,13 +483,11 @@ class Mock(object):
     return self
 
   def __getattribute__(self, name):
+    attr = object.__getattribute__(self, name)
     if name not in ORIGINAL_MOCK_ATTRS:
-      attr = object.__getattribute__(self, name)
       calls = object.__getattribute__(self, '__calls__')
       calls.append({'name': name, 'returned': attr})
-      return attr
-    else:
-      return object.__getattribute__(self, name)
+    return attr
 
   def __getattr__(self, name):
     self.__calls__.append({'name': name, 'returned': self})
@@ -861,30 +859,35 @@ def flexmock_teardown():
   """Performs lexmock-specific teardown tasks."""
 
   saved = {}
+  instances = []
+  classes = []
   for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
     saved[mock_object] = expectations[:]
     for expectation in expectations:
       expectation.reset()
-  instances = [x.__object__ for x in saved.keys()
-               if not isinstance(x.__object__, Mock) and
-               not inspect.isclass(x.__object__)]
-  classes = [x.__object__ for x in saved.keys()
-             if inspect.isclass(x.__object__)]
-  for obj in set(instances + classes):
+  for mock in saved.keys():
+    obj = mock.__object__
+    if not isinstance(obj, Mock) and not inspect.isclass(obj):
+      instances += [mock.__object__]
+    if inspect.isclass(obj):
+      classes += [obj]
+  for obj in instances + classes:
     for attr in Mock.UPDATED_ATTRS:
-      if (hasattr(obj, '__dict__') and
-          type(obj.__dict__) is dict and attr in obj.__dict__):
-        if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
-          del obj.__dict__[attr]
-      elif hasattr(obj, attr):
+      try:
+        obj_dict = obj.__dict__
+        if _get_code(obj_dict[attr]) is _get_code(Mock.__dict__[attr]):
+          del obj_dict[attr]
+      except:
         try:
-          if (_get_code(getattr(obj, attr)) is _get_code(getattr(Mock, attr))):
+          if _get_code(getattr(obj, attr)) is _get_code(Mock.__dict__[attr]):
             delattr(obj, attr)
         except AttributeError:
           pass
-  for mock_object, expectations in saved.items():
+  for mock_object in saved:
     del FlexmockContainer.flexmock_objects[mock_object]
 
+  # make sure this is done last to keep exceptions here from breaking
+  # any of the previous steps that cleanup all the changes
   for mock_object, expectations in saved.items():
     for expectation in expectations:
       expectation.verify()
