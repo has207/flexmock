@@ -522,7 +522,9 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    saved_length = len(self.__calls__)
+    calls = self.__calls__
+    obj = self.__object__
+    saved_length = len(calls)
     if method in Mock.UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
@@ -530,16 +532,14 @@ class Mock(object):
     if '.' in method:
       method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and not method.endswith('__') and
-        not inspect.ismodule(self.__object__)):
-      if inspect.isclass(self.__object__):
-        name = self.__object__.__name__
+        not inspect.ismodule(obj)):
+      if inspect.isclass(obj):
+        name = obj.__name__
       else:
-        name = self.__object__.__class__.__name__
+        name = obj.__class__.__name__
       method = '_%s__%s' % (name, method.lstrip('_'))
-    if (not isinstance(self.__object__, Mock) and
-        not hasattr(self.__object__, method)):
-      raise MethodDoesNotExist('%s does not have method %s' %
-                               (self.__object__, method))
+    if not isinstance(obj, Mock) and not hasattr(obj, method):
+      raise MethodDoesNotExist('%s does not have method %s' % (obj, method))
     if chained_methods:
       return_value = Mock()
       chained_expectation = return_value.should_receive(chained_methods)
@@ -549,7 +549,7 @@ class Mock(object):
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
       self._update_method(expectation, method)
-    self.__calls__ = self.__calls__[:saved_length]
+    calls = calls[:saved_length]
     if chained_methods:
       return chained_expectation
     else:
@@ -567,8 +567,8 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    if (inspect.isclass(self.__object__) and
-        not isinstance(self.__object__, Mock)):  # isclass is confused by Mock
+    obj = self.__object__
+    if inspect.isclass(obj) and not isinstance(obj, Mock):
       raise FlexmockError('should_call cannot be called on a class mock')
     expectation = self.should_receive(method)
     return expectation.replace_with(expectation.original_method)
@@ -603,20 +603,16 @@ class Mock(object):
 
   def _update_method(self, expectation, method):
     method_instance = self.__create_mock_method(method)
-    if (hasattr(self.__object__, method) and
-        not expectation.original_method):
-      if (hasattr(self.__object__, '__dict__') and
-          method in self.__object__.__dict__):
-        expectation.original_method = self.__object__.__dict__[method]
+    obj = self.__object__
+    if hasattr(obj, method) and not expectation.original_method:
+      if hasattr(obj, '__dict__') and method in obj.__dict__:
+        expectation.original_method = obj.__dict__[method]
       else:
-        expectation.original_method = getattr(self.__object__, method)
-    if (hasattr(self.__object__, '__dict__') and
-        type(self.__object__.__dict__) is dict):
-      self.__object__.__dict__[method] = types.MethodType(
-          method_instance, self.__object__)
+        expectation.original_method = getattr(obj, method)
+    if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
+      obj.__dict__[method] = types.MethodType(method_instance, obj)
     else:
-      setattr(self.__object__, method, types.MethodType(
-          method_instance, self.__object__))
+      setattr(obj, method, types.MethodType(method_instance, obj))
 
   def __create_mock_method(self, method):
     def generator_method(yield_values):
