@@ -463,7 +463,7 @@ class Mock(object):
     self.__calls__ = []
     self.__object__ = self
     for attr, value in kwargs.items():
-      if hasattr(value, '__call__'):
+      if hasattr(value, '__call__') and not isinstance(value, Mock):
         setattr(self, attr, self._recordable(value))
       else:
         setattr(self, attr, value)
