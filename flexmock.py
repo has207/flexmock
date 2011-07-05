@@ -483,11 +483,13 @@ class Mock(object):
     return self
 
   def __getattribute__(self, name):
-    attr = object.__getattribute__(self, name)
-    calls = object.__getattribute__(self, '__calls__')
     if name not in ORIGINAL_MOCK_ATTRS:
+      attr = object.__getattribute__(self, name)
+      calls = object.__getattribute__(self, '__calls__')
       calls.append({'name': name, 'returned': attr})
-    return attr
+      return attr
+    else:
+      return object.__getattribute__(self, name)
 
   def __getattr__(self, name):
     self.__calls__.append({'name': name, 'returned': self})
