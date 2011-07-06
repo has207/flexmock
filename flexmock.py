@@ -171,6 +171,18 @@ class Expectation(object):
   def __call__(self):
     return self
 
+  def __getattribute__(self, name):
+    if name == 'once':
+      return self.times(1)
+    elif name == 'twice':
+      return self.times(2)
+    elif name == 'never':
+      return self.times(0)
+    elif name in ('at_least', 'at_most', 'ordered', 'one_by_one'):
+      return object.__getattribute__(self, name)()
+    else:
+      return object.__getattribute__(self, name)
+
   @property
   def mock(self):
     """Return the mock associated with this expectation.
@@ -236,7 +248,6 @@ class Expectation(object):
     self.expected_calls[self.modifier] = number
     return self
 
-  @property
   def one_by_one(self):
     """Modifies the return value to be treated as a list of return values.
 
@@ -259,40 +270,6 @@ class Expectation(object):
           self.return_values.append(value)
     return self
 
-  @property
-  def once(self):
-    """Alias for times(1).
-
-    This is a property method so must be called without parentheses.
-
-    Returns:
-      - self, i.e. can be chained with other Expectation methods
-    """
-    return self.times(1)
-
-  @property
-  def twice(self):
-    """Alias for times(2).
-
-    This is a property method so must be called without parentheses.
-
-    Returns:
-      - self, i.e. can be chained with other Expectation methods
-    """
-    return self.times(2)
-
-  @property
-  def never(self):
-    """Alias for times(0).
-
-    This is a property method so must be called without parentheses.
-
-    Returns:
-      - self, i.e. can be chained with other Expectation methods
-    """
-    return self.times(0)
-
-  @property
   def at_least(self):
     """Modifies the associated times() expectation.
 
@@ -313,7 +290,6 @@ class Expectation(object):
     self.modifier = self.AT_LEAST
     return self
 
-  @property
   def at_most(self):
     """Modifies the associated "times" expectation.
 
@@ -334,7 +310,6 @@ class Expectation(object):
     self.modifier = self.AT_MOST
     return self
 
-  @property
   def ordered(self):
     """Makes the expectation respect the order of should_receive statements.
 
