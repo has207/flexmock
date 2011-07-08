@@ -468,6 +468,22 @@ class RegularClass(object):
         return 'class'
     assertRaises(FlexmockError, flexmock(User).should_call, 'foo')
 
+  def test_flexmock_should_not_blow_up_on_should_call_for_class_methods(self):
+    class User:
+      @classmethod
+      def foo(self):
+        return 'class'
+    flexmock(User).should_call('foo')
+    assertEqual('class', User.foo())
+
+  def test_flexmock_should_not_blow_up_on_should_call_for_static_methods(self):
+    class User:
+      @staticmethod
+      def foo():
+        return 'static'
+    flexmock(User).should_call('foo')
+    assertEqual('static', User.foo())
+
   def test_flexmock_should_mock_new_instances_with_multiple_params(self):
     class User(object): pass
     class Group(object):
