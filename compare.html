@@ -276,6 +276,10 @@ basic tasks with Flexmock as well as other popular Python mocking libraries.</p>
 </div>
 <div class="section" id="mocking-the-builtin-open-used-as-a-context-manager">
 <h3>Mocking the builtin open used as a context manager<a class="headerlink" href="#mocking-the-builtin-open-used-as-a-context-manager" title="Permalink to this headline">¶</a></h3>
+<p>The following examples work in an interactive Python session but may not work
+quite the same way in a script, or with Python 3.0+. See examples in the
+<a class="reference external" href="http://has207.github.com/flexmock/user-guide.html#mocking-builtin-functions">User Guide</a>
+for more specific flexmock instructions on mocking builtins.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Flexmock</span>
 <span class="n">flexmock</span><span class="p">(</span><span class="n">__builtins__</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;open&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;file_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
     <span class="n">flexmock</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;some data&#39;</span><span class="p">)</span>
