@@ -1,4 +1,5 @@
 from flexmock import flexmock
+import sys
 import unittest
 
 class ModernClass(object):
@@ -8,6 +9,19 @@ class ModernClass(object):
     with foo as mock:
       mock.should_receive('bar').and_return('baz')
     assert foo.bar() == 'baz'
+
+  def test_builtin_open(self):
+    if sys.version_info < (3, 0):
+      mock = flexmock(sys.modules['__builtin__'])
+    else:
+      mock = flexmock(sys.modules['builtins'])
+    mock.should_call('open')
+    mock.should_receive('open').once.with_args('file_name').and_return(
+      flexmock(read=lambda: 'some data'))
+    with open('file_name') as f:
+      data = f.read()
+    self.assertEqual('some data', data)
+
 
 
 class TestFlexmockUnittestModern(ModernClass, unittest.TestCase):
