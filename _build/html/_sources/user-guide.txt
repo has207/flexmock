@@ -409,6 +409,33 @@ There are times when it is useful to replace a method with a custom lambda or fu
 
    flexmock(some_object).should_receive('some_method').replace_with(lambda x, y, z: y == 5)
 
+Mocking builtin functions
+-------------------------
+
+Mocking or stubbing out builtin functions, such as open(), can be slightly tricky.
+The "builtins" module is accessed differenty in interactive Python sessions versus
+running applications and named differently in Python 3.0 and above.
+It is also not always obvious when the builtin function you are trying to mock might be
+internally called by the test runner and cause unexpected behavior in the test.
+As a result, the recommended way to mock out builtin functions is to always specify
+a fall-through with should_call() first and use with_args() to limit the scope of
+your mock or stub to just the specific invocation you are trying to replace:
+
+::
+
+   # python 2.4+
+   mock = flexmock(sys.modules['__builtin__'])
+   mock.should_call('open')  # set the fall-through
+   mock.should_receive('open').with_args('/your/file').and_return(
+       flexmock(read=lambda: 'file contents'))
+
+   # python 3.0+
+   mock = flexmock(sys.modules['builtins'])
+   mock.should_call('open')  # set the fall-through
+   mock.should_receive('open').with_args('/your/file').and_return(
+       flexmock(read=lambda: 'file contents'))
+
+
 Expectation Matching
 ====================
 

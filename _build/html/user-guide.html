@@ -383,6 +383,30 @@ intermediate method, you can always fall back to the above long version.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="mocking-builtin-functions">
+<h2>Mocking builtin functions<a class="headerlink" href="#mocking-builtin-functions" title="Permalink to this headline">¶</a></h2>
+<p>Mocking or stubbing out builtin functions, such as open(), can be slightly tricky.
+The &#8220;builtins&#8221; module is accessed differenty in interactive Python sessions versus
+running applications and named differently in Python 3.0 and above.
+It is also not always obvious when the builtin function you are trying to mock might be
+internally called by the test runner and cause unexpected behavior in the test.
+As a result, the recommended way to mock out builtin functions is to always specify
+a fall-through with should_call() first and use with_args() to limit the scope of
+your mock or stub to just the specific invocation you are trying to replace:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># python 2.4+</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s">&#39;__builtin__&#39;</span><span class="p">])</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;open&#39;</span><span class="p">)</span>  <span class="c"># set the fall-through</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;open&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;/your/file&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+    <span class="n">flexmock</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;file contents&#39;</span><span class="p">))</span>
+
+<span class="c"># python 3.0+</span>
+<span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s">&#39;builtins&#39;</span><span class="p">])</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;open&#39;</span><span class="p">)</span>  <span class="c"># set the fall-through</span>
+<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;open&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;/your/file&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+    <span class="n">flexmock</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;file contents&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="expectation-matching">
 <h1>Expectation Matching<a class="headerlink" href="#expectation-matching" title="Permalink to this headline">¶</a></h1>
@@ -503,6 +527,7 @@ the chain splits multiple lines and you want to ensure it shows up on the first 
 <li><a class="reference internal" href="#enforcing-call-order">Enforcing call order</a></li>
 <li><a class="reference internal" href="#chained-methods">Chained methods</a></li>
 <li><a class="reference internal" href="#replacing-methods-with-custom-functions">Replacing methods with custom functions</a></li>
+<li><a class="reference internal" href="#mocking-builtin-functions">Mocking builtin functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#expectation-matching">Expectation Matching</a></li>
