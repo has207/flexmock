@@ -262,9 +262,7 @@ If either and_return() or and_raise() is provided, flexmock will
 verify that the return value matches the expected return value or
 exception.
 
-NOTE: should_call() changes the behavior of and_return()
-and and_raise() to specify expectations rather than generate given
-values or exceptions.
+:NOTE: should_call() changes the behavior of and_return() and and_raise() to specify expectations rather than generate given values or exceptions.
 
 Return different values on successive method invocations
 --------------------------------------------------------
@@ -470,7 +468,7 @@ Match any single argument
 
     flexmock(foo).should_receive('method_bar').with_args(object)
 
-NOTE: In addition to exact values, you can match against the type or class of the argument.
+:NOTE: In addition to exact values, you can match against the type or class of the argument.
 
 Match any single string argument
 

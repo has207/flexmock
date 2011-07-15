@@ -261,9 +261,14 @@ times the method is called with the given arguments.</p>
 <p>If either and_return() or and_raise() is provided, flexmock will
 verify that the return value matches the expected return value or
 exception.</p>
-<p>NOTE: should_call() changes the behavior of and_return()
-and and_raise() to specify expectations rather than generate given
-values or exceptions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">NOTE:</th><td class="field-body">should_call() changes the behavior of and_return() and and_raise() to specify expectations rather than generate given values or exceptions.</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="return-different-values-on-successive-method-invocations">
 <h2>Return different values on successive method invocations<a class="headerlink" href="#return-different-values-on-successive-method-invocations" title="Permalink to this headline">¶</a></h2>
@@ -432,7 +437,14 @@ arguments, including no arguments.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>NOTE: In addition to exact values, you can match against the type or class of the argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">NOTE:</th><td class="field-body">In addition to exact values, you can match against the type or class of the argument.</td>
+</tr>
+</tbody>
+</table>
 <p>Match any single string argument</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 </pre></div>
