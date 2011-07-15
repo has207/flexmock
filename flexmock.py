@@ -537,7 +537,7 @@ class Mock(object):
     if self not in FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects[self] = []
     expectation = _getattr(
-        self, '_retrieve_or_create_expectation')(method, return_value)
+        self, '_create_expectation')(method, return_value)
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
       _getattr(self, '_update_method')(expectation, method)
@@ -584,7 +584,7 @@ class Mock(object):
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
-  def _retrieve_or_create_expectation(self, method, return_value=None):
+  def _create_expectation(self, method, return_value=None):
     obj = _getattr(self, '__object__')
     if method in [_getattr(x, 'method') for x in
                   FlexmockContainer.flexmock_objects[self]]:
