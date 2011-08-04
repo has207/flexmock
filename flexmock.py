@@ -764,6 +764,7 @@ if os.environ.get('FLEXMOCK_MODE', '').lower() == 'connected':
 
 
 def _arg_to_str(arg):
+  arg = '%s' % arg  # ensure unicode conversion
   if '_sre.SRE_Pattern' in str(type(arg)):
     return '/%s/' % arg.pattern
   if sys.version_info < (3, 0):
