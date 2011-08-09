@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Start Here &mdash; Flexmock v0.8.2 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.8.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flexmock v0.8.2 documentation" href="index.html" />
+    <link rel="next" title="Usage Documentation" href="user-guide.html" />
+    <link rel="prev" title="Flexmock - Mocking Library" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="user-guide.html" title="Usage Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flexmock - Mocking Library"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.8.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="start-here">
+<h1>Start Here<a class="headerlink" href="#start-here" title="Permalink to this headline">¶</a></h1>
+<p>So what does Flexmock actually help you do?</p>
+<div class="section" id="creating-fake-objects">
+<h2>Creating fake objects<a class="headerlink" href="#creating-fake-objects" title="Permalink to this headline">¶</a></h2>
+<p>Making a new object in Python requires defining a new class with all the
+fake methods and attributes you&#8217;re interested in emulating and then instantiating it.
+For example, to create a FakePlane object to use in a test in place of a real Plane object we would need to do something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FakePlane</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">operational</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s">&quot;MIG-21&quot;</span>
+    <span class="k">def</span> <span class="nf">fly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+
+<span class="n">plane</span> <span class="o">=</span> <span class="n">FakePlane</span><span class="p">()</span>  <span class="c"># this is tedious!</span>
+</pre></div>
+</div>
+<p>In other words, we must first create a class, make sure it contains all required attributes and methods, and finally instantiate it to create the object.</p>
+<p>Flexmock provides an easier way to generate a fake object on the fly using the flexmock()
+function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">operational</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&quot;MIG-21&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is also possible to add methods to this object using the same notation and Python&#8217;s handy
+lambda keyword to turn an attribute into a method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">operational</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">model</span><span class="o">=</span><span class="s">&quot;MIG-21&quot;</span><span class="p">,</span>
+                 <span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Objects created with the flexmock() function have an additional property
+of supporting any and all methods and attributes without having to define them explicitly.
+In other words, you can create a fake object and only have to worry about defining those attributes whose values you want to control explicitly.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">model</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In the example above, the &#8220;model&#8221; attribute as well as the &#8220;fly()&#8221; method both return the &#8220;plane&#8221; object itself.
+Which means that chained method calls will succeed as well without any extra effort on your part.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span><span class="o">.</span><span class="n">refuel</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can also ask the object about which attributes and method were accessed, in what order, and what they returned:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span><span class="o">.</span><span class="n">refuel</span><span class="p">()</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">__calls__</span>
+<span class="o">...</span> <span class="p">[{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;fly&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">},</span>
+<span class="o">...</span>  <span class="p">{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;land&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">},</span>
+<span class="o">...</span>  <span class="p">{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;refuel&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="replacing-parts-of-existing-objects-and-classes-stubs">
+<h2>Replacing parts of existing objects and classes (stubs)<a class="headerlink" href="#replacing-parts-of-existing-objects-and-classes-stubs" title="Permalink to this headline">¶</a></h2>
+<p>While creating fake objects from scratch is often sufficient, many times it is easier
+to take an existing object and simply stub out certain methods or replace them with
+fake ones. Flexmock makes this easy as well:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">,</span>
+         <span class="n">get_destination</span><span class="o">=</span><span class="s">&quot;Tokyo&quot;</span><span class="p">,</span>
+         <span class="n">get_speed</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By passing a real object or class into the flexmock() function as the first argument
+it is possible to modify that object in place and provide default return values for
+any of its existing methods.</p>
+<p>In addition to simply stubbing out return values, it can be useful to be able to call
+an entirely different method and substitute return values based on test-specific conditions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_route&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">custom_get_route</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-and-checking-expectations-mocks">
+<h2>Creating and checking expectations (mocks)<a class="headerlink" href="#creating-and-checking-expectations-mocks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic">
+<h3>Basic<a class="headerlink" href="#basic" title="Permalink to this headline">¶</a></h3>
+<p>Expectations take many flavors, and Flexmock has many different facilities and modes to generate them.
+The first and simplest is ensuring that a certain method is called:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+</pre></div>
+</div>
+<p>The .once modifier ensures that Train.get_destination() is called at some point during the test and
+will raise an exception if this does not happen.</p>
+<p>Of course, it is also possible to provide a default return value:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;Tokyo&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or check that a method is called with specific arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;set_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&quot;Tokyo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example we used .times(1) instead of .once and added the .at_least modifier
+to demonstate that it is easy to match any number of calls, including 0 calls or a variable amount of
+calls.</p>
+</div>
+<div class="section" id="spies">
+<h3>Spies<a class="headerlink" href="#spies" title="Permalink to this headline">¶</a></h3>
+<p>While replacing method calls with canned return values or checking that they are called with
+specific arguments is quite useful, there are also times when you want to execute the actual method
+and simply find out how many times it was called. Flexmock uses should_call() to generate this
+sort of expectations instead of should_receive():</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&quot;get_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+</pre></div>
+</div>
+<p>In the above case the real get_destination() method will be executed, but Flexmock will raise
+an exception unless it is executed exactly once. All the modifiers allowed with should_receive()
+can also be used with should_call() so it is possible to tweak the allowed arguments, return
+values and call times.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Train</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&quot;set_destination&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^Tok&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^No such dest.*&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The above example introduces a couple of new capabilities &#8211; raising exceptions and regex
+matching on string return values and arguments.</p>
+<p>Flexmock has a number of other features and capabilities, but hopefully the above overview has
+given you enough of the flavor for the kind of things that it makes possible. It is also important
+to note that Flexmock features smooth integration with the test runner,
+be it unittest, nose, py.test or doctest, so no special setup is necessary. Simply
+importing flexmock into your test module is sufficient to get started with any of the above
+examples.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Start Here</a><ul>
+<li><a class="reference internal" href="#creating-fake-objects">Creating fake objects</a></li>
+<li><a class="reference internal" href="#replacing-parts-of-existing-objects-and-classes-stubs">Replacing parts of existing objects and classes (stubs)</a></li>
+<li><a class="reference internal" href="#creating-and-checking-expectations-mocks">Creating and checking expectations (mocks)</a><ul>
+<li><a class="reference internal" href="#basic">Basic</a></li>
+<li><a class="reference internal" href="#spies">Spies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Flexmock - Mocking Library</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="user-guide.html"
+                        title="next chapter">Usage Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/start.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="user-guide.html" title="Usage Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flexmock - Mocking Library"
+             >previous</a> |</li>
+        <li><a href="index.html">Flexmock v0.8.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Herman Sheremetyev.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
