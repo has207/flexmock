@@ -242,6 +242,13 @@ class Expectation(object):
   def times(self, number):
     """Number of times this expectation's method is expected to be called.
 
+    There are also 3 aliases for the times() method that can be called without
+    parentheses:
+
+      - once -> times(1)
+      - twice -> times(2)
+      - never -> times(0)
+
     Args:
       - number: int
 
@@ -541,7 +548,7 @@ class Mock(object):
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
       _getattr(self, '_update_method')(expectation, method)
-    calls = calls[:saved_length]
+    self.__calls__ = calls[:saved_length]
     if chained_methods:
       return chained_expectation
     else:
