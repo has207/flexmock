@@ -5,13 +5,13 @@
  :Author: `Herman Sheremetyev <http://github.com/has207>`_
  :Version: |version|
  :Homepage: `Flexmock Homepage`_
- :Contribute: `Fork Flexmock on Github`_
+ :Contribute: `Flexmock on Github`_
  :Download: `http://pypi.python.org/pypi/flexmock <http://pypi.python.org/pypi/flexmock>`_
  :License: `FreeBSD-style License`_
- :Issue tracker: `GitHub Issue Tracker <http://github.com/has207/flexmock/issues>`_
+ :Issue tracker: `Issue Tracker <http://github.com/has207/flexmock/issues>`_
  :Twitter: `Follow pyflexmock <http://twitter.com/#!/pyflexmock>`_
 
- .. _Fork Flexmock on Github: http://github.com/has207/flexmock
+ .. _Flexmock on Github: http://github.com/has207/flexmock
  .. _Flexmock Homepage: http://has207.github.com/flexmock
  .. _FreeBSD-style License: http://github.com/has207/flexmock/blob/master/LICENSE
 
@@ -64,7 +64,7 @@ Start Here
 
 .. toctree::
 
-   why
+   start
 
 User Guide
 ===================

@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flexmock - Mocking Library &mdash; Flexmock v0.8.1 documentation</title>
+    <title>Flexmock - Mocking Library &mdash; Flexmock v0.8.2 documentation</title>
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,8 +22,8 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.8.1 documentation" href="#" />
-    <link rel="next" title="Start Here" href="why.html" /> 
+    <link rel="top" title="Flexmock v0.8.2 documentation" href="#" />
+    <link rel="next" title="Start Here" href="start.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,9 +36,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="why.html" title="Start Here"
+          <a href="start.html" title="Start Here"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Flexmock v0.8.1 documentation</a> &raquo;</li> 
+        <li><a href="#">Flexmock v0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,17 +56,17 @@
 <tbody valign="top">
 <tr class="field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="http://github.com/has207">Herman Sheremetyev</a></td>
 </tr>
-<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.8.1</td>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.8.2</td>
 </tr>
 <tr class="field"><th class="field-name">Homepage:</th><td class="field-body"><a class="reference external" href="http://has207.github.com/flexmock">Flexmock Homepage</a></td>
 </tr>
-<tr class="field"><th class="field-name">Contribute:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock">Fork Flexmock on Github</a></td>
+<tr class="field"><th class="field-name">Contribute:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock">Flexmock on Github</a></td>
 </tr>
 <tr class="field"><th class="field-name">Download:</th><td class="field-body"><a class="reference external" href="http://pypi.python.org/pypi/flexmock">http://pypi.python.org/pypi/flexmock</a></td>
 </tr>
 <tr class="field"><th class="field-name">License:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/blob/master/LICENSE">FreeBSD-style License</a></td>
 </tr>
-<tr class="field"><th class="field-name">Issue tracker:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/issues">GitHub Issue Tracker</a></td>
+<tr class="field"><th class="field-name">Issue tracker:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/issues">Issue Tracker</a></td>
 </tr>
 <tr class="field"><th class="field-name">Twitter:</th><td class="field-body"><a class="reference external" href="http://twitter.com/#!/pyflexmock">Follow pyflexmock</a></td>
 </tr>
@@ -110,12 +110,12 @@ expressiveness in a single line of code.</p>
 <h2>Start Here<a class="headerlink" href="#start-here" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="why.html">Start Here</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="why.html#creating-fake-objects-on-the-fly">Creating fake objects on the fly</a></li>
-<li class="toctree-l2"><a class="reference internal" href="why.html#replacing-parts-of-existing-objects-and-classes-stubs">Replacing parts of existing objects and classes (stubs)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="why.html#creating-and-checking-expectations-mocks">Creating and checking expectations (mocks)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="why.html#basic">Basic</a></li>
-<li class="toctree-l3"><a class="reference internal" href="why.html#spies">Spies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="start.html">Start Here</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="start.html#creating-fake-objects">Creating fake objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="start.html#replacing-parts-of-existing-objects-and-classes-stubs">Replacing parts of existing objects and classes (stubs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="start.html#creating-and-checking-expectations-mocks">Creating and checking expectations (mocks)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="start.html#basic">Basic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="start.html#spies">Spies</a></li>
 </ul>
 </li>
 </ul>
@@ -155,6 +155,7 @@ expressiveness in a single line of code.</p>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#create-a-mock-generator">Create a mock generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#private-methods">Private methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#enforcing-call-order">Enforcing call order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#state-support">State Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#chained-methods">Chained methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#replacing-methods-with-custom-functions">Replacing methods with custom functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#mocking-builtin-functions">Mocking builtin functions</a></li>
@@ -227,7 +228,7 @@ expressiveness in a single line of code.</p>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="why.html"
+  <p class="topless"><a href="start.html"
                         title="next chapter">Start Here</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
@@ -261,9 +262,9 @@ expressiveness in a single line of code.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="why.html" title="Start Here"
+          <a href="start.html" title="Start Here"
              >next</a> |</li>
-        <li><a href="#">Flexmock v0.8.1 documentation</a> &raquo;</li> 
+        <li><a href="#">Flexmock v0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

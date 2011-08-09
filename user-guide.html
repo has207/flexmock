@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Documentation &mdash; Flexmock v0.8.1 documentation</title>
+    <title>Usage Documentation &mdash; Flexmock v0.8.2 documentation</title>
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.8.1',
+        VERSION:     '0.8.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,9 +22,9 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.8.1 documentation" href="index.html" />
+    <link rel="top" title="Flexmock v0.8.2 documentation" href="index.html" />
     <link rel="next" title="Flexmock API" href="api.html" />
-    <link rel="prev" title="Start Here" href="why.html" /> 
+    <link rel="prev" title="Start Here" href="start.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,9 +40,9 @@
           <a href="api.html" title="Flexmock API"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="why.html" title="Start Here"
+          <a href="start.html" title="Start Here"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -110,57 +110,78 @@ so chances are they will simply just work without any special effort on Flexmock
 </div>
 <div class="section" id="make-a-fake-object">
 <h2>Make a fake object<a class="headerlink" href="#make-a-fake-object" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Specify attribute/return value pairs</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
-    <span class="n">some_attribute</span><span class="o">=</span><span class="s">&quot;value&quot;</span><span class="p">,</span>
-    <span class="n">some_other_attribute</span><span class="o">=</span><span class="s">&quot;another value&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s">&quot;MIG-16&quot;</span><span class="p">,</span>
+    <span class="n">condition</span><span class="o">=</span><span class="s">&quot;used&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Specify methods/return value pairs</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
-    <span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">,</span>
-    <span class="n">some_other_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;another value&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span>
+    <span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;voooosh!&quot;</span><span class="p">,</span>
+    <span class="n">land</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;landed!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can mix method and non-method attributes by making the return value a lambda for callable attributes.</p>
-<p>Flexmock Mock objects support the full range of flexmock commands but
+<p>Flexmock fake objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 can assign them new methods rather than being limited to acting on methods
 they already possess.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_method</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;some_other_method&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;another value&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s">&quot;vooosh!&quot;</span><span class="p">)</span>
+<span class="n">fake_plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;land&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;landed!&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+<p>Fake objects returned by the flexmock() function support arbitrary attribute access.
+This means that it is possible to create a fake object without providing any
+attribute/return value pairs unless you actually care about what it returned.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">fake_plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
+<span class="n">fake_plane</span><span class="o">.</span><span class="n">land</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>All attributes and methods return the fake object itself, so chained method access will also work:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<span class="n">fake_plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This is useful when passing a fake object into a fuction that will expect it to respond to a large number of attribute requests.</p>
+<p>After the fact, you can also examine which attributes were accessed and what values they returned:</p>
+<div class="highlight-python"><pre>fake_plane = flexmock(land=lambda: "landed!")
+fake_plane.fly().land()
+&gt;&gt;&gt; "landed!"
+&gt;&gt;&gt; fake_plane.__calls__
+... [{'kargs': (), 'kwargs': {}, 'name': 'fly', 'returned': &lt;flexmock.Mock object at 0x775b70&gt;},
+...  {'kargs': (), 'kwargs': {}, 'name': 'land', 'returned': 'landed'}]</pre>
 </div>
 </div>
 <div class="section" id="partially-mock-or-stub-an-existing-object">
 <h2>Partially mock or stub an existing object<a class="headerlink" href="#partially-mock-or-stub-an-existing-object" title="Permalink to this headline">¶</a></h2>
-<p>There are a few, basically equivalent, ways to hook into an existing
-object and overwrite its methods.</p>
+<p>Flexmock provides three syntactic ways to hook into an existing object and overwrite its methods.</p>
 <p>Mark the object as partially mocked, allowing it to be used to create new expectations</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
-<span class="n">some_object</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
-<span class="n">some_object</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some other return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span>
+<span class="n">Plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;vooosh!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<span class="n">Plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;landed!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
-<p>Equivalent syntax assigns the object to a variable</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some other return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<p>Equivalent syntax assigns the partially mocked object to a variable</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;vooosh!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;landed!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
 <p>Or you can combine everything into one line if there is only one method to overwrite</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some return value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;vooosh!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
 <p>You can also return the mock object after setting the expectations</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;some_value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mock</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;vooosh!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mock</span>
 </pre></div>
 </div>
 <p>Note the &#8220;mock&#8221; modifier above &#8211; the expectation chain returns an expectation otherwise</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_other_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -178,10 +199,10 @@ object and overwrite its methods.</p>
 <h2>Stub out a method for all instances of a class<a class="headerlink" href="#stub-out-a-method-for-all-instances-of-a-class" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">User</span><span class="p">:</span> <span class="k">pass</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;value_bar&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">user</span><span class="o">.</span><span class="n">method_foo</span><span class="p">()</span>
-<span class="go">&#39;value_bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;Bill Clinton&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bubba</span> <span class="o">=</span> <span class="n">User</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bubba</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+<span class="go">&#39;Bill Clinton&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -190,33 +211,33 @@ object and overwrite its methods.</p>
 <p>Using the times(N) modifier, or its aliases &#8211; once, twice, never &#8211;
 allows you to create expectations that will be automatically checked by
 the test runner.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Ensure method_bar(&#8216;a&#8217;) gets called exactly three times</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<p>Ensure fly(&#8216;forward&#8217;) gets called exactly three times</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;forward&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Ensure method_bar(&#8216;b&#8217;) gets called at least twice</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">twice</span>
+<p>Ensure turn(&#8216;east&#8217;) gets called at least twice</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;turn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;east&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">twice</span>
 </pre></div>
 </div>
-<p>Ensure method_bar(&#8216;c&#8217;) gets called at most once</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_most</span><span class="o">.</span><span class="n">once</span>
+<p>Ensure land(&#8216;airfield&#8217;) gets called at most once</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;airfield&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">at_most</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
-<p>Ensure that method_bar(&#8216;d&#8217;) is never called</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">never</span>
+<p>Ensure that crash(&#8216;boom!&#8217;) is never called</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;crash&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;boom!&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">never</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="raise-exceptions">
 <h2>Raise exceptions<a class="headerlink" href="#raise-exceptions" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">YourException</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">BadWeatherException</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Or you can add a message to the exception being raised</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">YourException</span><span class="p">,</span> <span class="s">&#39;exception message&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">BadWeatherException</span><span class="p">,</span> <span class="s">&#39;Oh noes, rain!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -227,35 +248,35 @@ Flexmock also allows you to call the original method and make
 expectations based on its return values/exceptions and the number of
 times the method is called with the given arguments.</p>
 <p>Matching specific arguments</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span><span class="o">.</span><span class="n">at_least</span><span class="o">.</span><span class="n">once</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;repair&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">wing</span><span class="p">,</span> <span class="n">cockpit</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
 <p>Matching any arguments</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">twice</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;turn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">twice</span>
 </pre></div>
 </div>
 <p>Matching specific return values</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;landed!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Matching a regular expression</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^foo&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;land&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^la&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Match return values by class/type</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Ensure that an appropriate exception is raised</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">BadWeatherException</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Check that the exception message matches your expectations</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="s">&quot;some error&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">BadWeatherException</span><span class="p">,</span> <span class="s">&#39;Oh noes, rain!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Check that the exception message matches a regular expression</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;some error&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_raise</span><span class="p">(</span><span class="n">BadWeatherException</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;rain&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>If either and_return() or and_raise() is provided, flexmock will
@@ -295,17 +316,17 @@ exception.</p>
 <p>Occasionally you will want a class to create fake objects when it&#8217;s
 being instantiated. Flexmock makes it easy and painless.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock_group</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fake_group</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">fake_group</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;fake&#39;</span>
 <span class="go">True</span>
 </pre></div>
 </div>
 <p>It is also possible to return different fake objects in a sequence.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> <span class="k">pass</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group1</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mock_group2</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;real&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock_group1</span><span class="p">,</span> <span class="n">mock_group2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fake_group1</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fake&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fake_group2</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;real&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Group</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">fake_group1</span><span class="p">,</span> <span class="n">fake_group2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;fake&#39;</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Group</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;real&#39;</span>
@@ -318,12 +339,12 @@ first. Luckily, multiple inheritance should make this pretty painless.</p>
 </div>
 <div class="section" id="create-a-mock-generator">
 <h2>Create a mock generator<a class="headerlink" href="#create-a-mock-generator" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;gen&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">foo</span><span class="o">.</span><span class="n">gen</span><span class="p">():</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;flight_log&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="s">&#39;take off&#39;</span><span class="p">,</span> <span class="s">&#39;flight&#39;</span><span class="p">,</span> <span class="s">&#39;landing&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Plane</span><span class="o">.</span><span class="n">flight_log</span><span class="p">():</span>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="k">print</span> <span class="n">i</span>
-<span class="go">1</span>
-<span class="go">2</span>
-<span class="go">3</span>
+<span class="go">&#39;take off&#39;</span>
+<span class="go">&#39;flight&#39;</span>
+<span class="go">&#39;landing&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -337,18 +358,56 @@ methods is exactly the same as any other methods.</p>
 </div>
 <div class="section" id="enforcing-call-order">
 <h2>Enforcing call order<a class="headerlink" href="#enforcing-call-order" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;forward&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">ordered</span>
 </pre></div>
 </div>
 <p>Now calling the methods in the same order will be fine</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
-<span class="go">&#39;bar&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-<span class="go">&#39;foo&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;forward&#39;</span><span class="p">)</span>
+<span class="go">&#39;ok&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">)</span>
+<span class="go">&#39;ok&#39;</span>
 </pre></div>
 </div>
 <p>But trying to call the second one first will result in an exception!</p>
+</div>
+<div class="section" id="state-support">
+<h2>State Support<a class="headerlink" href="#state-support" title="Permalink to this headline">¶</a></h2>
+<p>Flexmock supports conditional method execution based on external state. Consider a Radio class with the following methods:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Radio</span><span class="p">:</span>
+<span class="gp">... </span>  <span class="n">is_on</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="nf">switch_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_on</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="nf">switch_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_on</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="nf">select_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+<span class="gp">... </span>  <span class="k">def</span> <span class="nf">adjust_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">num</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span> <span class="o">=</span> <span class="n">Radio</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we can define some method call expectations dependent on the state of the radio:</p>
+<div class="highlight-python"><pre>&gt;&gt;&gt; flexmock(radio)
+&gt;&gt;&gt; radio.should_receive('select_channel').once.when(lambda: radio.is_on)
+&gt;&gt;&gt; radio.should_call('adjust_volume').once.with_args(5).when(lambda: radio.is_on)
+
+&gt;&gt;&gt; radio.select_channel()
+Traceback (most recent call last):
+File "flexmock.py", line 736, in mock_method_recordable_wrapper
+  return mock_method(runtime_self, *kargs, **kwargs)
+File "flexmock.py", line 701, in mock_method
+  (method, expectation.runnable))
+flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True
+
+&gt;&gt;&gt; radio.adjust_volume(5)
+Traceback (most recent call last):
+File "flexmock.py", line 736, in mock_method_recordable_wrapper
+  return mock_method(runtime_self, *kargs, **kwargs)
+File "flexmock.py", line 701, in mock_method
+  (method, expectation.runnable))
+flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True
+
+&gt;&gt;&gt; radio.is_on = True
+&gt;&gt;&gt; radio.select_channel()
+&gt;&gt;&gt; radio.adjust_volume(5)</pre>
+</div>
 </div>
 <div class="section" id="chained-methods">
 <h2>Chained methods<a class="headerlink" href="#chained-methods" title="Permalink to this headline">¶</a></h2>
@@ -358,13 +417,8 @@ methods is exactly the same as any other methods.</p>
 </pre></div>
 </div>
 <p>You could use Flexmock to mock each of these method calls individually:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mock</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">get_url</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">parse_html</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">flexmock</span><span class="p">(</span><span class="n">retrieve_results</span><span class="o">=</span><span class="p">[])))</span>
 <span class="n">flexmock</span><span class="p">(</span><span class="n">HTTP</span><span class="p">)</span><span class="o">.</span><span class="n">new_instances</span><span class="p">(</span><span class="n">mock</span><span class="p">)</span>
-<span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;get_url&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
-    <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;parse_html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
-        <span class="n">flexmock</span><span class="p">()</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;retrieve_results&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">([])</span><span class="o">.</span><span class="n">mock</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">mock</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 <p>But that looks really error prone and quite difficult to parse when
@@ -384,7 +438,7 @@ intermediate method, you can always fall back to the above long version.</p>
 <div class="section" id="replacing-methods-with-custom-functions">
 <h2>Replacing methods with custom functions<a class="headerlink" href="#replacing-methods-with-custom-functions" title="Permalink to this headline">¶</a></h2>
 <p>There are times when it is useful to replace a method with a custom lambda or function in order to return custom values based on provided arguments or a global value that changes between method calls.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">some_object</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;some_method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;set_speed&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -417,24 +471,24 @@ your mock or stub to just the specific invocation you are trying to replace:</p>
 <h1>Expectation Matching<a class="headerlink" href="#expectation-matching" title="Permalink to this headline">¶</a></h1>
 <p>Creating an expectation with no arguments will by default match all
 arguments, including no arguments.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Will be matched by any of the following:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">()</span>
-<span class="go">&#39;bar&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-<span class="go">&#39;bar&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
-<span class="go">&#39;bar&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
+<span class="go">&#39;ok&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">)</span>
+<span class="go">&#39;ok&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">,</span> <span class="s">&#39;down&#39;</span><span class="p">)</span>
+<span class="go">&#39;ok&#39;</span>
 </pre></div>
 </div>
 <p>Match exactly no arguments</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Match any single argument</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -446,32 +500,32 @@ arguments, including no arguments.</p>
 </tbody>
 </table>
 <p>Match any single string argument</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Match the empty string using a compiled regular expression</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^$&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^(up|down)$&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Match any set of three arguments where the first one is an integer,
 second one is anything, and third is string &#8216;foo&#8217;
 (matching against user defined classes is also supported in the same fashion)</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;repair&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="s">&#39;notes&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also override the default match with another expectation for the
 same method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">()</span>
-<span class="go">&#39;bar&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
-<span class="go">&#39;bar&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bad&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
+<span class="go">&#39;ok&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;forward&#39;</span><span class="p">,</span> <span class="s">&#39;down&#39;</span><span class="p">)</span>
+<span class="go">&#39;ok&#39;</span>
 </pre></div>
 </div>
 <p>But!</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">method_bar</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
-<span class="go">&#39;foo&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Plane</span><span class="o">.</span><span class="n">fly</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">)</span>
+<span class="go">&#39;bad&#39;</span>
 </pre></div>
 </div>
 <p>The order of the expectations being defined is significant, with later
@@ -484,19 +538,19 @@ more specific expectation would never be matched.</p>
 <p>While the order of modifiers is unimportant to Flexmock, there is a preferred convention
 that will make your tests more readable.</p>
 <p>If using with_arg(), place it before should_return():</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="s">&#39;up&#39;</span><span class="p">,</span> <span class="s">&#39;down&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If using the times() modifier (or its aliases: once, twice, never), place them at
 the end of the flexmock statement:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&#39;ok&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span>
 </pre></div>
 </div>
 <p>It is acceptable to have the times() modifier show up in the middle of the modifier chain if
 the chain splits multiple lines and you want to ensure it shows up on the first line:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;method_bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some_really_long_return_value&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some_other_really_long_return_value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">one_by_one</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">Plane</span><span class="p">)</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;fly&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some really long status message&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s">&#39;some other really long status message&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">one_by_one</span>
 </pre></div>
 </div>
 </div>
@@ -537,6 +591,7 @@ the chain splits multiple lines and you want to ensure it shows up on the first 
 <li><a class="reference internal" href="#create-a-mock-generator">Create a mock generator</a></li>
 <li><a class="reference internal" href="#private-methods">Private methods</a></li>
 <li><a class="reference internal" href="#enforcing-call-order">Enforcing call order</a></li>
+<li><a class="reference internal" href="#state-support">State Support</a></li>
 <li><a class="reference internal" href="#chained-methods">Chained methods</a></li>
 <li><a class="reference internal" href="#replacing-methods-with-custom-functions">Replacing methods with custom functions</a></li>
 <li><a class="reference internal" href="#mocking-builtin-functions">Mocking builtin functions</a></li>
@@ -547,7 +602,7 @@ the chain splits multiple lines and you want to ensure it shows up on the first 
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="why.html"
+  <p class="topless"><a href="start.html"
                         title="previous chapter">Start Here</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="api.html"
@@ -587,9 +642,9 @@ the chain splits multiple lines and you want to ensure it shows up on the first 
           <a href="api.html" title="Flexmock API"
              >next</a> |</li>
         <li class="right" >
-          <a href="why.html" title="Start Here"
+          <a href="start.html" title="Start Here"
              >previous</a> |</li>
-        <li><a href="index.html">Flexmock v0.8.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Flexmock v0.8.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

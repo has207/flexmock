@@ -65,76 +65,106 @@ Make a fake object
 
 ::
 
-  mock = flexmock()
+  fake = flexmock()
 
 Specify attribute/return value pairs
 
 ::
 
-  mock = flexmock(
-      some_attribute="value",
-      some_other_attribute="another value")
+  fake_plane = flexmock(
+      model="MIG-16",
+      condition="used")
 
 Specify methods/return value pairs
 
 ::
 
-  mock = flexmock(
-      some_method=lambda: "value",
-      some_other_method=lambda: "another value")
+  fake_plane = flexmock(
+      fly=lambda: "voooosh!",
+      land=lambda: "landed!")
  
 You can mix method and non-method attributes by making the return value a lambda for callable attributes.
 
-Flexmock Mock objects support the full range of flexmock commands but
+Flexmock fake objects support the full range of flexmock commands but
 differ from partial mocks (described below) in that should_receive()
 can assign them new methods rather than being limited to acting on methods
 they already possess.
 
 ::
 
-  mock = flexmock(some_method=lambda: "value")
-  mock.should_receive("some_other_method").and_return("another value")
+  fake_plane = flexmock(fly=lambda: "vooosh!")
+  fake_plane.should_receive("land").and_return("landed!")
  
+
+Fake objects returned by the flexmock() function support arbitrary attribute access.
+This means that it is possible to create a fake object without providing any
+attribute/return value pairs unless you actually care about what it returned.
+
+::
+
+  fake_plane = flexmock()
+  fake_plane.fly()
+  fake_plane.land()
+
+All attributes and methods return the fake object itself, so chained method access will also work:
+
+::
+
+  fake_plane = flexmock()
+  fake_plane.fly().land()
+
+This is useful when passing a fake object into a fuction that will expect it to respond to a large number of attribute requests.
+
+After the fact, you can also examine which attributes were accessed and what values they returned:
+
+::
+
+  fake_plane = flexmock(land=lambda: "landed!")
+  fake_plane.fly().land()
+  >>> "landed!"
+  >>> fake_plane.__calls__
+  ... [{'kargs': (), 'kwargs': {}, 'name': 'fly', 'returned': <flexmock.Mock object at 0x775b70>},
+  ...  {'kargs': (), 'kwargs': {}, 'name': 'land', 'returned': 'landed'}]
+
 
 Partially mock or stub an existing object
 -----------------------------------------
 
-There are a few, basically equivalent, ways to hook into an existing
-object and overwrite its methods.
+Flexmock provides three syntactic ways to hook into an existing object and overwrite its methods.
 
 Mark the object as partially mocked, allowing it to be used to create new expectations
 
 ::
 
-    flexmock(some_object)
-    some_object.should_receive('method1').and_return('some return value').once
-    some_object.should_receive('method2').and_return('some other return value').once
+    flexmock(Plane)
+    Plane.should_receive('fly').and_return('vooosh!').once
+    Plane.should_receive('land').and_return('landed!').once
 
-Equivalent syntax assigns the object to a variable
+Equivalent syntax assigns the partially mocked object to a variable
 
 ::
 
-    mock = flexmock(some_object)
-    mock.should_receive('method1').and_return('some return value').once
-    mock.should_receive('method2').and_return('some other return value').once
+    plane = flexmock(Plane)
+    plane.should_receive('fly').and_return('vooosh!').once
+    plane.should_receive('land').and_return('landed!').once
 
 Or you can combine everything into one line if there is only one method to overwrite
 
 ::
 
-    flexmock(some_object).should_receive('method').and_return('some return value').once
+    flexmock(Plane).should_receive('fly').and_return('vooosh!').once
 
 You can also return the mock object after setting the expectations
 
 ::
 
-    mock = flexmock(some_object).should_receive('method').and_return('some_value').mock
+    plane = flexmock(Plane).should_receive('fly').and_return('vooosh!').mock
 
 Note the "mock" modifier above -- the expectation chain returns an expectation otherwise
 
 ::
 
-    mock.should_receive('some_other_method').with_args().and_return('foo', 'bar')
+    plane.should_receive('land').with_args().and_return('foo', 'bar')
 
 
 :NOTE: If you do not specify the arguments then any set of arguments, including none, will be matched.
@@ -149,10 +179,10 @@ Stub out a method for all instances of a class
 
     >>> class User: pass
     >>> flexmock(User)
-    >>> User.should_receive('method_foo').and_return('value_bar')
-    >>> user = User()
-    >>> user.method_foo()
-    'value_bar'
+    >>> User.should_receive('get_name').and_return('Bill Clinton')
+    >>> bubba = User()
+    >>> bubba.get_name()
+    'Bill Clinton'
 
 Create automatically checked expectations
 -----------------------------------------
@@ -163,44 +193,45 @@ the test runner.
 
 ::
 
-    mock = flexmock(some_object)
+    plane = flexmock(Plane)
 
-Ensure method_bar('a') gets called exactly three times
-
-::
-
-    mock.should_receive('method_bar').with_args('a').times(3)
-
-Ensure method_bar('b') gets called at least twice
+Ensure fly('forward') gets called exactly three times
 
 ::
 
-    mock.should_receive('method_bar').with_args('b').at_least.twice
+    plane.should_receive('fly').with_args('forward').times(3)
 
-Ensure method_bar('c') gets called at most once
-
-::
-
-    mock.should_receive('method_bar').with_args('c').at_most.once
-
-Ensure that method_bar('d') is never called
+Ensure turn('east') gets called at least twice
 
 ::
 
-    mock.should_receive('method_bar').with_args('d').never
+    plane.should_receive('turn').with_args('east').at_least.twice
+
+Ensure land('airfield') gets called at most once
+
+::
+
+    plane.should_receive('land').with_args('airfield').at_most.once
+
+Ensure that crash('boom!') is never called
+
+::
+
+    plane.should_receive('crash').with_args('boom!').never
 
 Raise exceptions
 ----------------
 
 ::
 
-    flexmock(some_object).should_receive('some_method').and_raise(YourException)
+    flexmock(Plane).should_receive('fly').and_raise(BadWeatherException)
 
 Or you can add a message to the exception being raised
 
 ::
 
-    flexmock(some_object).should_receive('some_method').and_raise(YourException, 'exception message')
+    flexmock(Plane).should_receive('fly').and_raise(BadWeatherException, 'Oh noes, rain!')
+
 
 Add a spy (or proxy) to a method
 --------------------------------
@@ -214,49 +245,49 @@ Matching specific arguments
 
 ::
 
-    flexmock(some_object).should_call('method_bar').with_args(arg1, arg2).at_least.once
+    flexmock(Plane).should_call('repair').with_args(wing, cockpit).once
 
 Matching any arguments
 
 ::
 
-    flexmock(some_object).should_call('method_bar').twice
+    flexmock(Plane).should_call('turn').twice
 
 Matching specific return values
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_return('foo')
+    flexmock(Plane).should_call('land').and_return('landed!')
 
 Matching a regular expression
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_return(re.compile('^foo'))
+    flexmock(Plane).should_call('land').and_return(re.compile('^la'))
 
 Match return values by class/type
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_return(str, object, None)
+    flexmock(Plane).should_call('fly').and_return(str, object, None)
 
 Ensure that an appropriate exception is raised
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_raise(Exception)
+    flexmock(Plane).should_call('fly').and_raise(BadWeatherException)
 
 Check that the exception message matches your expectations
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_raise(Exception, "some error")
+    flexmock(Plane).should_call('fly').and_raise(BadWeatherException, 'Oh noes, rain!')
 
 Check that the exception message matches a regular expression
 
 ::
 
-    flexmock(some_object).should_call('method_bar').and_raise(Exception, re.compile("some error"))
+    flexmock(Plane).should_call('fly').and_raise(BadWeatherException, re.compile('rain'))
 
 If either and_return() or and_raise() is provided, flexmock will
 verify that the return value matches the expected return value or
@@ -298,8 +329,8 @@ being instantiated. Flexmock makes it easy and painless.
 ::
 
     >>> class Group(object): pass
-    >>> mock_group = flexmock(name='fake')
-    >>> flexmock(Group).new_instances(mock_group)
+    >>> fake_group = flexmock(name='fake')
+    >>> flexmock(Group).new_instances(fake_group)
     >>> Group().name == 'fake'
     True
 
@@ -308,9 +339,9 @@ It is also possible to return different fake objects in a sequence.
 ::
 
     >>> class Group(object): pass
-    >>> mock_group1 = flexmock(name='fake')
-    >>> mock_group2 = flexmock(name='real')
-    >>> flexmock(Group).new_instances(mock_group1, mock_group2)
+    >>> fake_group1 = flexmock(name='fake')
+    >>> fake_group2 = flexmock(name='real')
+    >>> flexmock(Group).new_instances(fake_group1, fake_group2)
     >>> Group().name == 'fake'
     True
     >>> Group().name == 'real'
@@ -325,12 +356,12 @@ Create a mock generator
 
 ::
 
-    >>> flexmock(foo).should_receive('gen').and_yield(1, 2, 3)
-    >>> for i in foo.gen():
+    >>> flexmock(Plane).should_receive('flight_log').and_yield('take off', 'flight', 'landing')
+    >>> for i in Plane.flight_log():
     >>>   print i
-    1
-    2
-    3
+    'take off'
+    'flight' 
+    'landing'
 
 Private methods
 ---------------
@@ -346,19 +377,64 @@ Enforcing call order
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').with_args('bar').and_return('bar').ordered
-    >>> flexmock(foo).should_receive('method_bar').with_args('foo').and_return('foo').ordered
+    >>> flexmock(Plane).should_receive('fly').with_args('forward').and_return('ok').ordered
+    >>> flexmock(Plane).should_receive('fly').with_args('up').and_return('ok').ordered
 
 Now calling the methods in the same order will be fine
 
 ::
 
-    >>> foo.method_bar('bar')
-    'bar'
-    >>> foo.method_bar('foo')
-    'foo'
+    >>> Plane.fly('forward')
+    'ok'
+    >>> Plane.fly('up')
+    'ok'
 
 But trying to call the second one first will result in an exception!
+
+State Support
+-------------
+
+Flexmock supports conditional method execution based on external state. Consider a Radio class with the following methods:
+
+::
+
+  >>> class Radio:
+  ...   is_on = False
+  ...   def switch_on(self): self.is_on = True
+  ...   def switch_off(self): self.is_on = False
+  ...   def select_channel(self): return None
+  ...   def adjust_volume(self, num): self.volume = num 
+  >>> radio = Radio()
+
+Now we can define some method call expectations dependent on the state of the radio:
+
+::
+
+  >>> flexmock(radio)
+  >>> radio.should_receive('select_channel').once.when(lambda: radio.is_on)
+  >>> radio.should_call('adjust_volume').once.with_args(5).when(lambda: radio.is_on)
+
+  >>> radio.select_channel()
+  Traceback (most recent call last):
+  File "flexmock.py", line 736, in mock_method_recordable_wrapper
+    return mock_method(runtime_self, *kargs, **kwargs)
+  File "flexmock.py", line 701, in mock_method
+    (method, expectation.runnable))
+  flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
+
+  >>> radio.adjust_volume(5)
+  Traceback (most recent call last):
+  File "flexmock.py", line 736, in mock_method_recordable_wrapper
+    return mock_method(runtime_self, *kargs, **kwargs)
+  File "flexmock.py", line 701, in mock_method
+    (method, expectation.runnable))
+  flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
+
+  >>> radio.is_on = True
+  >>> radio.select_channel()
+  >>> radio.adjust_volume(5)
+
+
 
 Chained methods
 ---------------
@@ -374,13 +450,8 @@ You could use Flexmock to mock each of these method calls individually:
 
 ::
 
-    mock = flexmock()
+    mock = flexmock(get_url=lambda: flexmock(parse_html=lambda: flexmock(retrieve_results=[])))
     flexmock(HTTP).new_instances(mock)
-    mock.should_receive('get_url').and_return(
-        flexmock().should_receive('parse_html').and_return(
-            flexmock().should_receive('retrieve_results').and_return([]).mock
-        ).mock
-    )
 
 But that looks really error prone and quite difficult to parse when
 reading. Here's a better way:
@@ -405,7 +476,7 @@ There are times when it is useful to replace a method with a custom lambda or fu
 
 ::
 
-   flexmock(some_object).should_receive('some_method').replace_with(lambda x, y, z: y == 5)
+   flexmock(Plane).should_receive('set_speed').replace_with(lambda x: x == 5)
 
 Mocking builtin functions
 -------------------------
@@ -442,31 +513,30 @@ arguments, including no arguments.
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').and_return('bar')
+    >>> flexmock(Plane).should_receive('fly').and_return('ok')
 
 Will be matched by any of the following:
 
 ::
 
-    >>> foo.method_bar()
-    'bar'
-    >>> foo.method_bar('foo')
-    'bar'
-    >>> foo.method_bar('foo', 'bar')
-    'bar'
+    >>> Plane.fly()
+    'ok'
+    >>> Plane.fly('up')
+    'ok'
+    >>> Plane.fly('up', 'down')
+    'ok'
 
 Match exactly no arguments 
 
 ::
 
-    flexmock(foo).should_receive('method_bar').with_args()
+    flexmock(Plane).should_receive('fly').with_args()
 
 Match any single argument
 
-
 ::
 
-    flexmock(foo).should_receive('method_bar').with_args(object)
+    flexmock(Plane).should_receive('fly').with_args(object)
 
 :NOTE: In addition to exact values, you can match against the type or class of the argument.
 
@@ -474,13 +544,13 @@ Match any single string argument
 
 ::
 
-    flexmock(foo).should_receive('method_bar').with_args(str)
+    flexmock(Plane).should_receive('fly').with_args(str)
 
 Match the empty string using a compiled regular expression
 
 ::
 
-    flexmock(foo).should_receive('method_bar').with_args(re.compile('^$'))
+    flexmock(Plane).should_receive('fly').with_args(re.compile('^(up|down)$'))
 
 Match any set of three arguments where the first one is an integer,
 second one is anything, and third is string 'foo'
@@ -488,26 +558,26 @@ second one is anything, and third is string 'foo'
 
 ::
 
-    flexmock(foo).should_receive('method_bar').with_args(int, object, 'foo')
+    flexmock(Plane).should_receive('repair').with_args(int, object, 'notes')
 
 You can also override the default match with another expectation for the
 same method.
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').and_return('bar')
-    >>> flexmock(foo).should_receive('method_bar').with_args('foo').and_return('foo')
-    >>> foo.method_bar()
-    'bar'
-    >>> foo.method_bar('foo', 'bar')
-    'bar'
+    >>> flexmock(Plane).should_receive('fly').and_return('ok')
+    >>> flexmock(Plane).should_receive('fly').with_args('up').and_return('bad')
+    >>> Plane.fly()
+    'ok'
+    >>> Plane.fly('forward', 'down')
+    'ok'
 
 But!
 
 ::
 
-    >>> foo.method_bar('foo')
-    'foo'
+    >>> Plane.fly('up')
+    'bad'
 
 The order of the expectations being defined is significant, with later
 expectations having higher precedence than previous ones. Which means
@@ -525,20 +595,20 @@ If using with_arg(), place it before should_return():
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').with_args(1, 2).and_return('bar')
+    >>> flexmock(Plane).should_receive('fly').with_args('up', 'down').and_return('ok')
 
 If using the times() modifier (or its aliases: once, twice, never), place them at
 the end of the flexmock statement:
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').and_return('bar').once
+    >>> flexmock(Plane).should_receive('fly').and_return('ok').once
 
 It is acceptable to have the times() modifier show up in the middle of the modifier chain if
 the chain splits multiple lines and you want to ensure it shows up on the first line:
 
 ::
 
-    >>> flexmock(foo).should_receive('method_bar').times(2).and_return(
-    >>>     'some_really_long_return_value',
-    >>>     'some_other_really_long_return_value').one_by_one
+    >>> flexmock(Plane).should_receive('fly').times(2).and_return(
+    >>>     'some really long status message',
+    >>>     'some other really long status message').one_by_one
