@@ -15,7 +15,7 @@
  .. _Flexmock Homepage: http://has207.github.com/flexmock
  .. _FreeBSD-style License: http://github.com/has207/flexmock/blob/master/LICENSE
 
-Flexmock is a mock/stub/spy library for Python.
+Flexmock is a testing library for Python.
 
 Its API is inspired by a Ruby library of the same name.
 However, it is not a goal of Python Flexmock to be a clone of the Ruby version.
