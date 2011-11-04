@@ -1142,10 +1142,6 @@ class RegularClass(object):
     foo.should_receive('bar').with_args('b').ordered
     assertRaises(CallOrderError, foo.bar, 'b')
 
-  def test_fake_object_takes_any_attribute(self):
-    foo = flexmock()
-    assertEqual(foo, foo.bar)
-
   def test_state_machine(self):
     class Radio:
       def __init__(self): self.is_on = False
@@ -1240,26 +1236,6 @@ class RegularClass(object):
       pass
     except Exception:
       raise
-
-  def test_recorder_for_unassigned_variables(self):
-    foo = flexmock()
-    foo.asdf()
-    foo.attr
-    foo.hjkl()
-    assertEqual([{'name': 'asdf', 'kargs': (), 'kwargs': {}, 'returned': foo},
-                 {'name': 'attr', 'returned': foo},
-                 {'name': 'hjkl', 'kargs': (), 'kwargs': {}, 'returned': foo}],
-                foo.__calls__)
-
-  def test_recorder_for_assigned_variables(self):
-    foo = flexmock(asdf=lambda: 'blah', attr=23)
-    foo.asdf()
-    foo.attr
-    foo.hjkl()
-    assertEqual([{'name': 'asdf', 'kargs': (), 'kwargs': {}, 'returned': 'blah'},
-                 {'name': 'attr', 'returned': 23},
-                 {'name': 'hjkl', 'kargs': (), 'kwargs': {}, 'returned': foo}],
-                foo.__calls__)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

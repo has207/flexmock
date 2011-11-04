@@ -1,23 +1,24 @@
 """Copyright 2011 Herman Sheremetyev. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are
-permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, this list of
-      conditions and the following disclaimer.
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, this list
-      of conditions and the following disclaimer in the documentation and/or other materials
-      provided with the distribution.
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
@@ -463,59 +464,18 @@ class Mock(object):
     Args:
       - kwargs: dict of attribute/value pairs used to initialize the mock object
     """
-    self.__calls__ = []
-    self.__object__ = self
+    self._object = self
     for attr, value in kwargs.items():
-      if hasattr(value, '__call__') and not isinstance(value, Mock):
-        setattr(self, attr, self._recordable(value))
-      else:
-        setattr(self, attr, value)
+      setattr(self, attr, value)
+
+  def __call__(self, *kargs, **kwargs):
+    return self
 
   def __enter__(self):
-    return _getattr(self, '__object__')
+    return self._object
 
   def __exit__(self, type, value, traceback):
     return self
-
-  def __call__(self, *kargs, **kwargs):
-    calls = _getattr(self, '__calls__')
-    if calls:
-      call = calls[-1]
-      call['kargs'] = kargs
-      call['kwargs'] = kwargs
-      call['returned'] = self
-    return self
-
-  def __getattribute__(self, name):
-    attr = _getattr(self, name)
-    if name not in ORIGINAL_MOCK_ATTRS:
-      calls = _getattr(self, '__calls__')
-      calls.append({'name': name, 'returned': attr})
-    return attr
-
-  def __getattr__(self, name):
-    calls = _getattr(self, '__calls__')
-    calls.append({'name': name, 'returned': self})
-    return self
-
-  def _recordable(self, func):
-    def inner(*kargs, **kwargs):
-      calls = _getattr(self, '__calls__')
-      if not calls:
-        return func(*kargs, **kwargs)
-      else:
-        call = calls[-1]
-        call['kargs'] = kargs
-        call['kwargs'] = kwargs
-        try:
-          ret = func(*kargs, **kwargs)
-          call['returned'] = ret
-          return ret
-        except:
-          call['raised'] = sys.exc_info()
-          del call['returned']
-          raise
-    return inner
 
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
@@ -526,9 +486,6 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    calls = _getattr(self, '__calls__')
-    obj = _getattr(self, '__object__')
-    saved_length = len(calls)
     if method in UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
@@ -536,25 +493,23 @@ class Mock(object):
     if '.' in method:
       method, chained_methods = method.split('.', 1)
     if (method.startswith('__') and not method.endswith('__') and
-        not inspect.ismodule(obj)):
-      if _isclass(obj):
-        name = obj.__name__
+        not inspect.ismodule(self._object)):
+      if _isclass(self._object):
+        name = self._object.__name__
       else:
-        name = obj.__class__.__name__
+        name = self._object.__class__.__name__
       method = '_%s__%s' % (name, method.lstrip('_'))
-    if not isinstance(obj, Mock) and not hasattr(obj, method):
-      raise FlexmockError('%s does not have method %s' % (obj, method))
+    if not isinstance(self._object, Mock) and not hasattr(self._object, method):
+      raise FlexmockError('%s does not have method %s' % (self._object, method))
     if chained_methods:
       return_value = Mock()
       chained_expectation = return_value.should_receive(chained_methods)
     if self not in FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects[self] = []
-    expectation = _getattr(
-        self, '_create_expectation')(method, return_value)
+    expectation = self._create_expectation(method, return_value)
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
-      _getattr(self, '_update_method')(expectation, method)
-    self.__calls__ = calls[:saved_length]
+      self._update_method(expectation, method)
     if chained_methods:
       return chained_expectation
     else:
@@ -572,13 +527,11 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    obj = _getattr(self, '__object__')
-    if _isclass(obj):
-      method_type = type(obj.__dict__[method])
+    if _isclass(self._object):
+      method_type = type(self._object.__dict__[method])
       if method_type is not classmethod and method_type is not staticmethod:
         raise FlexmockError('should_call cannot be called on a class mock')
-    expectation = _getattr(self, 'should_receive')(method)
-    original_method = _getattr(expectation, 'original_method')
+    expectation = self.should_receive(method)
     return expectation.replace_with(expectation.original_method)
 
   def new_instances(self, *kargs):
@@ -592,29 +545,27 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    if _isclass(_getattr(self, '__object__')):
+    if _isclass(self._object):
       return self.should_receive('__new__').and_return(kargs).one_by_one
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
   def _create_expectation(self, method, return_value=None):
-    obj = _getattr(self, '__object__')
-    if method in [_getattr(x, 'method') for x in
+    if method in [x.method for x in
                   FlexmockContainer.flexmock_objects[self]]:
       expectation = [x for x in FlexmockContainer.flexmock_objects[self]
-                     if _getattr(x, 'method') == method][0]
-      original_method = _getattr(expectation, 'original_method')
+                     if x.method == method][0]
       expectation = Expectation(
-          obj, name=method, return_value=return_value,
-          original_method=original_method)
+          self._object, name=method, return_value=return_value,
+          original_method=expectation.original_method)
     else:
       expectation = Expectation(
-          obj, name=method, return_value=return_value)
+          self._object, name=method, return_value=return_value)
     return expectation
 
   def _update_method(self, expectation, method):
-    method_instance = _getattr(self, '_create_mock_method')(method)
-    obj = _getattr(self, '__object__')
+    method_instance = self._create_mock_method(method)
+    obj = self._object
     original_method = _getattr(expectation, 'original_method')
     if hasattr(obj, method) and not original_method:
       if hasattr(obj, '__dict__') and method in obj.__dict__:
@@ -734,30 +685,7 @@ class Mock(object):
       else:
         raise MethodSignatureError(_format_args(method, arguments))
 
-    def mock_method_recordable_wrapper(runtime_self, *kargs, **kwargs):
-      mock_list = [o for o in FlexmockContainer.flexmock_objects
-                   if o.__object__ == runtime_self]
-      if mock_list:
-        mock_object = mock_list[0]
-        if not mock_object.__calls__:
-          return mock_method(runtime_self, *kargs, **kwargs)
-        else:
-          call = mock_object.__calls__[-1]
-          try:
-            ret = mock_method(runtime_self, *kargs, **kwargs)
-            call['kargs'] = kargs
-            call['kwargs'] = kwargs
-            call['returned'] = ret
-            return ret
-          except:
-            mock_object.__calls__[-1]['raised'] = sys.exc_info()
-            del mock_object.__calls__[-1]['returned']
-            raise
-
-    return mock_method_recordable_wrapper
-
-
-ORIGINAL_MOCK_ATTRS = dir(Mock) + ['__calls__', '__object__']
+    return mock_method
 
 
 def _arg_to_str(arg):
@@ -794,19 +722,19 @@ def _format_args(method, arguments):
 
 def _create_partial_mock(obj_or_class, **kwargs):
   matches = [x for x in FlexmockContainer.flexmock_objects
-             if x.__object__ is obj_or_class]
+             if x._object is obj_or_class]
   if matches:
     mock = matches[0]
   else:
     mock = Mock()
-    mock.__object__ = obj_or_class
+    mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
   if not matches:
     FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
   if (_attach_flexmock_methods(mock, Mock, obj_or_class) and
-    not _isclass(mock.__object__)):
-    mock = mock.__object__
+    not _isclass(mock._object)):
+    mock = mock._object
   return mock
 
 
@@ -895,7 +823,7 @@ def flexmock_teardown():
     for expectation in expectations:
       _getattr(expectation, 'reset')()
   for mock in saved.keys():
-    obj = _getattr(mock, '__object__')
+    obj = mock._object
     if not isinstance(obj, Mock) and not _isclass(obj):
       instances += [obj]
     if _isclass(obj):
