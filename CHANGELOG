@@ -1,3 +1,14 @@
+Release 0.9.0
+- adding state machine support using when()
+- make expectation fail as soon as number of expected calls is exceeded
+- flexmock_teardown no longer returns a function
+- allow should_call on class and static methods
+- disallow should_call on class mocks
+- fixing unicode args handling
+- fixing issues with @property methods misbehaving in the debugger
+- fixing pytest integration and instance teardown
+- fixing private method handling
+
 Release 0.8.1
 - fixing pytest and doctest integration to always call flexmock_teardown
 - fixing flexmock_teardown to return a function as before so it can be used as a decorator
