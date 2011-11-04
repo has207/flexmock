@@ -1,4 +1,4 @@
-from flexmock import MethodNotCalled
+from flexmock import MethodCallError
 from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock_test import assertRaises
@@ -10,7 +10,7 @@ import unittest
 def test_module_level():
   m = flexmock(mod=2)
   m.should_receive('mod').once
-  assertRaises(MethodNotCalled, flexmock_teardown)
+  assertRaises(MethodCallError, flexmock_teardown)
 
 
 def test_module_level_generator():
@@ -25,7 +25,7 @@ class TestRegularClass(flexmock_test.RegularClass):
   def test_regular(self):
     a = flexmock(a=2)
     a.should_receive('a').once
-    assertRaises(MethodNotCalled, flexmock_teardown)
+    assertRaises(MethodCallError, flexmock_teardown)
 
   def test_class_level_generator_tests(self):
     mock = flexmock(foo=lambda a, b: a)
@@ -39,5 +39,5 @@ class TestUnittestClass(flexmock_test.TestFlexmockUnittest):
   def test_unittest(self):
     a = flexmock(a=2)
     a.should_receive('a').once
-    assertRaises(MethodNotCalled, flexmock_teardown)
+    assertRaises(MethodCallError, flexmock_teardown)
 

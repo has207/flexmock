@@ -41,39 +41,31 @@ class FlexmockError(Exception):
   pass
 
 
-class AttemptingToMockBuiltin(Exception):
+class MockBuiltinError(Exception):
   pass
 
 
-class InvalidMethodSignature(FlexmockError):
+class MethodSignatureError(FlexmockError):
   pass
 
 
-class InvalidExceptionClass(FlexmockError):
+class ExceptionClassError(FlexmockError):
   pass
 
 
-class InvalidExceptionMessage(FlexmockError):
+class ExceptionMessageError(FlexmockError):
   pass
 
 
-class InvalidState(FlexmockError):
+class StateError(FlexmockError):
   pass
 
 
-class MethodNotCalled(FlexmockError):
+class MethodCallError(FlexmockError):
   pass
 
 
-class MethodCalledOutOfOrder(FlexmockError):
-  pass
-
-
-class MethodDoesNotExist(FlexmockError):
-  pass
-
-
-class AlreadyMocked(FlexmockError):
+class CallOrderError(FlexmockError):
   pass
 
 
@@ -119,7 +111,7 @@ class FlexmockContainer(object):
       if (exp.method == name and
           not _match_args(args, exp.args) and
           not exp.times_called):
-        raise MethodCalledOutOfOrder(
+        raise CallOrderError(
             '%s called before %s' %
             (_format_args(e.method, e.args),
              _format_args(exp.method, exp.args)))
@@ -165,6 +157,7 @@ class Expectation(object):
     self._pass_thru = False
     self._ordered = False
     self._one_by_one = False
+    self._verified = False
 
   def __str__(self):
     return '%s -> (%s)' % (_format_args(self.method, self.args),
@@ -182,14 +175,15 @@ class Expectation(object):
       return _getattr(self, 'times')(0)
     elif name in ('at_least', 'at_most', 'ordered', 'one_by_one'):
       return _getattr(self, name)()
+    elif name == 'mock':
+      return _getattr(self, 'mock')()
     else:
       return _getattr(self, name)
 
-  @property
   def mock(self):
     """Return the mock associated with this expectation.
 
-    Since this method is a property it must be called without parentheses.
+    This method may be called without parentheses.
     """
     return self._mock
 
@@ -265,7 +259,7 @@ class Expectation(object):
 
     Each value in the list is returned on successive invocations of the method.
 
-    This is a property method so must be called without parentheses.
+    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
@@ -289,7 +283,7 @@ class Expectation(object):
     When given, an exception will only be raised if the method is called less
     than times() specified. Does nothing if times() is not given.
 
-    This is a property method so must be called without parentheses.
+    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
@@ -309,7 +303,7 @@ class Expectation(object):
     When given, an exception will only be raised if the method is called more
     than times() specified. Does nothing if times() is not given.
 
-    This is a property method so must be called without parentheses.
+    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
@@ -329,7 +323,7 @@ class Expectation(object):
     An exception will be raised if methods are called out of order, determined
     by order of should_receive calls in the test.
 
-    This is a property method so must be called without parentheses.
+    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
@@ -396,11 +390,15 @@ class Expectation(object):
       yield_values.append(ReturnValue(value))
     return self
 
-  def verify(self):
+  def verify(self, final=True):
     """Verify that this expectation has been met.
 
+    Args:
+      final: boolean, True if no further calls to this method expected
+             (skip checking at_least expectations when False)
+
     Raises:
-      MethodNotCalled Exception
+      MethodCallError Exception
     """
     failed = False
     message = ''
@@ -408,10 +406,14 @@ class Expectation(object):
     times_called = _getattr(self, 'times_called')
     if expected_calls[EXACTLY] is not None:
       message = 'exactly %s' % expected_calls[EXACTLY]
-      if times_called != expected_calls[EXACTLY]:
-        failed = True
+      if final:
+        if times_called != expected_calls[EXACTLY]:
+          failed = True
+      else:
+        if times_called > expected_calls[EXACTLY]:
+          failed = True
     else:
-      if expected_calls[AT_LEAST] is not None:
+      if final and expected_calls[AT_LEAST] is not None:
         message = 'at least %s' % expected_calls[AT_LEAST]
         if times_called < expected_calls[AT_LEAST]:
           failed = True
@@ -424,9 +426,13 @@ class Expectation(object):
     if not failed:
       return
     else:
+      if self._verified:
+        return
+      else:
+        self._verified = True
       method = _getattr(self, 'method')
       args = _getattr(self, 'args')
-      raise MethodNotCalled(
+      raise MethodCallError(
           '%s expected to be called %s times, called %s times' %
           (_format_args(method, args), message, times_called))
 
@@ -537,7 +543,7 @@ class Mock(object):
         name = obj.__class__.__name__
       method = '_%s__%s' % (name, method.lstrip('_'))
     if not isinstance(obj, Mock) and not hasattr(obj, method):
-      raise MethodDoesNotExist('%s does not have method %s' % (obj, method))
+      raise FlexmockError('%s does not have method %s' % (obj, method))
     if chained_methods:
       return_value = Mock()
       chained_expectation = return_value.should_receive(chained_methods)
@@ -641,17 +647,17 @@ class Mock(object):
         expected_message = '%s' % expected_instance
         if _isclass(expected):
           if expected is not raised and expected not in raised.__bases__:
-            raise (InvalidExceptionClass('expected %s, raised %s' %
+            raise (ExceptionClassError('expected %s, raised %s' %
                    (expected, raised)))
           if args['kargs'] and '_sre.SRE_Pattern' in str(args['kargs'][0]):
             if not args['kargs'][0].search(message):
-              raise (InvalidExceptionMessage('expected /%s/, raised "%s"' %
+              raise (ExceptionMessageError('expected /%s/, raised "%s"' %
                      (args['kargs'][0].pattern, message)))
           elif expected_message and expected_message != message:
-            raise (InvalidExceptionMessage('expected "%s", raised "%s"' %
+            raise (ExceptionMessageError('expected "%s", raised "%s"' %
                    (expected_message, message)))
         elif expected is not raised:
-          raise (InvalidExceptionClass('expected "%s", raised "%s"' %
+          raise (ExceptionClassError('expected "%s", raised "%s"' %
                  (expected, raised)))
       else:
         raise
@@ -687,7 +693,7 @@ class Mock(object):
       expected_values = _getattr(expectation, 'return_values')
       if (expected_values and
           not match_return_values(expected_values[0].value, return_values)):
-        raise (InvalidMethodSignature('expected to return %s, returned %s' %
+        raise (MethodSignatureError('expected to return %s, returned %s' %
                (expected_values[0].value, return_values)))
       return return_values
 
@@ -697,9 +703,10 @@ class Mock(object):
           self, method, arguments)
       if expectation:
         if not expectation.runnable():
-          raise InvalidState('%s expected to be called when %s is True' %
+          raise StateError('%s expected to be called when %s is True' %
                              (method, expectation.runnable))
         expectation.times_called += 1
+        expectation.verify(final=False)
         _pass_thru = _getattr(expectation, '_pass_thru')
         _replace_with = _getattr(expectation, '_replace_with')
         if _pass_thru:
@@ -725,7 +732,7 @@ class Mock(object):
         else:
           return return_value.value
       else:
-        raise InvalidMethodSignature(_format_args(method, arguments))
+        raise MethodSignatureError(_format_args(method, arguments))
 
     def mock_method_recordable_wrapper(runtime_self, *kargs, **kwargs):
       mock_list = [o for o in FlexmockContainer.flexmock_objects
@@ -751,23 +758,6 @@ class Mock(object):
 
 
 ORIGINAL_MOCK_ATTRS = dir(Mock) + ['__calls__', '__object__']
-
-
-def __should_call_connected(self, method):
-  if _isclass(self.__object__):
-    return Expectation(self)
-
-  expectation = self.should_receive(method)
-  return expectation.replace_with(expectation.original_method)
-
-
-def __should_receive_connected(self, method):
-  return __should_call_connected(self, method)
-
-
-if os.environ.get('FLEXMOCK_MODE', '').lower() == 'connected':
-  Mock.should_call = __should_call_connected
-  Mock.should_receive = __should_receive_connected
 
 
 def _arg_to_str(arg):
@@ -833,11 +823,11 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
       else:
         setattr(obj, attr, getattr(mock, attr))
   except TypeError:
-    raise AttemptingToMockBuiltin(
+    raise MockBuiltinError(
         'Python does not allow you to mock builtin objects or modules. '
         'Consider wrapping it in a class you can mock instead')
   except AttributeError:
-    raise AttemptingToMockBuiltin(
+    raise MockBuiltinError(
         'Python does not allow you to mock instances of builtin objects. '
         'Consider wrapping it in a class you can mock instead')
   return True
