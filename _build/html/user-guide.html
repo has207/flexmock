@@ -362,29 +362,33 @@ methods is exactly the same as any other methods.</p>
 </pre></div>
 </div>
 <p>Now we can define some method call expectations dependent on the state of the radio:</p>
-<div class="highlight-python"><pre>&gt;&gt;&gt; flexmock(radio)
-&gt;&gt;&gt; radio.should_receive('select_channel').once.when(lambda: radio.is_on)
-&gt;&gt;&gt; radio.should_call('adjust_volume').once.with_args(5).when(lambda: radio.is_on)
-
-&gt;&gt;&gt; radio.select_channel()
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">flexmock</span><span class="p">(</span><span class="n">radio</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;select_channel&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">radio</span><span class="o">.</span><span class="n">is_on</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">should_call</span><span class="p">(</span><span class="s">&#39;adjust_volume&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">once</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">radio</span><span class="o">.</span><span class="n">is_on</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calling these while the radio is off will result in an error:</p>
+<div class="highlight-python"><pre>&gt;&gt;&gt; radio.select_channel()
 Traceback (most recent call last):
 File "flexmock.py", line 736, in mock_method_recordable_wrapper
   return mock_method(runtime_self, *kargs, **kwargs)
 File "flexmock.py", line 701, in mock_method
   (method, expectation.runnable))
-flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True
-
-&gt;&gt;&gt; radio.adjust_volume(5)
+flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True</pre>
+</div>
+<div class="highlight-python"><pre>&gt;&gt;&gt; radio.adjust_volume(5)
 Traceback (most recent call last):
 File "flexmock.py", line 736, in mock_method_recordable_wrapper
   return mock_method(runtime_self, *kargs, **kwargs)
 File "flexmock.py", line 701, in mock_method
   (method, expectation.runnable))
-flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True
-
-&gt;&gt;&gt; radio.is_on = True
-&gt;&gt;&gt; radio.select_channel()
-&gt;&gt;&gt; radio.adjust_volume(5)</pre>
+flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True</pre>
+</div>
+<p>Turning the radio on will make things work as expected:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">is_on</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">select_channel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">adjust_volume</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="chained-methods">

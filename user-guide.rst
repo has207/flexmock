@@ -383,6 +383,11 @@ Now we can define some method call expectations dependent on the state of the ra
   >>> radio.should_receive('select_channel').once.when(lambda: radio.is_on)
   >>> radio.should_call('adjust_volume').once.with_args(5).when(lambda: radio.is_on)
 
+
+Calling these while the radio is off will result in an error:
+
+::
+
   >>> radio.select_channel()
   Traceback (most recent call last):
   File "flexmock.py", line 736, in mock_method_recordable_wrapper
@@ -391,6 +396,8 @@ Now we can define some method call expectations dependent on the state of the ra
     (method, expectation.runnable))
   flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
 
+::
+
   >>> radio.adjust_volume(5)
   Traceback (most recent call last):
   File "flexmock.py", line 736, in mock_method_recordable_wrapper
@@ -398,6 +405,10 @@ Now we can define some method call expectations dependent on the state of the ra
   File "flexmock.py", line 701, in mock_method
     (method, expectation.runnable))
   flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
+
+Turning the radio on will make things work as expected:
+
+::
 
   >>> radio.is_on = True
   >>> radio.select_channel()

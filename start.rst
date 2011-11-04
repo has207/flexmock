@@ -72,6 +72,11 @@ an entirely different method and substitute return values based on test-specific
 
 Creating and checking expectations (mocks)
 ------------------------------------------
+ 
+Flexmock features smooth integration with the test runner,
+be it unittest, nose, py.test or doctest, so no special setup is necessary. Simply
+importing flexmock into your test module is sufficient to get started with any of the 
+following examples.
 
 
 Basic
@@ -137,8 +142,7 @@ The above example introduces a couple of new capabilities -- raising exceptions 
 matching on string return values and arguments.
 
 Flexmock has a number of other features and capabilities, but hopefully the above overview has
-given you enough of the flavor for the kind of things that it makes possible. It is also important
-to note that Flexmock features smooth integration with the test runner,
-be it unittest, nose, py.test or doctest, so no special setup is necessary. Simply
-importing flexmock into your test module is sufficient to get started with any of the above
-examples.
+given you enough of the flavor for the kind of things that it makes possible. For more
+details see the `User Guide`_.
+
+.. _User Guide: user-guide.html
