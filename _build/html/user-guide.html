@@ -134,28 +134,6 @@ they already possess.</p>
 <span class="n">fake_plane</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&quot;land&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="s">&quot;landed!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Fake objects returned by the flexmock() function support arbitrary attribute access.
-This means that it is possible to create a fake object without providing any
-attribute/return value pairs unless you actually care about what it returned.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">fake_plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
-<span class="n">fake_plane</span><span class="o">.</span><span class="n">land</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>All attributes and methods return the fake object itself, so chained method access will also work:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">fake_plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">fake_plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>This is useful when passing a fake object into a fuction that will expect it to respond to a large number of attribute requests.</p>
-<p>After the fact, you can also examine which attributes were accessed and what values they returned:</p>
-<div class="highlight-python"><pre>fake_plane = flexmock(land=lambda: "landed!")
-fake_plane.fly().land()
-&gt;&gt;&gt; "landed!"
-&gt;&gt;&gt; fake_plane.__calls__
-... [{'kargs': (), 'kwargs': {}, 'name': 'fly', 'returned': &lt;flexmock.Mock object at 0x775b70&gt;},
-...  {'kargs': (), 'kwargs': {}, 'name': 'land', 'returned': 'landed'}]</pre>
-</div>
 </div>
 <div class="section" id="partially-mock-or-stub-an-existing-object">
 <h2>Partially mock or stub an existing object<a class="headerlink" href="#partially-mock-or-stub-an-existing-object" title="Permalink to this headline">¶</a></h2>

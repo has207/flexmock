@@ -80,29 +80,6 @@ lambda keyword to turn an attribute into a method:</p>
                  <span class="n">fly</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Objects created with the flexmock() function have an additional property
-of supporting any and all methods and attributes without having to define them explicitly.
-In other words, you can create a fake object and only have to worry about defining those attributes whose values you want to control explicitly.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">plane</span><span class="o">.</span><span class="n">model</span>
-<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>In the example above, the &#8220;model&#8221; attribute as well as the &#8220;fly()&#8221; method both return the &#8220;plane&#8221; object itself.
-Which means that chained method calls will succeed as well without any extra effort on your part.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span><span class="o">.</span><span class="n">refuel</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>You can also ask the object about which attributes and method were accessed, in what order, and what they returned:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">plane</span> <span class="o">=</span> <span class="n">flexmock</span><span class="p">()</span>
-<span class="n">plane</span><span class="o">.</span><span class="n">fly</span><span class="p">()</span><span class="o">.</span><span class="n">land</span><span class="p">()</span><span class="o">.</span><span class="n">refuel</span><span class="p">()</span>
-<span class="n">plane</span><span class="o">.</span><span class="n">__calls__</span>
-<span class="o">...</span> <span class="p">[{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;fly&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">},</span>
-<span class="o">...</span>  <span class="p">{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;land&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">},</span>
-<span class="o">...</span>  <span class="p">{</span><span class="s">&#39;kargs&#39;</span><span class="p">:</span> <span class="p">(),</span> <span class="s">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;refuel&#39;</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">flexmock</span><span class="o">.</span><span class="n">Mock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x775a70</span><span class="o">&gt;</span><span class="p">}]</span>
-</pre></div>
-</div>
 </div>
 <div class="section" id="replacing-parts-of-existing-objects-and-classes-stubs">
 <h2>Replacing parts of existing objects and classes (stubs)<a class="headerlink" href="#replacing-parts-of-existing-objects-and-classes-stubs" title="Permalink to this headline">¶</a></h2>

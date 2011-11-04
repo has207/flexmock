@@ -96,37 +96,6 @@ they already possess.
   fake_plane.should_receive("land").and_return("landed!")
  
 
-Fake objects returned by the flexmock() function support arbitrary attribute access.
-This means that it is possible to create a fake object without providing any
-attribute/return value pairs unless you actually care about what it returned.
-
-::
-
-  fake_plane = flexmock()
-  fake_plane.fly()
-  fake_plane.land()
-
-All attributes and methods return the fake object itself, so chained method access will also work:
-
-::
-
-  fake_plane = flexmock()
-  fake_plane.fly().land()
-
-This is useful when passing a fake object into a fuction that will expect it to respond to a large number of attribute requests.
-
-After the fact, you can also examine which attributes were accessed and what values they returned:
-
-::
-
-  fake_plane = flexmock(land=lambda: "landed!")
-  fake_plane.fly().land()
-  >>> "landed!"
-  >>> fake_plane.__calls__
-  ... [{'kargs': (), 'kwargs': {}, 'name': 'fly', 'returned': <flexmock.Mock object at 0x775b70>},
-  ...  {'kargs': (), 'kwargs': {}, 'name': 'land', 'returned': 'landed'}]
-
-
 Partially mock or stub an existing object
 -----------------------------------------
 

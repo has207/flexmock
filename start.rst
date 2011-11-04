@@ -42,38 +42,6 @@ lambda keyword to turn an attribute into a method:
                    fly=lambda: None)
 
 
-Objects created with the flexmock() function have an additional property
-of supporting any and all methods and attributes without having to define them explicitly.
-In other words, you can create a fake object and only have to worry about defining those attributes whose values you want to control explicitly.
-
-::
-
-  plane = flexmock()
-  plane.model
-  plane.fly()
-
-
-In the example above, the "model" attribute as well as the "fly()" method both return the "plane" object itself.
-Which means that chained method calls will succeed as well without any extra effort on your part.
-
-::
-
-  plane = flexmock()
-  plane.fly().land().refuel()
-
-
-You can also ask the object about which attributes and method were accessed, in what order, and what they returned:
-
-::
-
-  plane = flexmock()
-  plane.fly().land().refuel()
-  plane.__calls__
-  ... [{'kargs': (), 'kwargs': {}, 'name': 'fly', 'returned': <flexmock.Mock object at 0x775a70>},
-  ...  {'kargs': (), 'kwargs': {}, 'name': 'land', 'returned': <flexmock.Mock object at 0x775a70>},
-  ...  {'kargs': (), 'kwargs': {}, 'name': 'refuel', 'returned': <flexmock.Mock object at 0x775a70>}]
-  
-
 Replacing parts of existing objects and classes (stubs)
 -------------------------------------------------------
 
