@@ -368,21 +368,19 @@ methods is exactly the same as any other methods.</p>
 </pre></div>
 </div>
 <p>Calling these while the radio is off will result in an error:</p>
-<div class="highlight-python"><pre>&gt;&gt;&gt; radio.select_channel()
-Traceback (most recent call last):
-File "flexmock.py", line 736, in mock_method_recordable_wrapper
-  return mock_method(runtime_self, *kargs, **kwargs)
-File "flexmock.py", line 701, in mock_method
-  (method, expectation.runnable))
-flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True</pre>
-</div>
-<div class="highlight-python"><pre>&gt;&gt;&gt; radio.adjust_volume(5)
-Traceback (most recent call last):
-File "flexmock.py", line 736, in mock_method_recordable_wrapper
-  return mock_method(runtime_self, *kargs, **kwargs)
-File "flexmock.py", line 701, in mock_method
-  (method, expectation.runnable))
-flexmock.InvalidState: select_channel expected to be called when &lt;function &lt;lambda&gt; at 0x10abb30&gt; is True</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">select_channel</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;flexmock.py&quot;</span>, line <span class="m">674</span>, in <span class="n">mock_method</span>
+    <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">_get_runnable</span><span class="p">()))</span>
+<span class="gr">flexmock.StateError</span>: <span class="n">select_channel expected to be called when condition is True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">adjust_volume</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;flexmock.py&quot;</span>, line <span class="m">674</span>, in <span class="n">mock_method</span>
+    <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">_get_runnable</span><span class="p">()))</span>
+<span class="gr">flexmock.StateError</span>: <span class="n">adjust_volume expected to be called when condition is True</span>
+</pre></div>
 </div>
 <p>Turning the radio on will make things work as expected:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">radio</span><span class="o">.</span><span class="n">is_on</span> <span class="o">=</span> <span class="bp">True</span>

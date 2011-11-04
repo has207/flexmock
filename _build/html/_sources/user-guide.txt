@@ -390,21 +390,17 @@ Calling these while the radio is off will result in an error:
 
   >>> radio.select_channel()
   Traceback (most recent call last):
-  File "flexmock.py", line 736, in mock_method_recordable_wrapper
-    return mock_method(runtime_self, *kargs, **kwargs)
-  File "flexmock.py", line 701, in mock_method
-    (method, expectation.runnable))
-  flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
-
-::
-
+    File "<stdin>", line 1, in <module>
+    File "flexmock.py", line 674, in mock_method
+      (method, expectation._get_runnable()))
+  flexmock.StateError: select_channel expected to be called when condition is True
   >>> radio.adjust_volume(5)
   Traceback (most recent call last):
-  File "flexmock.py", line 736, in mock_method_recordable_wrapper
-    return mock_method(runtime_self, *kargs, **kwargs)
-  File "flexmock.py", line 701, in mock_method
-    (method, expectation.runnable))
-  flexmock.InvalidState: select_channel expected to be called when <function <lambda> at 0x10abb30> is True
+    File "<stdin>", line 1, in <module>
+    File "flexmock.py", line 674, in mock_method
+      (method, expectation._get_runnable()))
+  flexmock.StateError: adjust_volume expected to be called when condition is True
+  Traceback (most recent call last):
 
 Turning the radio on will make things work as expected:
 
