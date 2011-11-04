@@ -468,13 +468,14 @@ class Mock(object):
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
-  def __call__(self, *kargs, **kwargs):
-    return self
-
   def __enter__(self):
     return self._object
 
   def __exit__(self, type, value, traceback):
+    return self
+
+  def __call__(self, *kargs, **kwargs):
+    """Hack to make Expectation.mock() work with parens."""
     return self
 
   def should_receive(self, method):
