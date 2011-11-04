@@ -299,7 +299,7 @@ parentheses:</p>
 <dd><p>Modifies the associated times() expectation.</p>
 <p>When given, an exception will only be raised if the method is called less
 than times() specified. Does nothing if times() is not given.</p>
-<p>This is a property method so must be called without parentheses.</p>
+<p>This method may be called without parentheses.</p>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
@@ -315,7 +315,7 @@ than times() specified. Does nothing if times() is not given.</p>
 <dd><p>Modifies the associated &#8220;times&#8221; expectation.</p>
 <p>When given, an exception will only be raised if the method is called more
 than times() specified. Does nothing if times() is not given.</p>
-<p>This is a property method so must be called without parentheses.</p>
+<p>This method may be called without parentheses.</p>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
@@ -331,7 +331,7 @@ than times() specified. Does nothing if times() is not given.</p>
 <dd><p>Makes the expectation respect the order of should_receive statements.</p>
 <p>An exception will be raised if methods are called out of order, determined
 by order of should_receive calls in the test.</p>
-<p>This is a property method so must be called without parentheses.</p>
+<p>This method may be called without parentheses.</p>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
@@ -346,7 +346,7 @@ by order of should_receive calls in the test.</p>
 <tt class="descname">one_by_one</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.one_by_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.one_by_one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modifies the return value to be treated as a list of return values.</p>
 <p>Each value in the list is returned on successive invocations of the method.</p>
-<p>This is a property method so must be called without parentheses.</p>
+<p>This method may be called without parentheses.</p>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
@@ -356,11 +356,11 @@ by order of should_receive calls in the test.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="flexmock.Expectation.mock">
-<tt class="descname">mock</tt><a class="reference internal" href="_modules/flexmock.html#Expectation.mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.mock" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">mock</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/flexmock.html#Expectation.mock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexmock.Expectation.mock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the mock associated with this expectation.</p>
-<p>Since this method is a property it must be called without parentheses.</p>
+<p>This method may be called without parentheses.</p>
 </dd></dl>
 
 </dd></dl>

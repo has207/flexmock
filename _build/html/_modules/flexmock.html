@@ -48,24 +48,25 @@
   <h1>Source code for flexmock</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;Copyright 2011 Herman Sheremetyev. All rights reserved.</span>
 
-<span class="sd">Redistribution and use in source and binary forms, with or without modification, are</span>
-<span class="sd">permitted provided that the following conditions are met:</span>
+<span class="sd">Redistribution and use in source and binary forms, with or without modification,</span>
+<span class="sd">are permitted provided that the following conditions are met:</span>
 
-<span class="sd">   1. Redistributions of source code must retain the above copyright notice, this list of</span>
-<span class="sd">      conditions and the following disclaimer.</span>
+<span class="sd">   1. Redistributions of source code must retain the above copyright notice,</span>
+<span class="sd">      this list of conditions and the following disclaimer.</span>
 
-<span class="sd">   2. Redistributions in binary form must reproduce the above copyright notice, this list</span>
-<span class="sd">      of conditions and the following disclaimer in the documentation and/or other materials</span>
-<span class="sd">      provided with the distribution.</span>
+<span class="sd">   2. Redistributions in binary form must reproduce the above copyright notice,</span>
+<span class="sd">      this list of conditions and the following disclaimer in the documentation</span>
+<span class="sd">      and/or other materials provided with the distribution.</span>
 
 <span class="sd">THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS&#39;&#39; AND ANY EXPRESS OR IMPLIED</span>
-<span class="sd">WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND</span>
-<span class="sd">FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR</span>
-<span class="sd">CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
-<span class="sd">CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR</span>
-<span class="sd">SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON</span>
-<span class="sd">ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING</span>
-<span class="sd">NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF</span>
+<span class="sd">WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF</span>
+<span class="sd">MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO</span>
+<span class="sd">EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,</span>
+<span class="sd">INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="sd">LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR</span>
+<span class="sd">PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF</span>
+<span class="sd">LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE</span>
+<span class="sd">OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF</span>
 <span class="sd">ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -89,39 +90,31 @@
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">AttemptingToMockBuiltin</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MockBuiltinError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">InvalidMethodSignature</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MethodSignatureError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">InvalidExceptionClass</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ExceptionClassError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">InvalidExceptionMessage</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ExceptionMessageError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">InvalidState</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">StateError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">MethodNotCalled</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MethodCallError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">MethodCalledOutOfOrder</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
-  <span class="k">pass</span>
-
-
-<span class="k">class</span> <span class="nc">MethodDoesNotExist</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
-  <span class="k">pass</span>
-
-
-<span class="k">class</span> <span class="nc">AlreadyMocked</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CallOrderError</span><span class="p">(</span><span class="n">FlexmockError</span><span class="p">):</span>
   <span class="k">pass</span>
 
 
@@ -167,7 +160,7 @@
       <span class="k">if</span> <span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">and</span>
           <span class="ow">not</span> <span class="n">_match_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="ow">and</span>
           <span class="ow">not</span> <span class="n">exp</span><span class="o">.</span><span class="n">times_called</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">MethodCalledOutOfOrder</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">CallOrderError</span><span class="p">(</span>
             <span class="s">&#39;</span><span class="si">%s</span><span class="s"> called before </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
             <span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">),</span>
              <span class="n">_format_args</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">args</span><span class="p">)))</span>
@@ -213,6 +206,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_pass_thru</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_ordered</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_one_by_one</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_verified</span> <span class="o">=</span> <span class="bp">False</span>
 
   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> -&gt; (</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">),</span>
@@ -230,14 +224,15 @@
       <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;times&#39;</span><span class="p">)(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;at_least&#39;</span><span class="p">,</span> <span class="s">&#39;at_most&#39;</span><span class="p">,</span> <span class="s">&#39;ordered&#39;</span><span class="p">,</span> <span class="s">&#39;one_by_one&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)()</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;mock&#39;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;mock&#39;</span><span class="p">)()</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
 <div class="viewcode-block" id="Expectation.mock"><a class="viewcode-back" href="../api.html#flexmock.Expectation.mock">[docs]</a>  <span class="k">def</span> <span class="nf">mock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the mock associated with this expectation.</span>
 
-<span class="sd">    Since this method is a property it must be called without parentheses.</span>
+<span class="sd">    This method may be called without parentheses.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mock</span>
 </div>
@@ -313,7 +308,7 @@
 
 <span class="sd">    Each value in the list is returned on successive invocations of the method.</span>
 
-<span class="sd">    This is a property method so must be called without parentheses.</span>
+<span class="sd">    This method may be called without parentheses.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
@@ -337,7 +332,7 @@
 <span class="sd">    When given, an exception will only be raised if the method is called less</span>
 <span class="sd">    than times() specified. Does nothing if times() is not given.</span>
 
-<span class="sd">    This is a property method so must be called without parentheses.</span>
+<span class="sd">    This method may be called without parentheses.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
@@ -357,7 +352,7 @@
 <span class="sd">    When given, an exception will only be raised if the method is called more</span>
 <span class="sd">    than times() specified. Does nothing if times() is not given.</span>
 
-<span class="sd">    This is a property method so must be called without parentheses.</span>
+<span class="sd">    This method may be called without parentheses.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
@@ -377,7 +372,7 @@
 <span class="sd">    An exception will be raised if methods are called out of order, determined</span>
 <span class="sd">    by order of should_receive calls in the test.</span>
 
-<span class="sd">    This is a property method so must be called without parentheses.</span>
+<span class="sd">    This method may be called without parentheses.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
@@ -444,11 +439,15 @@
       <span class="n">yield_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ReturnValue</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
-  <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Verify that this expectation has been met.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">      final: boolean, True if no further calls to this method expected</span>
+<span class="sd">             (skip checking at_least expectations when False)</span>
+
 <span class="sd">    Raises:</span>
-<span class="sd">      MethodNotCalled Exception</span>
+<span class="sd">      MethodCallError Exception</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">failed</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
@@ -456,10 +455,14 @@
     <span class="n">times_called</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;times_called&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">EXACTLY</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;exactly </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">EXACTLY</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">times_called</span> <span class="o">!=</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">EXACTLY</span><span class="p">]:</span>
-        <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">if</span> <span class="n">final</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">times_called</span> <span class="o">!=</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">EXACTLY</span><span class="p">]:</span>
+          <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">times_called</span> <span class="o">&gt;</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">EXACTLY</span><span class="p">]:</span>
+          <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">AT_LEAST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">final</span> <span class="ow">and</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">AT_LEAST</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;at least </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">AT_LEAST</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">times_called</span> <span class="o">&lt;</span> <span class="n">expected_calls</span><span class="p">[</span><span class="n">AT_LEAST</span><span class="p">]:</span>
           <span class="n">failed</span> <span class="o">=</span> <span class="bp">True</span>
@@ -472,9 +475,13 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">failed</span><span class="p">:</span>
       <span class="k">return</span>
     <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verified</span><span class="p">:</span>
+        <span class="k">return</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verified</span> <span class="o">=</span> <span class="bp">True</span>
       <span class="n">method</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">)</span>
       <span class="n">args</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;args&#39;</span><span class="p">)</span>
-      <span class="k">raise</span> <span class="n">MethodNotCalled</span><span class="p">(</span>
+      <span class="k">raise</span> <span class="n">MethodCallError</span><span class="p">(</span>
           <span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called </span><span class="si">%s</span><span class="s"> times, called </span><span class="si">%s</span><span class="s"> times&#39;</span> <span class="o">%</span>
           <span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="n">message</span><span class="p">,</span> <span class="n">times_called</span><span class="p">))</span>
 
@@ -505,59 +512,18 @@
 <span class="sd">    Args:</span>
 <span class="sd">      - kwargs: dict of attribute/value pairs used to initialize the mock object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__calls__</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__object__</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="bp">self</span>
     <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mock</span><span class="p">):</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recordable</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
 
   <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span>
 
   <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
-
-  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">calls</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__calls__&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">calls</span><span class="p">:</span>
-      <span class="n">call</span> <span class="o">=</span> <span class="n">calls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">call</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kargs</span>
-      <span class="n">call</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
-      <span class="n">call</span><span class="p">[</span><span class="s">&#39;returned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
-    <span class="k">return</span> <span class="bp">self</span>
-
-  <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="n">attr</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ORIGINAL_MOCK_ATTRS</span><span class="p">:</span>
-      <span class="n">calls</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__calls__&#39;</span><span class="p">)</span>
-      <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="n">attr</span><span class="p">})</span>
-    <span class="k">return</span> <span class="n">attr</span>
-
-  <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="n">calls</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__calls__&#39;</span><span class="p">)</span>
-    <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">&#39;returned&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="p">})</span>
-    <span class="k">return</span> <span class="bp">self</span>
-
-  <span class="k">def</span> <span class="nf">_recordable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-      <span class="n">calls</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__calls__&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">calls</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">call</span> <span class="o">=</span> <span class="n">calls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">call</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kargs</span>
-        <span class="n">call</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
-        <span class="k">try</span><span class="p">:</span>
-          <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-          <span class="n">call</span><span class="p">[</span><span class="s">&#39;returned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
-          <span class="k">return</span> <span class="n">ret</span>
-        <span class="k">except</span><span class="p">:</span>
-          <span class="n">call</span><span class="p">[</span><span class="s">&#39;raised&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-          <span class="k">del</span> <span class="n">call</span><span class="p">[</span><span class="s">&#39;returned&#39;</span><span class="p">]</span>
-          <span class="k">raise</span>
-    <span class="k">return</span> <span class="n">inner</span>
 
 <div class="viewcode-block" id="Mock.should_receive"><a class="viewcode-back" href="../api.html#flexmock.Mock.should_receive">[docs]</a>  <span class="k">def</span> <span class="nf">should_receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds a method Expectation to the provided class or instance.</span>
@@ -568,9 +534,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - Expectation object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">calls</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__calls__&#39;</span><span class="p">)</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
-    <span class="n">saved_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">UPDATED_ATTRS</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;unable to replace flexmock methods&#39;</span><span class="p">)</span>
     <span class="n">chained_methods</span> <span class="o">=</span> <span class="bp">None</span>
@@ -578,25 +541,23 @@
     <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">method</span><span class="p">:</span>
       <span class="n">method</span><span class="p">,</span> <span class="n">chained_methods</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">method</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span>
-        <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismodule</span><span class="p">(</span><span class="n">obj</span><span class="p">)):</span>
-      <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismodule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">__name__</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
       <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;_</span><span class="si">%s</span><span class="s">__</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="n">MethodDoesNotExist</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> does not have method </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> does not have method </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">chained_methods</span><span class="p">:</span>
       <span class="n">return_value</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
       <span class="n">chained_expectation</span> <span class="o">=</span> <span class="n">return_value</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">chained_methods</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">:</span>
       <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">expectation</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_create_expectation&#39;</span><span class="p">)(</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="p">)</span>
+    <span class="n">expectation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_expectation</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">expectation</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="bp">self</span><span class="p">]:</span>
       <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expectation</span><span class="p">)</span>
-      <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_update_method&#39;</span><span class="p">)(</span><span class="n">expectation</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__calls__</span> <span class="o">=</span> <span class="n">calls</span><span class="p">[:</span><span class="n">saved_length</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_update_method</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">chained_methods</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">chained_expectation</span>
     <span class="k">else</span><span class="p">:</span>
@@ -614,13 +575,11 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - Expectation object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-      <span class="n">method_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">method</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">):</span>
+      <span class="n">method_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">method</span><span class="p">])</span>
       <span class="k">if</span> <span class="n">method_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">classmethod</span> <span class="ow">and</span> <span class="n">method_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">staticmethod</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;should_call cannot be called on a class mock&#39;</span><span class="p">)</span>
-    <span class="n">expectation</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;should_receive&#39;</span><span class="p">)(</span><span class="n">method</span><span class="p">)</span>
-    <span class="n">original_method</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;original_method&#39;</span><span class="p">)</span>
+    <span class="n">expectation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">expectation</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="n">expectation</span><span class="o">.</span><span class="n">original_method</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Mock.new_instances"><a class="viewcode-back" href="../api.html#flexmock.Mock.new_instances">[docs]</a>  <span class="k">def</span> <span class="nf">new_instances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">):</span>
@@ -634,29 +593,27 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - Expectation object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="s">&#39;__new__&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">kargs</span><span class="p">)</span><span class="o">.</span><span class="n">one_by_one</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;new_instances can only be called on a class mock&#39;</span><span class="p">)</span>
 </div>
   <span class="k">def</span> <span class="nf">_create_expectation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="n">_getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">method</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
                   <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="bp">self</span><span class="p">]]:</span>
       <span class="n">expectation</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span>
-                     <span class="k">if</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">&#39;method&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">method</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">original_method</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;original_method&#39;</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">method</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
       <span class="n">expectation</span> <span class="o">=</span> <span class="n">Expectation</span><span class="p">(</span>
-          <span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">return_value</span><span class="p">,</span>
-          <span class="n">original_method</span><span class="o">=</span><span class="n">original_method</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">return_value</span><span class="p">,</span>
+          <span class="n">original_method</span><span class="o">=</span><span class="n">expectation</span><span class="o">.</span><span class="n">original_method</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">expectation</span> <span class="o">=</span> <span class="n">Expectation</span><span class="p">(</span>
-          <span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">return_value</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">return_value</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">expectation</span>
 
   <span class="k">def</span> <span class="nf">_update_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expectation</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-    <span class="n">method_instance</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_create_mock_method&#39;</span><span class="p">)(</span><span class="n">method</span><span class="p">)</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
+    <span class="n">method_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_mock_method</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span>
     <span class="n">original_method</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;original_method&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">original_method</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__dict__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
@@ -689,17 +646,17 @@
         <span class="n">expected_message</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">expected_instance</span>
         <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">expected</span><span class="p">):</span>
           <span class="k">if</span> <span class="n">expected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">raised</span> <span class="ow">and</span> <span class="n">expected</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">raised</span><span class="o">.</span><span class="n">__bases__</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="p">(</span><span class="n">InvalidExceptionClass</span><span class="p">(</span><span class="s">&#39;expected </span><span class="si">%s</span><span class="s">, raised </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+            <span class="k">raise</span> <span class="p">(</span><span class="n">ExceptionClassError</span><span class="p">(</span><span class="s">&#39;expected </span><span class="si">%s</span><span class="s">, raised </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
                    <span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">raised</span><span class="p">)))</span>
           <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s">&#39;_sre.SRE_Pattern&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
-              <span class="k">raise</span> <span class="p">(</span><span class="n">InvalidExceptionMessage</span><span class="p">(</span><span class="s">&#39;expected /</span><span class="si">%s</span><span class="s">/, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
+              <span class="k">raise</span> <span class="p">(</span><span class="n">ExceptionMessageError</span><span class="p">(</span><span class="s">&#39;expected /</span><span class="si">%s</span><span class="s">/, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
                      <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="n">message</span><span class="p">)))</span>
           <span class="k">elif</span> <span class="n">expected_message</span> <span class="ow">and</span> <span class="n">expected_message</span> <span class="o">!=</span> <span class="n">message</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="p">(</span><span class="n">InvalidExceptionMessage</span><span class="p">(</span><span class="s">&#39;expected &quot;</span><span class="si">%s</span><span class="s">&quot;, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
+            <span class="k">raise</span> <span class="p">(</span><span class="n">ExceptionMessageError</span><span class="p">(</span><span class="s">&#39;expected &quot;</span><span class="si">%s</span><span class="s">&quot;, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
                    <span class="p">(</span><span class="n">expected_message</span><span class="p">,</span> <span class="n">message</span><span class="p">)))</span>
         <span class="k">elif</span> <span class="n">expected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">raised</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="p">(</span><span class="n">InvalidExceptionClass</span><span class="p">(</span><span class="s">&#39;expected &quot;</span><span class="si">%s</span><span class="s">&quot;, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
+          <span class="k">raise</span> <span class="p">(</span><span class="n">ExceptionClassError</span><span class="p">(</span><span class="s">&#39;expected &quot;</span><span class="si">%s</span><span class="s">&quot;, raised &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span>
                  <span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">raised</span><span class="p">)))</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span>
@@ -735,7 +692,7 @@
       <span class="n">expected_values</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;return_values&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">expected_values</span> <span class="ow">and</span>
           <span class="ow">not</span> <span class="n">match_return_values</span><span class="p">(</span><span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">return_values</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="p">(</span><span class="n">InvalidMethodSignature</span><span class="p">(</span><span class="s">&#39;expected to return </span><span class="si">%s</span><span class="s">, returned </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="n">MethodSignatureError</span><span class="p">(</span><span class="s">&#39;expected to return </span><span class="si">%s</span><span class="s">, returned </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
                <span class="p">(</span><span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">return_values</span><span class="p">)))</span>
       <span class="k">return</span> <span class="n">return_values</span>
 
@@ -745,9 +702,10 @@
           <span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">expectation</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">():</span>
-          <span class="k">raise</span> <span class="n">InvalidState</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called when </span><span class="si">%s</span><span class="s"> is True&#39;</span> <span class="o">%</span>
+          <span class="k">raise</span> <span class="n">StateError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called when </span><span class="si">%s</span><span class="s"> is True&#39;</span> <span class="o">%</span>
                              <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">))</span>
         <span class="n">expectation</span><span class="o">.</span><span class="n">times_called</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">expectation</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="n">_pass_thru</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;_pass_thru&#39;</span><span class="p">)</span>
         <span class="n">_replace_with</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;_replace_with&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">_pass_thru</span><span class="p">:</span>
@@ -773,51 +731,11 @@
         <span class="k">else</span><span class="p">:</span>
           <span class="k">return</span> <span class="n">return_value</span><span class="o">.</span><span class="n">value</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidMethodSignature</span><span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">arguments</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">MethodSignatureError</span><span class="p">(</span><span class="n">_format_args</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">arguments</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">mock_method_recordable_wrapper</span><span class="p">(</span><span class="n">runtime_self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-      <span class="n">mock_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span>
-                   <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">__object__</span> <span class="o">==</span> <span class="n">runtime_self</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">mock_list</span><span class="p">:</span>
-        <span class="n">mock_object</span> <span class="o">=</span> <span class="n">mock_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">mock_object</span><span class="o">.</span><span class="n">__calls__</span><span class="p">:</span>
-          <span class="k">return</span> <span class="n">mock_method</span><span class="p">(</span><span class="n">runtime_self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">call</span> <span class="o">=</span> <span class="n">mock_object</span><span class="o">.</span><span class="n">__calls__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">mock_method</span><span class="p">(</span><span class="n">runtime_self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">call</span><span class="p">[</span><span class="s">&#39;kargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kargs</span>
-            <span class="n">call</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
-            <span class="n">call</span><span class="p">[</span><span class="s">&#39;returned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
-            <span class="k">return</span> <span class="n">ret</span>
-          <span class="k">except</span><span class="p">:</span>
-            <span class="n">mock_object</span><span class="o">.</span><span class="n">__calls__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;raised&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
-            <span class="k">del</span> <span class="n">mock_object</span><span class="o">.</span><span class="n">__calls__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;returned&#39;</span><span class="p">]</span>
-            <span class="k">raise</span>
-
-    <span class="k">return</span> <span class="n">mock_method_recordable_wrapper</span>
+    <span class="k">return</span> <span class="n">mock_method</span>
 
 </div>
-<span class="n">ORIGINAL_MOCK_ATTRS</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">(</span><span class="n">Mock</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;__calls__&#39;</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">]</span>
-
-
-<span class="k">def</span> <span class="nf">__should_call_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-  <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__object__</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Expectation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-  <span class="n">expectation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">expectation</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="n">expectation</span><span class="o">.</span><span class="n">original_method</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">__should_receive_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-  <span class="k">return</span> <span class="n">__should_call_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;FLEXMOCK_MODE&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;connected&#39;</span><span class="p">:</span>
-  <span class="n">Mock</span><span class="o">.</span><span class="n">should_call</span> <span class="o">=</span> <span class="n">__should_call_connected</span>
-  <span class="n">Mock</span><span class="o">.</span><span class="n">should_receive</span> <span class="o">=</span> <span class="n">__should_receive_connected</span>
-
-
 <span class="k">def</span> <span class="nf">_arg_to_str</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
   <span class="n">arg</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">arg</span>  <span class="c"># ensure unicode conversion</span>
   <span class="k">if</span> <span class="s">&#39;_sre.SRE_Pattern&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)):</span>
@@ -852,19 +770,19 @@
 
 <span class="k">def</span> <span class="nf">_create_partial_mock</span><span class="p">(</span><span class="n">obj_or_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">flexmock_objects</span>
-             <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">__object__</span> <span class="ow">is</span> <span class="n">obj_or_class</span><span class="p">]</span>
+             <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">_object</span> <span class="ow">is</span> <span class="n">obj_or_class</span><span class="p">]</span>
   <span class="k">if</span> <span class="n">matches</span><span class="p">:</span>
     <span class="n">mock</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">mock</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
-    <span class="n">mock</span><span class="o">.</span><span class="n">__object__</span> <span class="o">=</span> <span class="n">obj_or_class</span>
+    <span class="n">mock</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="n">obj_or_class</span>
   <span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">return_value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">mock</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
     <span class="n">FlexmockContainer</span><span class="o">.</span><span class="n">add_expectation</span><span class="p">(</span><span class="n">mock</span><span class="p">,</span> <span class="n">Expectation</span><span class="p">(</span><span class="n">obj_or_class</span><span class="p">))</span>
   <span class="k">if</span> <span class="p">(</span><span class="n">_attach_flexmock_methods</span><span class="p">(</span><span class="n">mock</span><span class="p">,</span> <span class="n">Mock</span><span class="p">,</span> <span class="n">obj_or_class</span><span class="p">)</span> <span class="ow">and</span>
-    <span class="ow">not</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">mock</span><span class="o">.</span><span class="n">__object__</span><span class="p">)):</span>
-    <span class="n">mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">__object__</span>
+    <span class="ow">not</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">mock</span><span class="o">.</span><span class="n">_object</span><span class="p">)):</span>
+    <span class="n">mock</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">_object</span>
   <span class="k">return</span> <span class="n">mock</span>
 
 
@@ -881,11 +799,11 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mock</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
   <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="n">AttemptingToMockBuiltin</span><span class="p">(</span>
+    <span class="k">raise</span> <span class="n">MockBuiltinError</span><span class="p">(</span>
         <span class="s">&#39;Python does not allow you to mock builtin objects or modules. &#39;</span>
         <span class="s">&#39;Consider wrapping it in a class you can mock instead&#39;</span><span class="p">)</span>
   <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="n">AttemptingToMockBuiltin</span><span class="p">(</span>
+    <span class="k">raise</span> <span class="n">MockBuiltinError</span><span class="p">(</span>
         <span class="s">&#39;Python does not allow you to mock instances of builtin objects. &#39;</span>
         <span class="s">&#39;Consider wrapping it in a class you can mock instead&#39;</span><span class="p">)</span>
   <span class="k">return</span> <span class="bp">True</span>
@@ -953,7 +871,7 @@
     <span class="k">for</span> <span class="n">expectation</span> <span class="ow">in</span> <span class="n">expectations</span><span class="p">:</span>
       <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;reset&#39;</span><span class="p">)()</span>
   <span class="k">for</span> <span class="n">mock</span> <span class="ow">in</span> <span class="n">saved</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">mock</span><span class="p">,</span> <span class="s">&#39;__object__&#39;</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">_object</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
       <span class="n">instances</span> <span class="o">+=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">_isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
