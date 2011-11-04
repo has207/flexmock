@@ -181,6 +181,19 @@ class Expectation(object):
     else:
       return _getattr(self, name)
 
+  def _get_runnable(self):
+    """Ugly hack to get the name of when() condition from the source code."""
+    name = 'condition'
+    try:
+      source = inspect.getsource(self.runnable)
+      if 'when(' in source:
+        name = source.split('when(')[1].split(')')[0]
+      elif 'def ' in source:
+        name = source.split('def ')[1].split('(')[0]
+    except:  # couldn't get the source, oh well
+      pass
+    return name
+
   def mock(self):
     """Return the mock associated with this expectation.
 
@@ -341,6 +354,8 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if not hasattr(func, '__call__'):
+      raise FlexmockError('when() parameter must be callable')
     self.runnable = func
     return self
 
@@ -468,13 +483,14 @@ class Mock(object):
     for attr, value in kwargs.items():
       setattr(self, attr, value)
 
-  def __call__(self, *kargs, **kwargs):
-    return self
-
   def __enter__(self):
     return self._object
 
   def __exit__(self, type, value, traceback):
+    return self
+
+  def __call__(self, *kargs, **kwargs):
+    """Hack to make Expectation.mock() work with parens."""
     return self
 
   def should_receive(self, method):
@@ -655,7 +671,7 @@ class Mock(object):
       if expectation:
         if not expectation.runnable():
           raise StateError('%s expected to be called when %s is True' %
-                             (method, expectation.runnable))
+                             (method, expectation._get_runnable()))
         expectation.times_called += 1
         expectation.verify(final=False)
         _pass_thru = _getattr(expectation, '_pass_thru')

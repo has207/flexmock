@@ -229,6 +229,19 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
+  <span class="k">def</span> <span class="nf">_get_runnable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ugly hack to get the name of when() condition from the source code.&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;condition&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">source</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runnable</span><span class="p">)</span>
+      <span class="k">if</span> <span class="s">&#39;when(&#39;</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;when(&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">elif</span> <span class="s">&#39;def &#39;</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;def &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="c"># couldn&#39;t get the source, oh well</span>
+      <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">name</span>
+
 <div class="viewcode-block" id="Expectation.mock"><a class="viewcode-back" href="../api.html#flexmock.Expectation.mock">[docs]</a>  <span class="k">def</span> <span class="nf">mock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the mock associated with this expectation.</span>
 
@@ -389,6 +402,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      - self, i.e. can be chained with other Expectation methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;when() parameter must be callable&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">runnable</span> <span class="o">=</span> <span class="n">func</span>
     <span class="k">return</span> <span class="bp">self</span>
 </div>
@@ -516,13 +531,14 @@
     <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span>
-
   <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span>
 
   <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+
+  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hack to make Expectation.mock() work with parens.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="Mock.should_receive"><a class="viewcode-back" href="../api.html#flexmock.Mock.should_receive">[docs]</a>  <span class="k">def</span> <span class="nf">should_receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
@@ -703,7 +719,7 @@
       <span class="k">if</span> <span class="n">expectation</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">():</span>
           <span class="k">raise</span> <span class="n">StateError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> expected to be called when </span><span class="si">%s</span><span class="s"> is True&#39;</span> <span class="o">%</span>
-                             <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">runnable</span><span class="p">))</span>
+                             <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">expectation</span><span class="o">.</span><span class="n">_get_runnable</span><span class="p">()))</span>
         <span class="n">expectation</span><span class="o">.</span><span class="n">times_called</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">expectation</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="n">_pass_thru</span> <span class="o">=</span> <span class="n">_getattr</span><span class="p">(</span><span class="n">expectation</span><span class="p">,</span> <span class="s">&#39;_pass_thru&#39;</span><span class="p">)</span>
