@@ -1,3 +1,5 @@
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=has207&url=http://github.com/has207&title=flexmock&language=en_GB&tags=github&category=software)
+
 FlexMock is a mock/stub/spy library for Python.
 
 Its API is inspired by a Ruby library of the same name. However, it is not a goal of Python Flexmock to be a clone of the Ruby version. Instead, the focus is on providing full support for testing Python programs and making the creation of fake objects as unobtrusive as possible.
