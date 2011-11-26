@@ -932,6 +932,22 @@ _hook_into_doctest()
 
 
 def _patch_test_result(klass):
+  """Patches flexmock into any class that inherits unittest.TestResult.
+
+  This seems to work well for majority of test runners. In the case of nose
+  it's not even necessary as it doesn't override unittest.TestResults's
+  addSuccess and addFailure methods so simply patching unittest works
+  out of the box for nose.
+
+  For those that do inherit from unittest.TestResult and override its
+  addSuccess and addFailure methods, patching is pretty straightforward
+  (numerous examples below).
+
+  The reason we don't simply patch unittest's parent TestResult class
+  is addSuccess and addFailure in the child classes tend to add messages
+  into the output that we want to override in case flexmock generates
+  its own failures.
+  """
 
   saved_addSuccess = klass.addSuccess
   saved_stopTest = klass.stopTest
@@ -997,3 +1013,12 @@ def _hook_into_subunit():
   except:
     pass
 _hook_into_subunit()
+
+
+def _hook_into_zope():
+  try:
+    from zope import testrunner
+    _patch_test_result(testrunner.runner.TestResult)
+  except:
+    pass
+_hook_into_zope()
