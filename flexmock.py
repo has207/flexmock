@@ -515,7 +515,10 @@ class Mock(object):
         name = self._object.__class__.__name__
       method = '_%s__%s' % (name, method.lstrip('_'))
     if not isinstance(self._object, Mock) and not hasattr(self._object, method):
-      raise FlexmockError('%s does not have method %s' % (self._object, method))
+      exc_msg = '%s does not have method %s' % (self._object, method)
+      if method == '__new__':
+         exc_msg = 'old-style classes do not have a __new__() method'
+      raise FlexmockError(exc_msg)
     if chained_methods:
       return_value = Mock()
       chained_expectation = return_value.should_receive(chained_methods)
