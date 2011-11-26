@@ -28,7 +28,6 @@ import os
 import re
 import sys
 import types
-import unittest
 import warnings
 
 
@@ -830,7 +829,6 @@ def _isclass(obj):
 
 def flexmock_teardown():
   """Performs lexmock-specific teardown tasks."""
-
   saved = {}
   instances = []
   classes = []
@@ -933,32 +931,69 @@ def _hook_into_doctest():
 _hook_into_doctest()
 
 
-def _update_unittest(klass):
-  saved_stopTest = klass.stopTest
+def _patch_test_result(klass):
+
   saved_addSuccess = klass.addSuccess
+  saved_stopTest = klass.stopTest
+
+  def addSuccess(self, test):
+    self._pre_flexmock_success = True
+
   def stopTest(self, test):
     try:
       flexmock_teardown()
       saved_addSuccess(self, test)
     except:
       if hasattr(self, '_pre_flexmock_success'):
-        self.addError(test, sys.exc_info())
+        self.addFailure(test, sys.exc_info())
     return saved_stopTest(self, test)
-  klass.stopTest = stopTest
 
-  def addSuccess(self, test):
-    self._pre_flexmock_success = True
-  klass.addSuccess = addSuccess
+  if klass.stopTest is not stopTest:
+    klass.stopTest = stopTest
+
+  if klass.addSuccess is not addSuccess:
+    klass.addSuccess = addSuccess
 
 
 def _hook_into_unittest():
+  import unittest
   try:
-    import unittest
     try:
-      from unittest import TextTestResult as TestResult
-    except ImportError:
-      from unittest import _TextTestResult as TestResult
-    _update_unittest(TestResult)
-  except ImportError:
+      # only valid TestResult class for unittest is TextTestResult
+      _patch_test_result(unittest.TextTestResult)
+    except AttributeError:
+      # ugh, python2.4
+      _patch_test_result(unittest._TextTestResult)
+  except: # let's not take any chances
     pass
 _hook_into_unittest()
+
+
+def _hook_into_unittest2():
+  try:
+    import unittest2
+    _patch_test_result(unittest2.TextTestResult)
+  except:
+    pass
+_hook_into_unittest2()
+
+
+def _hook_into_twisted():
+  try:
+    from twisted.trial import reporter
+    _patch_test_result(reporter.MinimalReporter)
+    _patch_test_result(reporter.TextReporter)
+    _patch_test_result(reporter.VerboseTextReporter)
+    _patch_test_result(reporter.TreeReporter)
+  except:
+    pass
+_hook_into_twisted()
+
+
+def _hook_into_subunit():
+  try:
+    import subunit
+    _patch_test_result(subunit.TestProtocolClient)
+  except:
+    pass
+_hook_into_subunit()
