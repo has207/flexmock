@@ -990,8 +990,12 @@ _hook_into_unittest()
 
 def _hook_into_unittest2():
   try:
-    import unittest2
-    _patch_test_result(unittest2.TextTestResult)
+    try:
+      from unittest2 import TextTestResult
+    except ImportError:
+      # Django has its own copy of unittest2 it uses as fallback
+      from django.utils.unittest import TextTestResult
+    _patch_test_result(TextTestResult)
   except:
     pass
 _hook_into_unittest2()
