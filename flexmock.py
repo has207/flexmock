@@ -1025,3 +1025,12 @@ def _hook_into_zope():
   except:
     pass
 _hook_into_zope()
+
+
+def _hook_into_testtools():
+  try:
+    from testtools import testresult
+    _patch_test_result(testresult.TestResult)
+  except:
+    pass
+_hook_into_testtools()
