@@ -943,11 +943,11 @@ def _patch_test_result(klass):
   out of the box for nose.
 
   For those that do inherit from unittest.TestResult and override its
-  addSuccess and addFailure methods, patching is pretty straightforward
+  stopTest and addSuccess methods, patching is pretty straightforward
   (numerous examples below).
 
   The reason we don't simply patch unittest's parent TestResult class
-  is addSuccess and addFailure in the child classes tend to add messages
+  is stopTest and addSuccess in the child classes tend to add messages
   into the output that we want to override in case flexmock generates
   its own failures.
   """
@@ -959,12 +959,17 @@ def _patch_test_result(klass):
     self._pre_flexmock_success = True
 
   def stopTest(self, test):
-    try:
-      flexmock_teardown()
-      saved_addSuccess(self, test)
-    except:
-      if hasattr(self, '_pre_flexmock_success'):
-        self.addFailure(test, sys.exc_info())
+    if _get_code(saved_stopTest) is not _get_code(stopTest):
+      # if parent class was for some reason patched, avoid calling
+      # flexmock_teardown() twice and delegate up the class hierarchy
+      # this doesn't help if there is a gap and only the parent's
+      # parent class was patched, but should cover most screw-ups
+      try:
+        flexmock_teardown()
+        saved_addSuccess(self, test)
+      except:
+        if hasattr(self, '_pre_flexmock_success'):
+          self.addFailure(test, sys.exc_info())
     return saved_stopTest(self, test)
 
   if klass.stopTest is not stopTest:
