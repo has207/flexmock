@@ -26,27 +26,62 @@ unittest
 
 Fully supported.
 
-Nose
+nose
 ~~~~
 
-Fully supported, with one caveat that "generator" tests do not interact well with Flexmock's expectation checking code.
-Current recommendation is to only use Flexmock's stubbing and fake object facilities in generator tests.
+Fully supported, with one caveat that "generator" tests are treated as a single test for the purposes
+of creating mocks, meaning they are not properly torn down between generated tests. This is conistent
+with how generator tests typically behave but might be surprising when using flexmock's expectations.
+Current recommendation is to only use flexmock's stubbing and fake object facilities in generator tests.
 
-Py.test
+py.test
 ~~~~~~~
 
 Fully supported, with same caveat about "generator" tests as nose.
 
-Doctest
+doctest
 ~~~~~~~
 
 Not yet extensively tested but provisionally supported, including automatic expectation checking.
+
+unittest2
+~~~~~~~~~
+
+Fully supported.
+
+django
+~~~~~~
+
+Django uses unittest2 and is fully supported.
+
+twisted / trial
+~~~~~~~~~~~~~~~
+
+Fully supported, including all included reporter types.
+
+zope.testrunner
+~~~~~~~~~~~~~~~
+
+Not yet extensively tested as I find zope really hard to work with, but should be supported.
+
+subunit
+~~~~~~~
+
+Not yet extensively tested but should be fully supported.
+
+testtools
+~~~~~~~~~
+
+Fully supported.
 
 Other test runners
 ~~~~~~~~~~~~~~~~~~
 
 As far as I can tell most test runners out there are based on unittest to some degree
-so chances are they will simply just work without any special effort on Flexmock's side, as is the case with Nose.
+so chances are they will simply just work without any special effort on Flexmock's side,
+as is the case with Nose. However, if you find that your test runner isn't supported
+it should be trivial to add (see examples in the code, or just let me know what test runner
+you're using).
 
 
 Example Usage

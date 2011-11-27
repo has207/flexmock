@@ -76,7 +76,6 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">types</span>
-<span class="kn">import</span> <span class="nn">unittest</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 
@@ -564,7 +563,10 @@
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
       <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;_</span><span class="si">%s</span><span class="s">__</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">Mock</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> does not have method </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
+      <span class="n">exc_msg</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> does not have method </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;__new__&#39;</span><span class="p">:</span>
+         <span class="n">exc_msg</span> <span class="o">=</span> <span class="s">&#39;old-style classes do not have a __new__() method&#39;</span>
+      <span class="k">raise</span> <span class="n">FlexmockError</span><span class="p">(</span><span class="n">exc_msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">chained_methods</span><span class="p">:</span>
       <span class="n">return_value</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
       <span class="n">chained_expectation</span> <span class="o">=</span> <span class="n">return_value</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="n">chained_methods</span><span class="p">)</span>
@@ -878,7 +880,6 @@
 
 <span class="k">def</span> <span class="nf">flexmock_teardown</span><span class="p">():</span>
   <span class="sd">&quot;&quot;&quot;Performs lexmock-specific teardown tasks.&quot;&quot;&quot;</span>
-
   <span class="n">saved</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="n">instances</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">classes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -981,35 +982,115 @@
 <span class="n">_hook_into_doctest</span><span class="p">()</span>
 
 
-<span class="k">def</span> <span class="nf">_update_unittest</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
-  <span class="n">saved_stopTest</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span>
+<span class="k">def</span> <span class="nf">_patch_test_result</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Patches flexmock into any class that inherits unittest.TestResult.</span>
+
+<span class="sd">  This seems to work well for majority of test runners. In the case of nose</span>
+<span class="sd">  it&#39;s not even necessary as it doesn&#39;t override unittest.TestResults&#39;s</span>
+<span class="sd">  addSuccess and addFailure methods so simply patching unittest works</span>
+<span class="sd">  out of the box for nose.</span>
+
+<span class="sd">  For those that do inherit from unittest.TestResult and override its</span>
+<span class="sd">  stopTest and addSuccess methods, patching is pretty straightforward</span>
+<span class="sd">  (numerous examples below).</span>
+
+<span class="sd">  The reason we don&#39;t simply patch unittest&#39;s parent TestResult class</span>
+<span class="sd">  is stopTest and addSuccess in the child classes tend to add messages</span>
+<span class="sd">  into the output that we want to override in case flexmock generates</span>
+<span class="sd">  its own failures.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
   <span class="n">saved_addSuccess</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span>
-  <span class="k">def</span> <span class="nf">stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">flexmock_teardown</span><span class="p">()</span>
-      <span class="n">saved_addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_pre_flexmock_success&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">saved_stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
-  <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span> <span class="o">=</span> <span class="n">stopTest</span>
+  <span class="n">saved_stopTest</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span>
 
   <span class="k">def</span> <span class="nf">addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_pre_flexmock_success</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span> <span class="o">=</span> <span class="n">addSuccess</span>
+
+  <span class="k">def</span> <span class="nf">stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">_get_code</span><span class="p">(</span><span class="n">saved_stopTest</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_get_code</span><span class="p">(</span><span class="n">stopTest</span><span class="p">):</span>
+      <span class="c"># if parent class was for some reason patched, avoid calling</span>
+      <span class="c"># flexmock_teardown() twice and delegate up the class hierarchy</span>
+      <span class="c"># this doesn&#39;t help if there is a gap and only the parent&#39;s</span>
+      <span class="c"># parent class was patched, but should cover most screw-ups</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">flexmock_teardown</span><span class="p">()</span>
+        <span class="n">saved_addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_pre_flexmock_success&#39;</span><span class="p">):</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">addFailure</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">saved_stopTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">stopTest</span><span class="p">:</span>
+    <span class="n">klass</span><span class="o">.</span><span class="n">stopTest</span> <span class="o">=</span> <span class="n">stopTest</span>
+
+  <span class="k">if</span> <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">addSuccess</span><span class="p">:</span>
+    <span class="n">klass</span><span class="o">.</span><span class="n">addSuccess</span> <span class="o">=</span> <span class="n">addSuccess</span>
 
 
 <span class="k">def</span> <span class="nf">_hook_into_unittest</span><span class="p">():</span>
+  <span class="kn">import</span> <span class="nn">unittest</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">unittest</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TextTestResult</span> <span class="k">as</span> <span class="n">TestResult</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-      <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">_TextTestResult</span> <span class="k">as</span> <span class="n">TestResult</span>
-    <span class="n">_update_unittest</span><span class="p">(</span><span class="n">TestResult</span><span class="p">)</span>
-  <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+      <span class="c"># only valid TestResult class for unittest is TextTestResult</span>
+      <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TextTestResult</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+      <span class="c"># ugh, python2.4</span>
+      <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">_TextTestResult</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span> <span class="c"># let&#39;s not take any chances</span>
     <span class="k">pass</span>
 <span class="n">_hook_into_unittest</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_hook_into_unittest2</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">unittest2</span> <span class="kn">import</span> <span class="n">TextTestResult</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+      <span class="c"># Django has its own copy of unittest2 it uses as fallback</span>
+      <span class="kn">from</span> <span class="nn">django.utils.unittest</span> <span class="kn">import</span> <span class="n">TextTestResult</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">TextTestResult</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">_hook_into_unittest2</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_hook_into_twisted</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">twisted.trial</span> <span class="kn">import</span> <span class="n">reporter</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">reporter</span><span class="o">.</span><span class="n">MinimalReporter</span><span class="p">)</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">reporter</span><span class="o">.</span><span class="n">TextReporter</span><span class="p">)</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">reporter</span><span class="o">.</span><span class="n">VerboseTextReporter</span><span class="p">)</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">reporter</span><span class="o">.</span><span class="n">TreeReporter</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">_hook_into_twisted</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_hook_into_subunit</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">subunit</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">subunit</span><span class="o">.</span><span class="n">TestProtocolClient</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">_hook_into_subunit</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_hook_into_zope</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">zope</span> <span class="kn">import</span> <span class="n">testrunner</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">testrunner</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">TestResult</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">_hook_into_zope</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_hook_into_testtools</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">testresult</span>
+    <span class="n">_patch_test_result</span><span class="p">(</span><span class="n">testresult</span><span class="o">.</span><span class="n">TestResult</span><span class="p">)</span>
+  <span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">_hook_into_testtools</span><span class="p">()</span>
 </pre></div>
 
           </div>
