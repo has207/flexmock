@@ -970,6 +970,8 @@ def _patch_test_result(klass):
       except:
         if hasattr(self, '_pre_flexmock_success'):
           self.addFailure(test, sys.exc_info())
+      if hasattr(self, '_pre_flexmock_success'):
+        del self._pre_flexmock_success
     return saved_stopTest(self, test)
 
   if klass.stopTest is not stopTest:
