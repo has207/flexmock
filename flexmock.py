@@ -184,6 +184,11 @@ class Expectation(object):
     else:
       return _getattr(self, name)
 
+  def __getattr__(self, name):
+    self.__raise(
+        AttributeError,
+        "'%s' object has not attribute '%s'" % (self.__class__.__name__, name))
+
   def _get_runnable(self):
     """Ugly hack to get the name of when() condition from the source code."""
     name = 'condition'
@@ -196,6 +201,17 @@ class Expectation(object):
     except:  # couldn't get the source, oh well
       pass
     return name
+
+  def __raise(self, exception, message):
+    """Safe internal raise implementation.
+
+    In case we're patching builtins, it's important to reset the
+    expectation before raising any exceptions or else things like
+    open() might be stubbed out and the resulting runner errors are very
+    difficult to diagnose.
+    """
+    self.reset()
+    raise exception(message)
 
   def mock(self):
     """Return the mock associated with this expectation.
@@ -308,9 +324,9 @@ class Expectation(object):
     expected_calls = _getattr(self, 'expected_calls')
     modifier = _getattr(self, 'modifier')
     if expected_calls[AT_LEAST] is not None or modifier == AT_LEAST:
-      raise FlexmockError('cannot use at_least modifier twice')
+      self.__raise(FlexmockError, 'cannot use at_least modifier twice')
     if modifier == AT_MOST and expected_calls[AT_MOST] is None:
-      raise FlexmockError('cannot use at_least with at_most unset')
+      self.__raise(FlexmockError, 'cannot use at_least with at_most unset')
     self.modifier = AT_LEAST
     return self
 
@@ -328,9 +344,9 @@ class Expectation(object):
     expected_calls = _getattr(self, 'expected_calls')
     modifier = _getattr(self, 'modifier')
     if expected_calls[AT_MOST] is not None or modifier == AT_MOST:
-      raise FlexmockError('cannot use at_most modifier twice')
+      self.__raise(FlexmockError, 'cannot use at_most modifier twice')
     if modifier == AT_LEAST and expected_calls[AT_LEAST] is None:
-      raise FlexmockError('cannot use at_most with at_least unset')
+      self.__raise(FlexmockError, 'cannot use at_most with at_least unset')
     self.modifier = AT_MOST
     return self
 
@@ -358,7 +374,7 @@ class Expectation(object):
       - self, i.e. can be chained with other Expectation methods
     """
     if not hasattr(func, '__call__'):
-      raise FlexmockError('when() parameter must be callable')
+      self.__raise(FlexmockError, 'when() parameter must be callable')
     self.runnable = func
     return self
 
@@ -390,7 +406,7 @@ class Expectation(object):
     replace_with = _getattr(self, '_replace_with')
     original_method = _getattr(self, 'original_method')
     if replace_with:
-      raise FlexmockError('replace_with cannot be specified twice')
+      self.__raise(FlexmockError, 'replace_with cannot be specified twice')
     if function == original_method:
       self._pass_thru = True
     self._replace_with = function
@@ -451,7 +467,8 @@ class Expectation(object):
         self._verified = True
       method = _getattr(self, 'method')
       args = _getattr(self, 'args')
-      raise MethodCallError(
+      self.__raise(
+          MethodCallError,
           '%s expected to be called %s times, called %s times' %
           (_format_args(method, args), message, times_called))
 
@@ -705,6 +722,12 @@ class Mock(object):
         else:
           return return_value.value
       else:
+        # make sure to clean up expectations to ensure none of them
+        # interfere with the runner's error reporing mechanism
+        # e.g. open()
+        for _, expectations in FlexmockContainer.flexmock_objects.items():
+          for expectation in expectations:
+            _getattr(expectation, 'reset')()
         raise MethodSignatureError(_format_args(method, arguments))
 
     return mock_method

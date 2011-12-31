@@ -626,7 +626,9 @@ class RegularClass(object):
     flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
     assertEqual('ok', foo.method1('some string', 12))
     assertRaises(MethodSignatureError, foo.method1, 12, 32)
+    flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
     assertRaises(MethodSignatureError, foo.method1, 12, 'some string')
+    flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
     assertRaises(MethodSignatureError, foo.method1, 'string', 12, 14)
 
   def test_flexmock_should_match_types_on_multiple_arguments_generic(self):
@@ -640,6 +642,8 @@ class RegularClass(object):
     assertEqual('ok', foo.method1(12, 14, []))
     assertEqual('ok', foo.method1('some string', 'another one', False))
     assertRaises(MethodSignatureError, foo.method1, 'string', 12)
+    flexmock(foo).should_receive('method1').with_args(
+        object, object, object).and_return('ok')
     assertRaises(MethodSignatureError, foo.method1, 'string', 12, 13, 14)
 
   def test_flexmock_should_match_types_on_multiple_arguments_classes(self):
@@ -652,6 +656,8 @@ class RegularClass(object):
         object, Bar).and_return('ok')
     assertEqual('ok', foo.method1('some string', bar))
     assertRaises(MethodSignatureError, foo.method1, bar, 'some string')
+    flexmock(foo).should_receive('method1').with_args(
+        object, Bar).and_return('ok')
     assertRaises(MethodSignatureError, foo.method1, 12, 'some string')
 
   def test_flexmock_should_match_keyword_arguments(self):
@@ -664,7 +670,9 @@ class RegularClass(object):
     self._tear_down()
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2)
     assertRaises(MethodSignatureError, foo.method1, arg2=2, arg3=3)
+    flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2)
     assertRaises(MethodSignatureError, foo.method1, 1, arg2=2, arg3=4)
+    flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2)
     assertRaises(MethodSignatureError, foo.method1, 1)
 
   def test_flexmock_should_call_should_match_keyword_arguments(self):

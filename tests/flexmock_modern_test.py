@@ -15,9 +15,8 @@ class ModernClass(object):
       mock = flexmock(sys.modules['__builtin__'])
     else:
       mock = flexmock(sys.modules['builtins'])
-    mock.should_call('open')
-    mock.should_receive('open').once.with_args('file_name').and_return(
-      flexmock(read=lambda: 'some data'))
+    fake_fd = flexmock(read=lambda: 'some data')
+    mock.should_receive('open').once.with_args('file_name').and_return(fake_fd)
     with open('file_name') as f:
       data = f.read()
     self.assertEqual('some data', data)
