@@ -23,6 +23,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 
+# from flexmock import * is evil, keep it from doing any damage
+__all__ = ['flexmock']
+
+
 import inspect
 import os
 import re
