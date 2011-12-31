@@ -517,7 +517,7 @@ class Mock(object):
         name = self._object.__name__
       else:
         name = self._object.__class__.__name__
-      method = '_%s__%s' % (name, method.lstrip('_'))
+      method = '_%s__%s' % (name.lstrip('_'), method.lstrip('_'))
     if not isinstance(self._object, Mock) and not hasattr(self._object, method):
       exc_msg = '%s does not have method %s' % (self._object, method)
       if method == '__new__':
