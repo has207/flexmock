@@ -1,3 +1,9 @@
+Release 0.9.2
+- fix mocking builtins by reseting expectation when raising exceptions
+- fix mocking private methods on classes with leading underscores
+- limit the damage of "from flexmock import *" by limiting to just flexmock()
+- ensure _pre_flexmock_success is cleaned up after each test
+
 Release 0.9.1
 - adding support for more test runners:
   * unittest2
