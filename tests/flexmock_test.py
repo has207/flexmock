@@ -1254,6 +1254,17 @@ class RegularClass(object):
     except Exception:
       raise
 
+  def test_proper_reset_of_subclass_methods(self):
+    class A:
+      def x(self):
+        return 'a'
+    class B(A):
+      def x(self):
+        return 'b'
+    flexmock(B).should_receive('x').and_return('1')
+    self._tear_down()
+    assertEqual('b', B().x())
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
