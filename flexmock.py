@@ -732,7 +732,6 @@ class Mock(object):
 
 
 def _arg_to_str(arg):
-  arg = '%s' % arg  # ensure unicode conversion
   if '_sre.SRE_Pattern' in str(type(arg)):
     return '/%s/' % arg.pattern
   if sys.version_info < (3, 0):
@@ -740,14 +739,14 @@ def _arg_to_str(arg):
     # from basestring along with str, in 3.0 both unicode and basestring
     # go away and str handles everything properly
     if isinstance(arg, basestring):
-      return '"%s"' % arg
+      return '"%s"' % (arg,)
     else:
-      return '%s' % arg
+      return '%s' % (arg,)
   else:
     if isinstance(arg, str):
-      return '"%s"' % arg
+      return '"%s"' % (arg,)
     else:
-      return '%s' % arg
+      return '%s' % (arg,)
 
 
 def _format_args(method, arguments):

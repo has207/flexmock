@@ -1265,6 +1265,10 @@ class RegularClass(object):
     self._tear_down()
     assertEqual('b', B().x())
 
+  def test_format_args_supports_tuples(self):
+    formatted = _format_args('method', {'kargs' : ((1, 2),), 'kwargs' : {}})
+    assertEqual('method((1, 2))', formatted)
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
