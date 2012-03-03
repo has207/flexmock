@@ -483,7 +483,7 @@ class Expectation(object):
         if (hasattr(_mock, '__dict__') and
             method in _mock.__dict__ and
             type(_mock.__dict__) is dict):
-            _mock.__dict__[method] = original_method
+          _mock.__dict__[method] = original_method
         else:
           setattr(_mock, method, original_method)
     del self
