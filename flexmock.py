@@ -92,6 +92,8 @@ class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
   flexmock_objects = {}
   teardown_updated = []
+  ordered = []
+  last = None
 
   @classmethod
   def get_flexmock_expectation(cls, obj, name=None, args=None):
@@ -106,23 +108,21 @@ class FlexmockContainer(object):
       for e in reversed(cls.flexmock_objects[obj]):
         if e.method == name and _match_args(args, e.args):
           if e._ordered:
-            cls._verify_call_order(e, obj, args, name)
+            cls._verify_call_order(e, args)
           return e
 
   @classmethod
-  def _verify_call_order(cls, e, obj, args, name):
-    for exp in cls.flexmock_objects[obj]:
-      if (exp.method == name and
-          not _match_args(args, exp.args) and
-          not exp.times_called):
-        raise CallOrderError(
-            '%s called before %s' %
-            (_format_args(e.method, e.args),
-             _format_args(exp.method, exp.args)))
-      if (exp.method == name and
-          args and exp.args and  # ignore default stub case
-          _match_args(args, exp.args)):
-        break
+  def _verify_call_order(cls, expectation, args):
+    if not cls.ordered:
+      next = cls.last
+    else:
+      next = cls.ordered.pop(0)
+      cls.last = next
+    if expectation is not next:
+      raise CallOrderError(
+          '%s called before %s' %
+          (_format_args(expectation.method, args),
+           _format_args(next.method, next.args)))
 
   @classmethod
   def add_expectation(cls, obj, expectation):
@@ -362,6 +362,7 @@ class Expectation(object):
       - self, i.e. can be chained with other Expectation methods
     """
     self._ordered = True
+    FlexmockContainer.ordered.append(self)
     return self
 
   def when(self, func):
@@ -859,6 +860,8 @@ def flexmock_teardown():
   saved = {}
   instances = []
   classes = []
+  FlexmockContainer.ordered = []
+  FlexmockContainer.last = None
   for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
     saved[mock_object] = expectations[:]
     for expectation in expectations:
