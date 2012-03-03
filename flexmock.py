@@ -915,7 +915,7 @@ def flexmock(spec=None, **kwargs):
   Returns:
     Mock object if no spec is provided. Otherwise return the spec object.
   """
-  if spec:
+  if spec is not None:
     return _create_partial_mock(spec, **kwargs)
   else:
     return Mock(**kwargs)

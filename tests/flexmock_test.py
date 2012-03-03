@@ -1269,6 +1269,14 @@ class RegularClass(object):
     formatted = _format_args('method', {'kargs' : ((1, 2),), 'kwargs' : {}})
     assertEqual('method((1, 2))', formatted)
 
+  def test_mocking_subclass_of_str(self):
+    class String(str): pass
+    s = String()
+    flexmock(s, endswith='fake')
+    assertEqual('fake', s.endswith('stuff'))
+    self._tear_down()
+    assertEqual(False, s.endswith('stuff'))
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
