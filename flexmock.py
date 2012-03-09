@@ -931,8 +931,8 @@ def _hook_into_pytest():
   try:
     from _pytest import runner
     saved = runner.call_runtest_hook
-    def call_runtest_hook(item, when):
-      ret = saved(item, when)
+    def call_runtest_hook(item, when, **kwargs):
+      ret = saved(item, when, **kwargs)
       teardown = runner.CallInfo(flexmock_teardown, when=when)
       if when == 'call' and not ret.excinfo:
         teardown.result = None
