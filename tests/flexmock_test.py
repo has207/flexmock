@@ -1028,7 +1028,7 @@ class RegularClass(object):
   def test_should_mock_properties(self):
     mock = flexmock()
     mock.should_receive_property('foo').and_return('bar')
-    assert mock.foo == 'bar'
+    assertEqual('bar', mock.foo)
 
   def test_should_not_allow_with_args_on_properties(self):
     assertRaises(FlexmockError, lambda: flexmock().should_receive_property('foo').with_args("bar"))
@@ -1036,8 +1036,8 @@ class RegularClass(object):
   def test_should_allow_multiple_returns_on_properties(self):
     mock = flexmock()
     mock.should_receive_property('foo').and_return('bar').and_return('baz')
-    assert mock.foo == 'bar'
-    assert mock.foo == 'baz'
+    assertEqual('bar', mock.foo)
+    assertEqual('baz', mock.foo)
 
   def test_should_mock_property_and_verify(self):
     mock = flexmock()
