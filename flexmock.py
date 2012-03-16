@@ -38,7 +38,7 @@ import warnings
 AT_LEAST = 'at least'
 AT_MOST = 'at most'
 EXACTLY = 'exactly'
-UPDATED_ATTRS = ['should_receive', 'should_receive_property', 'should_call', 'new_instances']
+UPDATED_ATTRS = ['should_receive', 'should_receive_property', 'should_have_attribute', 'should_call', 'new_instances']
 
 
 class FlexmockError(Exception):
@@ -131,6 +131,25 @@ class FlexmockContainer(object):
     else:
       cls.flexmock_objects[obj] = [expectation]
 
+
+class AttributeExpectation(object):
+  def __init__(self, mock, name=None, return_value=None, original_value=None):
+    self.method = None
+    self.original_method = None
+    self.name = name
+    self._mock = mock
+    self.return_value=return_value
+    self.original_value=original_value
+    self.is_property = False
+
+  def reset(self):
+    """Returns the methods overriden by this expectation to their originals."""
+    _mock = _getattr(self, '_mock')
+    setattr(_mock._object, _getattr(self, 'name'), _getattr(self, 'original_value'))
+    del self
+
+  def verify(self):
+    pass
 
 class Expectation(object):
   """Holds expectations about methods.
@@ -529,6 +548,22 @@ class Mock(object):
     for expectation in FlexmockContainer.flexmock_objects[self]:
       if expectation.method == prop and expectation.is_property == True:
         raise FlexmockError('%s has already been mocked as a property.' % prop)
+
+  def should_have_attribute(self, attr, value):
+    """Adds an attribute to a mocked class.
+
+    Args:
+      - method: string name of the attribute to add
+
+    Returns:
+      - Expectation object
+    """
+    if hasattr(self._object, attr):
+      if self not in FlexmockContainer.flexmock_objects:
+        FlexmockContainer.flexmock_objects[self] = []
+      FlexmockContainer.flexmock_objects[self].append(AttributeExpectation(self, attr, value, original_value = getattr(self._object, attr)))
+    setattr(self._object, attr, value)
+    return self
 
   def should_receive_property(self, prop):
     """Adds a property Expectation to the provided class or instance.

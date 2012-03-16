@@ -1011,6 +1011,20 @@ class RegularClass(object):
     flexmock(foo).should_receive('method1.method2.method3').and_return('bar')
     assertEqual('bar', foo.method1().method2().method3())
 
+  def test_should_add_attributes(self):
+    mock = flexmock()
+    mock.should_have_attribute("foo", "bar")
+    assertEqual('bar', mock.foo)
+    self._tear_down()
+
+  def test_should_reset_attributes(self):
+    class Foo(object): 
+        bar = 'original'
+    flexmock(Foo).should_have_attribute('bar', 'new')
+    assertEqual('new', Foo.bar)
+    self._tear_down()
+    assertEqual('original', Foo.bar)
+
   def test_should_mock_properties(self):
     mock = flexmock()
     mock.should_receive_property('foo').and_return('bar')
