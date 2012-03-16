@@ -38,7 +38,7 @@ import warnings
 AT_LEAST = 'at least'
 AT_MOST = 'at most'
 EXACTLY = 'exactly'
-UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
+UPDATED_ATTRS = ['should_receive', 'should_receive_property', 'should_call', 'new_instances']
 
 
 class FlexmockError(Exception):
@@ -140,11 +140,12 @@ class Expectation(object):
   raise.
   """
 
-  def __init__(self, mock, name=None, return_value=None, original_method=None):
+  def __init__(self, mock, name=None, return_value=None, original_method=None, is_property=False):
     self.method = name
     self.modifier = EXACTLY
     self.original_method = original_method
     self.args = None
+    self.is_property = is_property
     value = ReturnValue(return_value)
     self.return_values = return_values = []
     self._replace_with = None
@@ -177,8 +178,9 @@ class Expectation(object):
       return _getattr(self, 'times')(2)
     elif name == 'never':
       return _getattr(self, 'times')(0)
-    elif name in ('at_least', 'at_most', 'ordered', 'one_by_one'):
+    elif name in ('at_least', 'at_most', 'ordered', 'one_by_one', 'should_receive_property'):
       return _getattr(self, name)()
+      
     elif name == 'mock':
       return _getattr(self, 'mock')()
     else:
@@ -230,6 +232,9 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if self.is_property:
+      self.__raise(FlexmockError, 'Cannot use with_args on properties')
+
     self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
@@ -361,6 +366,9 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if self.is_property:
+      self.__raise(FlexmockError, 'cannot order properties')
+
     self._ordered = True
     FlexmockContainer.ordered.append(self)
     return self
@@ -512,6 +520,36 @@ class Mock(object):
     """Hack to make Expectation.mock() work with parens."""
     return self
 
+  def check_that_property_is_not_already_mocked(self, prop):
+    for expectation in FlexmockContainer.flexmock_objects[self]:
+      if expectation.method == prop and expectation.is_property == False:
+        raise FlexmockError('%s has already been mocked as a method.' % prop)
+
+  def check_that_method_is_not_already_mocked(self, prop):
+    for expectation in FlexmockContainer.flexmock_objects[self]:
+      if expectation.method == prop and expectation.is_property == True:
+        raise FlexmockError('%s has already been mocked as a property.' % prop)
+
+  def should_receive_property(self, prop):
+    """Adds a property Expectation to the provided class or instance.
+
+    Args:
+      - method: string name of the method to add
+
+    Returns:
+      - Expectation object
+    """
+    if self not in FlexmockContainer.flexmock_objects:
+      FlexmockContainer.flexmock_objects[self] = []
+
+    self.check_that_property_is_not_already_mocked(prop)
+
+    expectation = self._create_expectation(prop, is_property=True)
+    if expectation not in FlexmockContainer.flexmock_objects[self]:
+      FlexmockContainer.flexmock_objects[self].append(expectation)
+      self._update_property(expectation, prop)
+    return expectation
+
   def should_receive(self, method):
     """Adds a method Expectation to the provided class or instance.
 
@@ -540,10 +578,13 @@ class Mock(object):
          exc_msg = 'old-style classes do not have a __new__() method'
       raise FlexmockError(exc_msg)
     if chained_methods:
-      return_value = Mock()
+      return_value = flexmock()
       chained_expectation = return_value.should_receive(chained_methods)
     if self not in FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects[self] = []
+
+    self.check_that_method_is_not_already_mocked(method)
+
     expectation = self._create_expectation(method, return_value)
     if expectation not in FlexmockContainer.flexmock_objects[self]:
       FlexmockContainer.flexmock_objects[self].append(expectation)
@@ -588,18 +629,26 @@ class Mock(object):
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
-  def _create_expectation(self, method, return_value=None):
+  def _create_expectation(self, method, return_value=None, is_property=False):
     if method in [x.method for x in
                   FlexmockContainer.flexmock_objects[self]]:
       expectation = [x for x in FlexmockContainer.flexmock_objects[self]
                      if x.method == method][0]
       expectation = Expectation(
           self._object, name=method, return_value=return_value,
-          original_method=expectation.original_method)
+          original_method=expectation.original_method, is_property=is_property)
     else:
       expectation = Expectation(
-          self._object, name=method, return_value=return_value)
+          self._object, name=method, return_value=return_value, is_property=is_property)
     return expectation
+
+    
+  def _update_property(self, expectation, prop):
+    def get_property_value(prop):
+        return method_instance(self)
+
+    method_instance = self._create_mock_method(prop)
+    setattr(self._object.__class__, prop, property(fget=lambda self: get_property_value(prop)))
 
   def _update_method(self, expectation, method):
     method_instance = self._create_mock_method(method)
@@ -763,19 +812,19 @@ def _format_args(method, arguments):
   return '%s(%s)' % (method, args)
 
 
-def _create_partial_mock(obj_or_class, **kwargs):
+def _create_partial_mock(mock_class, obj_or_class, **kwargs):
   matches = [x for x in FlexmockContainer.flexmock_objects
              if x._object is obj_or_class]
   if matches:
     mock = matches[0]
   else:
-    mock = Mock()
+    mock = mock_class()
     mock._object = obj_or_class
   for method, return_value in kwargs.items():
     mock.should_receive(method).and_return(return_value)
   if not matches:
     FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
-  if (_attach_flexmock_methods(mock, Mock, obj_or_class) and
+  if (_attach_flexmock_methods(mock, mock_class, obj_or_class) and
     not _isclass(mock._object)):
     mock = mock._object
   return mock
@@ -918,10 +967,18 @@ def flexmock(spec=None, **kwargs):
   Returns:
     Mock object if no spec is provided. Otherwise return the spec object.
   """
+
+  class MockImpl(Mock):
+    """
+    This class exists to make each instance of a mock be unique class,
+    making it so we can add properties.
+    """
+    pass
+
   if spec is not None:
-    return _create_partial_mock(spec, **kwargs)
+    return _create_partial_mock(MockImpl, spec, **kwargs)
   else:
-    return Mock(**kwargs)
+    return MockImpl(**kwargs)
 
 
 # RUNNER INTEGRATION
