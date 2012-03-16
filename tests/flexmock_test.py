@@ -1011,6 +1011,52 @@ class RegularClass(object):
     flexmock(foo).should_receive('method1.method2.method3').and_return('bar')
     assertEqual('bar', foo.method1().method2().method3())
 
+  def test_should_add_attributes(self):
+    mock = flexmock()
+    mock.should_have_attribute("foo", "bar")
+    assertEqual('bar', mock.foo)
+    self._tear_down()
+
+  def test_should_reset_attributes(self):
+    class Foo(object): 
+        bar = 'original'
+    flexmock(Foo).should_have_attribute('bar', 'new')
+    assertEqual('new', Foo.bar)
+    self._tear_down()
+    assertEqual('original', Foo.bar)
+
+  def test_should_mock_properties(self):
+    mock = flexmock()
+    mock.should_receive_property('foo').and_return('bar')
+    assertEqual('bar', mock.foo)
+
+  def test_should_not_allow_with_args_on_properties(self):
+    assertRaises(FlexmockError, lambda: flexmock().should_receive_property('foo').with_args("bar"))
+
+  def test_should_allow_multiple_returns_on_properties(self):
+    mock = flexmock()
+    mock.should_receive_property('foo').and_return('bar').and_return('baz')
+    assertEqual('bar', mock.foo)
+    assertEqual('baz', mock.foo)
+
+  def test_should_mock_property_and_verify(self):
+    mock = flexmock()
+    mock.should_receive_property('foo').and_return('bar').once
+    mock.foo
+    assertRaises(MethodCallError, lambda: mock.foo)
+
+  def test_should_fail_if_you_try_to_add_properties_and_method_with_same_name(self):
+    mock = flexmock()
+    mock.should_receive('foo').and_return('bar')
+    assertRaises(FlexmockError, lambda: mock.should_receive_property('foo'))
+
+    mock.should_receive_property('baz').and_return('')
+    assertRaises(FlexmockError, lambda: mock.should_receive('baz'))
+
+  def test_should_fail_if_you_try_to_order_properties(self):
+    mock = flexmock()
+    assertRaises(FlexmockError, lambda: mock.should_receive_property('foo').ordered)
+
   def test_flexmock_should_replace_method(self):
     class Foo:
       def method(self, arg):
