@@ -1285,6 +1285,12 @@ class RegularClass(object):
     s.should_call('endswith').ordered
     assertRaises(CallOrderError, s.endswith, 'c')
 
+  def test_fake_object_takes_properties(self):
+    foo = flexmock(bar=property(lambda self: 'baz'))
+    bar = flexmock(foo=property(lambda self: 'baz'))
+    assertEqual('baz', foo.bar)
+    assertEqual('baz', bar.foo)
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):

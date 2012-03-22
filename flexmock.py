@@ -500,7 +500,10 @@ class Mock(object):
     """
     self._object = self
     for attr, value in kwargs.items():
-      setattr(self, attr, value)
+      if type(value) is property:
+        setattr(self.__class__, attr, value)
+      else:
+        setattr(self, attr, value)
 
   def __enter__(self):
     return self._object
@@ -921,7 +924,9 @@ def flexmock(spec=None, **kwargs):
   if spec is not None:
     return _create_partial_mock(spec, **kwargs)
   else:
-    return Mock(**kwargs)
+    # use this intermediate class to attach properties
+    klass = type('MockClass', (Mock,), {})
+    return klass(**kwargs)
 
 
 # RUNNER INTEGRATION
