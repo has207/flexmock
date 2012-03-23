@@ -1,3 +1,12 @@
+Release 0.9.3
+- add python 3.3 test target
+- add proper handling of ordered() expectation across different methods
+- add property support on fake objects
+- fix compatibility with pytest 2.2 (thanks jpvanhal!)
+- fix insidious bug with mocking subclasses of str class
+- fix tuple handling when formatting arguments
+- fix reseting subclass methods
+
 Release 0.9.2
 - fix mocking builtins by reseting expectation when raising exceptions
 - fix mocking private methods on classes with leading underscores
