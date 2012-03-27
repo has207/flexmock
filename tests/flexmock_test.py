@@ -28,6 +28,9 @@ def module_level_function(some, args):
   return "%s, %s" % (some, args)
 
 
+module_level_attribute = 'test'
+
+
 def assertRaises(exception, method, *kargs, **kwargs):
   try:
     method(*kargs, **kwargs)
@@ -64,7 +67,7 @@ class RegularClass(object):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo')
     assert ('method_foo' in
-            [x.method for x in FlexmockContainer.flexmock_objects[mock]])
+            [x.name for x in FlexmockContainer.flexmock_objects[mock]])
 
   def test_flexmock_should_return_value(self):
     mock = flexmock(name='temp')
@@ -100,7 +103,7 @@ class RegularClass(object):
     mock.should_receive('method_foo')
     assertEqual('method_foo',
                 FlexmockContainer.get_flexmock_expectation(
-                     mock, 'method_foo').method)
+                     mock, 'method_foo').name)
 
   def test_flexmock_expectations_returns_none_if_not_found(self):
     mock = flexmock(name='temp')
@@ -1290,6 +1293,53 @@ class RegularClass(object):
     bar = flexmock(foo=property(lambda self: 'baz'))
     assertEqual('baz', foo.bar)
     assertEqual('baz', bar.foo)
+
+  def test_replace_non_callable_class_attributes(self):
+    class Foo:
+      bar = 1
+    foo = Foo()
+    bar = Foo()
+    flexmock(foo, bar=2)
+    assertEqual(2, foo.bar)
+    assertEqual(1, bar.bar)
+    self._tear_down()
+    assertEqual(1, foo.bar)
+
+  def test_replace_non_callable_instance_attributes(self):
+    class Foo:
+      def __init__(self):
+        self.bar = 1
+    foo = Foo()
+    bar = Foo()
+    flexmock(foo, bar=2)
+    flexmock(bar, bar=1)
+    assertEqual(2, foo.bar)
+    self._tear_down()
+    assertEqual(1, foo.bar)
+
+  def test_replace_non_callable_module_attributes(self):
+    if 'flexmock_test' in sys.modules:
+      mod = sys.modules['flexmock_test']
+    else:
+      mod = sys.modules['__main__']
+    flexmock(mod, module_level_attribute='yay')
+    assertEqual('yay',  module_level_attribute)
+    self._tear_down()
+    assertEqual('test', module_level_attribute)
+
+  def test_non_callable_attributes_fail_to_set_expectations(self):
+    class Foo:
+      bar = 1
+    foo = Foo()
+    e = flexmock(foo).should_receive('bar').and_return(2)
+    assertRaises(FlexmockError, e.times, 1)
+    assertRaises(FlexmockError, object.__getattribute__(e, 'ordered'))
+    assertRaises(FlexmockError, object.__getattribute__(e, 'at_least'))
+    assertRaises(FlexmockError, object.__getattribute__(e, 'at_most'))
+    assertRaises(FlexmockError, object.__getattribute__(e, 'replace_with'), lambda x: x)
+    assertRaises(FlexmockError, object.__getattribute__(e, 'and_raise'), Exception)
+    assertRaises(FlexmockError, object.__getattribute__(e, 'when'), lambda x: x)
+    assertRaises(FlexmockError, object.__getattribute__(e, 'and_yield'), 1)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
