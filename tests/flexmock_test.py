@@ -1343,6 +1343,11 @@ class RegularClass(object):
     assertRaises(FlexmockError, object.__getattribute__(e, 'at_most'))
     assertRaises(FlexmockError, object.__getattribute__(e, 'one_by_one'))
 
+  def test_and_return_defaults_to_none_with_no_arguments(self):
+    foo = flexmock()
+    foo.should_receive('bar').and_return()
+    assertEqual(None, foo.bar())
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):

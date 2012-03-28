@@ -255,14 +255,17 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
-    if not self._callable:
-      _setattr(self._mock, self.name, values[0])
-      return self
-
-    if len(values) == 1:
+    if not values:
+      value = None
+    elif len(values) == 1:
       value = values[0]
     else:
       value = values
+
+    if not self._callable:
+      _setattr(self._mock, self.name, value)
+      return self
+
     return_values = _getattr(self, 'return_values')
     if not _getattr(self, '_one_by_one'):
       value = ReturnValue(value)
