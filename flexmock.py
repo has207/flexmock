@@ -568,7 +568,7 @@ class Mock(object):
       else:
         class_name = self._object.__class__.__name__
       name = '_%s__%s' % (class_name.lstrip('_'), name.lstrip('_'))
-    if not isinstance(self._object, Mock) and not hasattr(self._object, name):
+    if not isinstance(self._object, Mock) and not _hasattr(self._object, name):
       exc_msg = '%s does not have attribute %s' % (self._object, name)
       if name == '__new__':
          exc_msg = 'old-style classes do not have a __new__() method'
@@ -581,7 +581,7 @@ class Mock(object):
     expectation = self._create_expectation(name, return_value)
     FlexmockContainer.flexmock_objects[self].append(expectation)
     if (isinstance(self._object, Mock) or
-        hasattr(getattr(self._object, name), '__call__')):
+        _hasattr(getattr(self._object, name), '__call__')):
       self._update_method(expectation, name)
     else:
       self._update_attribute(expectation, name)
@@ -645,7 +645,7 @@ class Mock(object):
   def _update_method(self, expectation, name):
     method_instance = self._create_mock_method(name)
     obj = self._object
-    if hasattr(obj, name) and not hasattr(expectation, 'original'):
+    if _hasattr(obj, name) and not hasattr(expectation, 'original'):
       if hasattr(obj, '__dict__') and name in obj.__dict__:
         expectation.original = obj.__dict__[name]
       else:
@@ -658,7 +658,7 @@ class Mock(object):
   def _update_attribute(self, expectation, name):
     obj = self._object
     expectation._callable = False
-    if hasattr(obj, name) and not hasattr(expectation, 'original'):
+    if _hasattr(obj, name) and not hasattr(expectation, 'original'):
       if hasattr(obj, '__dict__') and name in obj.__dict__:
         expectation.original = obj.__dict__[name]
       else:
@@ -888,15 +888,24 @@ def _arguments_match(arg, expected_arg):
 
 
 def _getattr(obj, name):
-  """Convenience wrapper."""
+  """Convenience wrapper to work around custom __getattribute__."""
   return object.__getattribute__(obj, name)
 
 
 def _setattr(obj, name, value):
+  """Ensure we use local __dict__ where possible."""
   if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
     obj.__dict__[name] = value
   else:
     setattr(obj, name, value)
+
+
+def _hasattr(obj, name):
+  """Ensure hasattr checks don't create side-effects for properties."""
+  if not _isclass(obj) and hasattr(obj, '__dict__') and name not in obj.__dict__:
+    return hasattr(obj.__class__, name)
+  else:
+    return hasattr(obj, name)
 
 
 def _isclass(obj):
