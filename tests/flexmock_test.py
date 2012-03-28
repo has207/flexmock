@@ -1333,13 +1333,15 @@ class RegularClass(object):
     foo = Foo()
     e = flexmock(foo).should_receive('bar').and_return(2)
     assertRaises(FlexmockError, e.times, 1)
+    assertRaises(FlexmockError, e.with_args, ())
+    assertRaises(FlexmockError, e.replace_with, lambda x: x)
+    assertRaises(FlexmockError, e.and_raise, Exception)
+    assertRaises(FlexmockError, e.when, lambda x: x)
+    assertRaises(FlexmockError, e.and_yield, 1)
     assertRaises(FlexmockError, object.__getattribute__(e, 'ordered'))
     assertRaises(FlexmockError, object.__getattribute__(e, 'at_least'))
     assertRaises(FlexmockError, object.__getattribute__(e, 'at_most'))
-    assertRaises(FlexmockError, object.__getattribute__(e, 'replace_with'), lambda x: x)
-    assertRaises(FlexmockError, object.__getattribute__(e, 'and_raise'), Exception)
-    assertRaises(FlexmockError, object.__getattribute__(e, 'when'), lambda x: x)
-    assertRaises(FlexmockError, object.__getattribute__(e, 'and_yield'), 1)
+    assertRaises(FlexmockError, object.__getattribute__(e, 'one_by_one'))
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):

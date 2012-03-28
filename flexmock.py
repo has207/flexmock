@@ -232,6 +232,8 @@ class Expectation(object):
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
+    if not self._callable:
+      self.__raise(FlexmockError, "can't use with_args() with attribute stubs")
     self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
@@ -254,12 +256,7 @@ class Expectation(object):
       - self, i.e. can be chained with other Expectation methods
     """
     if not self._callable:
-      obj = _getattr(self, '_mock')
-      name = _getattr(self, 'name')
-      if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
-        obj.__dict__[name] = values[0]
-      else:
-        setattr(obj, name, values[0])
+      _setattr(self._mock, self.name, values[0])
       return self
 
     if len(values) == 1:
@@ -653,10 +650,7 @@ class Mock(object):
       method_type = type(_getattr(expectation, 'original'))
       if method_type is classmethod or method_type is staticmethod:
         expectation.original_function = getattr(obj, name)
-    if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
-      obj.__dict__[name] = types.MethodType(method_instance, obj)
-    else:
-      setattr(obj, name, types.MethodType(method_instance, obj))
+    _setattr(obj, name, types.MethodType(method_instance, obj))
 
   def _update_attribute(self, expectation, name):
     obj = self._object
@@ -666,10 +660,7 @@ class Mock(object):
         expectation.original = obj.__dict__[name]
       else:
         expectation.original = getattr(obj, name)
-    if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
-      obj.__dict__[name] = None
-    else:
-      setattr(obj, name, None)
+    _setattr(obj, name, None)
 
   def _create_mock_method(self, name):
     def generator_method(yield_values):
@@ -842,10 +833,7 @@ def _attach_flexmock_methods(mock, flexmock_class, obj):
             _get_code(getattr(flexmock_class, attr))):
           return False
     for attr in UPDATED_ATTRS:
-      if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
-        obj.__dict__[attr] = getattr(mock, attr)
-      else:
-        setattr(obj, attr, getattr(mock, attr))
+      _setattr(obj, attr, getattr(mock, attr))
   except TypeError:
     raise MockBuiltinError(
         'Python does not allow you to mock builtin objects or modules. '
@@ -899,6 +887,13 @@ def _arguments_match(arg, expected_arg):
 def _getattr(obj, name):
   """Convenience wrapper."""
   return object.__getattribute__(obj, name)
+
+
+def _setattr(obj, name, value):
+  if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
+    obj.__dict__[name] = value
+  else:
+    setattr(obj, name, value)
 
 
 def _isclass(obj):
