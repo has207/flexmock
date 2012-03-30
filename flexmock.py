@@ -547,48 +547,29 @@ class Mock(object):
     return self
 
   def should_receive(self, name):
-    """Adds an Expectation to the provided class, instance or module.
+    """Replaces the specified attribute with a fake.
 
     Args:
-      - name: string name of the attribute
+      - name: string name of the attribute to replace
 
     Returns:
-      - Expectation object
+      - Expectation object which can be used to modify the expectations
+        on the fake attribute
     """
     if name in UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
-    return_value = None
+    obj = _getattr(self, '_object')
     if '.' in name:
       name, chained_methods = name.split('.', 1)
-    if (name.startswith('__') and not name.endswith('__') and
-        not inspect.ismodule(self._object)):
-      if _isclass(self._object):
-        class_name = self._object.__name__
-      else:
-        class_name = self._object.__class__.__name__
-      name = '_%s__%s' % (class_name.lstrip('_'), name.lstrip('_'))
-    if not isinstance(self._object, Mock) and not _hasattr(self._object, name):
-      exc_msg = '%s does not have attribute %s' % (self._object, name)
-      if name == '__new__':
-         exc_msg = 'old-style classes do not have a __new__() method'
-      raise FlexmockError(exc_msg)
+    name = _update_name_if_private(obj, name)
+    _ensure_object_has_named_attribute(obj, name)
     if chained_methods:
       return_value = Mock()
-      chained_expectation = return_value.should_receive(chained_methods)
-    if self not in FlexmockContainer.flexmock_objects:
-      FlexmockContainer.flexmock_objects[self] = []
-    expectation = self._create_expectation(name, return_value)
-    FlexmockContainer.flexmock_objects[self].append(expectation)
-    if (isinstance(self._object, Mock) or
-        _hasattr(getattr(self._object, name), '__call__')):
-      self._update_method(expectation, name)
+      self._create_expectation(obj, name, return_value)
+      return return_value.should_receive(chained_methods)
     else:
-      self._update_attribute(expectation, name)
-    if chained_methods:
-      return chained_expectation
-    else:
-      return expectation
+      return self._create_expectation(obj, name)
 
   def should_call(self, name):
     """Creates a spy.
@@ -629,7 +610,18 @@ class Mock(object):
     else:
       raise FlexmockError('new_instances can only be called on a class mock')
 
-  def _create_expectation(self, name, return_value=None):
+  def _create_expectation(self, obj, name, return_value=None):
+    if self not in FlexmockContainer.flexmock_objects:
+      FlexmockContainer.flexmock_objects[self] = []
+    expectation = self._save_expectation(name, return_value)
+    FlexmockContainer.flexmock_objects[self].append(expectation)
+    if isinstance(obj, Mock) or _hasattr(getattr(obj, name), '__call__'):
+      self._update_method(expectation, name)
+    else:
+      self._update_attribute(expectation, name)
+    return expectation
+
+  def _save_expectation(self, name, return_value=None):
     if name in [x.name for x in
                 FlexmockContainer.flexmock_objects[self]]:
       expectation = [x for x in FlexmockContainer.flexmock_objects[self]
@@ -914,6 +906,26 @@ def _isclass(obj):
     return isinstance(obj, (type, types.ClassType))
   else:
     return inspect.isclass(obj)
+
+
+def _update_name_if_private(obj, name):
+  if (name.startswith('__') and not name.endswith('__') and
+      not inspect.ismodule(obj)):
+    if _isclass(obj):
+      class_name = obj.__name__
+    else:
+      class_name = obj.__class__.__name__
+    name = '_%s__%s' % (class_name.lstrip('_'), name.lstrip('_'))
+  return name
+
+
+def _ensure_object_has_named_attribute(obj, name):
+  if not isinstance(obj, Mock) and not _hasattr(obj, name):
+    exc_msg = '%s does not have attribute %s' % (obj, name)
+    if name == '__new__':
+       exc_msg = 'old-style classes do not have a __new__() method'
+    raise FlexmockError(exc_msg)
+
 
 def flexmock_teardown():
   """Performs lexmock-specific teardown tasks."""
