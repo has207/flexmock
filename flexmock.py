@@ -39,6 +39,8 @@ AT_LEAST = 'at least'
 AT_MOST = 'at most'
 EXACTLY = 'exactly'
 UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
+DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
+                            if attr not in dir(type('', (object,), {}))]
 
 
 class FlexmockError(Exception):
@@ -615,7 +617,7 @@ class Mock(object):
       FlexmockContainer.flexmock_objects[self] = []
     expectation = self._save_expectation(name, return_value)
     FlexmockContainer.flexmock_objects[self].append(expectation)
-    if isinstance(obj, Mock) or _hasattr(getattr(obj, name), '__call__'):
+    if isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
       self._update_method(expectation, name)
     else:
       self._update_attribute(expectation, name)
@@ -894,8 +896,12 @@ def _setattr(obj, name, value):
 
 def _hasattr(obj, name):
   """Ensure hasattr checks don't create side-effects for properties."""
-  if not _isclass(obj) and hasattr(obj, '__dict__') and name not in obj.__dict__:
-    return hasattr(obj.__class__, name)
+  if (not _isclass(obj) and hasattr(obj, '__dict__') and
+      name not in obj.__dict__):
+    if name in DEFAULT_CLASS_ATTRIBUTES:
+      return False  # avoid false positives for things like __call__
+    else:
+      return hasattr(obj.__class__, name)
   else:
     return hasattr(obj, name)
 

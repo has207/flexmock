@@ -1348,6 +1348,15 @@ class RegularClass(object):
     foo.should_receive('bar').and_return()
     assertEqual(None, foo.bar())
 
+  def test_should_replace_attributes_that_are_instances_of_classes(self):
+    class Foo(object):
+      pass
+    class Bar(object):
+      foo = Foo()
+    bar = Bar()
+    flexmock(bar, foo='test')
+    assertEqual('test', bar.foo)
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
