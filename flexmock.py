@@ -567,7 +567,10 @@ class Mock(object):
     name = _update_name_if_private(obj, name)
     _ensure_object_has_named_attribute(obj, name)
     if chained_methods:
-      return_value = Mock()
+      if not isinstance(obj, Mock) and not _hasattr(getattr(obj, name), '__call__'):
+        return_value = _create_partial_mock(getattr(obj, name))
+      else:
+        return_value = Mock()
       self._create_expectation(obj, name, return_value)
       return return_value.should_receive(chained_methods)
     else:
@@ -623,7 +626,7 @@ class Mock(object):
     elif isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
       self._update_method(expectation, name)
     else:
-      self._update_attribute(expectation, name)
+      self._update_attribute(expectation, name, return_value)
     return expectation
 
   def _save_expectation(self, name, return_value=None):
@@ -652,7 +655,7 @@ class Mock(object):
         expectation.original_function = getattr(obj, name)
     _setattr(obj, name, types.MethodType(method_instance, obj))
 
-  def _update_attribute(self, expectation, name):
+  def _update_attribute(self, expectation, name, return_value=None):
     obj = self._object
     expectation._callable = False
     if _hasattr(obj, name) and not hasattr(expectation, 'original'):
@@ -660,7 +663,7 @@ class Mock(object):
         expectation.original = obj.__dict__[name]
       else:
         expectation.original = getattr(obj, name)
-    _setattr(obj, name, None)
+    _setattr(obj, name, return_value)
 
   def _create_mock_method(self, name):
     def generator_method(yield_values):

@@ -1306,6 +1306,21 @@ class RegularClass(object):
     self._tear_down()
     assertEqual(1, foo.bar)
 
+  def test_should_chain_attributes(self):
+    class Baz:
+      x = 1
+    class Bar:
+      baz = Baz()
+    class Foo:
+      bar = Bar()
+      
+    foo = Foo()
+    foo = flexmock(foo)
+    foo.should_receive('bar.baz.x').and_return(2)
+    assertEqual(2, foo.bar.baz.x)
+    self._tear_down()
+    assertEqual(1, foo.bar.baz.x)
+
   def test_replace_non_callable_instance_attributes(self):
     class Foo:
       def __init__(self):
