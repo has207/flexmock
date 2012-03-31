@@ -1313,7 +1313,7 @@ class RegularClass(object):
       baz = Baz()
     class Foo:
       bar = Bar()
-      
+
     foo = Foo()
     foo = flexmock(foo)
     foo.should_receive('bar.baz.x').and_return(2)

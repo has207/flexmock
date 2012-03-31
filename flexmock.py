@@ -567,7 +567,8 @@ class Mock(object):
     name = _update_name_if_private(obj, name)
     _ensure_object_has_named_attribute(obj, name)
     if chained_methods:
-      if not isinstance(obj, Mock) and not _hasattr(getattr(obj, name), '__call__'):
+      if (not isinstance(obj, Mock) and
+          not hasattr(getattr(obj, name), '__call__')):
         return_value = _create_partial_mock(getattr(obj, name))
       else:
         return_value = Mock()
@@ -622,7 +623,7 @@ class Mock(object):
     FlexmockContainer.flexmock_objects[self].append(expectation)
     if _isproperty(obj, name):
       # TODO(herman): this needs to call _update_property once it's implemented
-      self._update_attribute(expectation, name)
+      self._update_attribute(expectation, name, return_value)
     elif isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
       self._update_method(expectation, name)
     else:
