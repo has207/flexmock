@@ -617,7 +617,10 @@ class Mock(object):
       FlexmockContainer.flexmock_objects[self] = []
     expectation = self._save_expectation(name, return_value)
     FlexmockContainer.flexmock_objects[self].append(expectation)
-    if isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
+    if _isproperty(obj, name):
+      # TODO(herman): this needs to call _update_property once it's implemented
+      self._update_attribute(expectation, name)
+    elif isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
       self._update_method(expectation, name)
     else:
       self._update_attribute(expectation, name)
@@ -912,6 +915,20 @@ def _isclass(obj):
     return isinstance(obj, (type, types.ClassType))
   else:
     return inspect.isclass(obj)
+
+
+def _isproperty(obj, name):
+  if isinstance(obj, Mock):
+    return False
+  if not _isclass(obj) and hasattr(obj, '__dict__') and name not in obj.__dict__:
+    attr = getattr(obj.__class__, name)
+    if type(attr) is property:
+      return True
+  elif _isclass(obj):
+    attr = getattr(obj, name)
+    if type(attr) is property:
+      return True
+  return False
 
 
 def _update_name_if_private(obj, name):

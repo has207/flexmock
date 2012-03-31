@@ -18,6 +18,7 @@ from flexmock import ReturnValue
 from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock import _format_args
+from flexmock import _isproperty
 import re
 import sys
 import unicodedata
@@ -1356,6 +1357,24 @@ class RegularClass(object):
     bar = Bar()
     flexmock(bar, foo='test')
     assertEqual('test', bar.foo)
+
+  def test_isproperty(self):
+    class Foo:
+      @property
+      def bar(self): pass
+      def baz(self): pass
+    class Bar(Foo): pass
+    foo = Foo()
+    bar = Bar()
+    assertEqual(True, _isproperty(foo, 'bar'))
+    assertEqual(False, _isproperty(foo, 'baz'))
+    assertEqual(True, _isproperty(Foo, 'bar'))
+    assertEqual(False, _isproperty(Foo, 'baz'))
+    assertEqual(True, _isproperty(bar, 'bar'))
+    assertEqual(False, _isproperty(bar, 'baz'))
+    assertEqual(True, _isproperty(Bar, 'bar'))
+    assertEqual(False, _isproperty(Bar, 'baz'))
+    assertEqual(False, _isproperty(Mock(), 'baz'))
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
