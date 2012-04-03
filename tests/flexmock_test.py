@@ -723,6 +723,13 @@ class RegularClass(object):
     flexmock(Foo).should_receive('__iter__').and_yield(1, 2, 3)
     assertEqual([1, 2, 3], [x for x in Foo()])
 
+  def test_flexmock_should_mock_iter_on_new_style_instances(self):
+    class Foo(object):
+      def __iter__(self): pass
+    foo = Foo()
+    flexmock(foo, __iter__=iter([1, 2, 3]))
+    assertEqual([1, 2, 3], [x for x in foo])
+
   def test_flexmock_should_mock_private_methods_with_leading_underscores(self):
     class _Foo:
       def __stuff(self): pass
