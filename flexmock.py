@@ -554,6 +554,18 @@ class Mock(object):
     """Hack to make Expectation.mock() work with parens."""
     return self
 
+  def __iter__(self):
+    """Makes the mock object iterable.
+
+    Call the instance's version of __iter__ if available, otherwise yield self.
+    """
+    if (hasattr(self, '__dict__') and type(self.__dict__) is dict and
+        '__iter__' in self.__dict__):
+      for item in self.__dict__['__iter__'](self):
+        yield item
+    else:
+      yield self
+
   def should_receive(self, name):
     """Replaces the specified attribute with a fake.
 

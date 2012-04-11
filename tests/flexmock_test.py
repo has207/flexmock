@@ -1391,6 +1391,11 @@ class RegularClass(object):
     assertEqual(False, _isproperty(Bar, 'baz'))
     assertEqual(False, _isproperty(Mock(), 'baz'))
 
+  def test_fake_object_supporting_iteration(self):
+    foo = flexmock()
+    foo.should_receive('__iter__').and_yield(1, 2, 3)
+    assertEqual([1, 2, 3], [i for i in foo])
+
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
