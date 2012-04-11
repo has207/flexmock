@@ -41,7 +41,7 @@ EXACTLY = 'exactly'
 UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
 DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
-RE_PATTERN_STRING = 'SRE_Pattern'
+RE_PATTERN_STRING = str(re.compile('test')).split()[0].split('<')[1]
 
 
 class FlexmockError(Exception):
