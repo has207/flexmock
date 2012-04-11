@@ -41,6 +41,7 @@ EXACTLY = 'exactly'
 UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
 DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
+RE_PATTERN_STRING = 'SRE_Pattern'
 
 
 class FlexmockError(Exception):
@@ -166,6 +167,7 @@ class Expectation(object):
     self._one_by_one = False
     self._verified = False
     self._callable = True
+    self._local_override = False
 
   def __str__(self):
     return '%s -> (%s)' % (_format_args(self.name, self.args),
@@ -515,6 +517,10 @@ class Expectation(object):
         name = _getattr(self, 'name')
         if (hasattr(_mock, '__dict__') and
             name in _mock.__dict__ and
+            self._local_override):
+          del _mock.__dict__[name]
+        elif (hasattr(_mock, '__dict__') and
+            name in _mock.__dict__ and
             type(_mock.__dict__) is dict):
           _mock.__dict__[name] = original
         else:
@@ -654,7 +660,8 @@ class Mock(object):
       method_type = type(_getattr(expectation, 'original'))
       if method_type is classmethod or method_type is staticmethod:
         expectation.original_function = getattr(obj, name)
-    _setattr(obj, name, types.MethodType(method_instance, obj))
+    override = _setattr(obj, name, types.MethodType(method_instance, obj))
+    expectation._local_override = override
 
   def _update_attribute(self, expectation, name, return_value=None):
     obj = self._object
@@ -664,7 +671,8 @@ class Mock(object):
         expectation.original = obj.__dict__[name]
       else:
         expectation.original = getattr(obj, name)
-    _setattr(obj, name, return_value)
+    override = _setattr(obj, name, return_value)
+    expectation._local_override = override
 
   def _create_mock_method(self, name):
     def generator_method(yield_values):
@@ -686,7 +694,7 @@ class Mock(object):
           if expected is not raised and expected not in raised.__bases__:
             raise (ExceptionClassError('expected %s, raised %s' %
                    (expected, raised)))
-          if args['kargs'] and '_sre.SRE_Pattern' in str(args['kargs'][0]):
+          if args['kargs'] and RE_PATTERN_STRING in str(args['kargs'][0]):
             if not args['kargs'][0].search(message):
               raise (ExceptionMessageError('expected /%s/, raised "%s"' %
                      (args['kargs'][0].pattern, message)))
@@ -781,7 +789,7 @@ class Mock(object):
 
 
 def _arg_to_str(arg):
-  if '_sre.SRE_Pattern' in str(type(arg)):
+  if RE_PATTERN_STRING in str(type(arg)):
     return '/%s/' % arg.pattern
   if sys.version_info < (3, 0):
     # prior to 3.0 unicode strings are type unicode that inherits
@@ -881,7 +889,7 @@ def _arguments_match(arg, expected_arg):
     return True
   elif _isclass(expected_arg) and isinstance(arg, expected_arg):
     return True
-  elif ('_sre.SRE_Pattern' in str(type(expected_arg)) and
+  elif (RE_PATTERN_STRING in str(type(expected_arg)) and
         expected_arg.search(arg)):
     return True
   else:
@@ -895,10 +903,14 @@ def _getattr(obj, name):
 
 def _setattr(obj, name, value):
   """Ensure we use local __dict__ where possible."""
+  local_override = False
   if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
+    if name not in obj.__dict__:
+      local_override = True
     obj.__dict__[name] = value
   else:
     setattr(obj, name, value)
+  return local_override
 
 
 def _hasattr(obj, name):
@@ -968,9 +980,9 @@ def flexmock_teardown():
   for mock in saved.keys():
     obj = mock._object
     if not isinstance(obj, Mock) and not _isclass(obj):
-      instances += [obj]
+      instances.append(obj)
     if _isclass(obj):
-      classes += [obj]
+      classes.append(obj)
   for obj in instances + classes:
     for attr in UPDATED_ATTRS:
       try:
