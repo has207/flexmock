@@ -3,4 +3,4 @@ include CHANGELOG
 include LICENSE
 include README.md
 include Makefile
-recursive-include tests/ *py
+recursive-include tests/ *py *sh
