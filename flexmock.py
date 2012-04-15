@@ -41,7 +41,7 @@ EXACTLY = 'exactly'
 UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
 DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
-RE_PATTERN_STRING = str(re.compile('test')).split()[0].split('<')[1]
+RE_TYPE = re.compile('')
 
 
 class FlexmockError(Exception):
@@ -698,7 +698,7 @@ class Mock(object):
           if expected is not raised and expected not in raised.__bases__:
             raise (ExceptionClassError('expected %s, raised %s' %
                    (expected, raised)))
-          if args['kargs'] and RE_PATTERN_STRING in str(args['kargs'][0]):
+          if args['kargs'] and type(RE_TYPE) is type(args['kargs'][0]):
             if not args['kargs'][0].search(message):
               raise (ExceptionMessageError('expected /%s/, raised "%s"' %
                      (args['kargs'][0].pattern, message)))
@@ -790,7 +790,7 @@ class Mock(object):
 
 
 def _arg_to_str(arg):
-  if RE_PATTERN_STRING in str(type(arg)):
+  if type(RE_TYPE) is type(arg):
     return '/%s/' % arg.pattern
   if sys.version_info < (3, 0):
     # prior to 3.0 unicode strings are type unicode that inherits
@@ -890,7 +890,7 @@ def _arguments_match(arg, expected_arg):
     return True
   elif _isclass(expected_arg) and isinstance(arg, expected_arg):
     return True
-  elif (RE_PATTERN_STRING in str(type(expected_arg)) and
+  elif (type(RE_TYPE) is type(expected_arg) and
         expected_arg.search(arg)):
     return True
   else:
