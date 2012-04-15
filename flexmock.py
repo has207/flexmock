@@ -154,7 +154,6 @@ class Expectation(object):
     self._replace_with = None
     if return_value is not None:
       return_values.append(value)
-    self.yield_values = []
     self.times_called = 0
     self.expected_calls = {
         EXACTLY: None,
@@ -456,10 +455,7 @@ class Expectation(object):
     if not self._callable:
       self.__raise(
           FlexmockError, "can't use and_yield() with attribute stubs")
-    yield_values = _getattr(self, 'yield_values')
-    for value in kargs:
-      yield_values.append(ReturnValue(value))
-    return self
+    return self.and_return(iter(kargs))
 
   def verify(self, final=True):
     """Verify that this expectation has been met.
@@ -687,10 +683,6 @@ class Mock(object):
     expectation._local_override = override
 
   def _create_mock_method(self, name):
-    def generator_method(yield_values):
-      for value in yield_values:
-        yield value.value
-
     def _handle_exception_matching(expectation):
       return_values = _getattr(expectation, 'return_values')
       if return_values:
@@ -770,11 +762,8 @@ class Mock(object):
           return pass_thru(expectation, *kargs, **kwargs)
         elif _replace_with:
           return _replace_with(*kargs, **kwargs)
-        yield_values = _getattr(expectation, 'yield_values')
         return_values = _getattr(expectation, 'return_values')
-        if yield_values:
-          return generator_method(yield_values)
-        elif return_values:
+        if return_values:
           return_value = return_values[0]
           del return_values[0]
           return_values.append(return_value)
