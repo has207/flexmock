@@ -634,7 +634,7 @@ class Mock(object):
     if self not in FlexmockContainer.flexmock_objects:
       FlexmockContainer.flexmock_objects[self] = []
     expectation = self._save_expectation(name, return_value)
-    FlexmockContainer.flexmock_objects[self].append(expectation)
+    FlexmockContainer.add_expectation(self, expectation)
     if _isproperty(obj, name):
       # TODO(herman): this needs to call _update_property once it's implemented
       self._update_attribute(expectation, name, return_value)
@@ -657,6 +657,31 @@ class Mock(object):
           self._object, name=name, return_value=return_value)
     return expectation
 
+  def _update_class_for_iter(self, obj, name):
+    """Fixes MRO for overridden __iter__ on new-style objects.
+
+    Typically, replacing __iter__ on instances of new-style classes has no
+    effect as the one attached to the class takes precedence.
+    To work around it, we update the class' method to check if the instance
+    in question has one in its own __dict__ and call that instead.
+
+    Yay for consistency :/
+    """
+    original = getattr(obj.__class__, name)
+    def updated(self, *kargs, **kwargs):
+      if (hasattr(self, '__dict__') and type(self.__dict__) is dict and
+          name in self.__dict__):
+        return self.__dict__[name](self, *kargs, **kwargs)
+      else:
+        return original(self, *kargs, **kwargs)
+    setattr(obj.__class__, name, updated)
+    # create placeholder Mock and expectation to make sure this hack
+    # is torn down properly
+    mock = Mock()
+    mock._object = obj.__class__
+    expectation = Expectation(obj.__class__, name=name, original=original)
+    FlexmockContainer.add_expectation(mock, expectation)
+
   def _update_method(self, expectation, name):
     method_instance = self._create_mock_method(name)
     obj = self._object
@@ -670,6 +695,9 @@ class Mock(object):
         expectation.original_function = getattr(obj, name)
     override = _setattr(obj, name, types.MethodType(method_instance, obj))
     expectation._local_override = override
+    if (override and not _isclass(obj) and not isinstance(obj, Mock) and
+        hasattr(obj.__class__, name) and name == '__iter__'):
+      self._update_class_for_iter(obj, name)
 
   def _update_attribute(self, expectation, name, return_value=None):
     obj = self._object

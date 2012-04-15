@@ -697,14 +697,14 @@ class RegularClass(object):
     flexmock(foo).should_receive('__private_method').and_return('bar')
     assertEqual('bar', foo.public_method())
 
-  def test_flexmock_should_mock_private_special_methods(self):
+  def test_flexmock_should_mock_special_methods(self):
     class Foo:
-      def __private_special_method__(self):
+      def __special_method__(self):
         return 'foo'
       def public_method(self):
-        return self.__private_special_method__()
+        return self.__special_method__()
     foo = Foo()
-    flexmock(foo).should_receive('__private_special_method__').and_return('bar')
+    flexmock(foo).should_receive('__special_method__').and_return('bar')
     assertEqual('bar', foo.public_method())
 
   def test_flexmock_should_mock_double_underscore_method(self):
@@ -722,6 +722,19 @@ class RegularClass(object):
       def __iter__(self): pass
     flexmock(Foo).should_receive('__iter__').and_yield(1, 2, 3)
     assertEqual([1, 2, 3], [x for x in Foo()])
+
+  def test_flexmock_should_mock_iter_on_new_style_instances(self):
+    class Foo(object):
+      def __iter__(self):
+        yield None
+    old = Foo.__iter__
+    foo = Foo()
+    flexmock(foo, __iter__=iter([1, 2, 3]))
+    assertEqual([1, 2, 3], [x for x in foo])
+    assertEqual(False, foo.__iter__ == old)
+    self._tear_down()
+    assertEqual([None], [x for x in foo])
+    assertEqual(True, Foo.__iter__ == old, '%s != %s' % (Foo.__iter__, old))
 
   def test_flexmock_should_mock_private_methods_with_leading_underscores(self):
     class _Foo:
