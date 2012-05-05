@@ -43,6 +43,9 @@ DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
 RE_TYPE = re.compile('')
 
+# TODO(herman): figure out all the methods that should be listed here
+NEW_MRO_BUILTINS = ['__iter__', '__enter__', '__exit__']
+
 
 class FlexmockError(Exception):
   pass
@@ -657,21 +660,21 @@ class Mock(object):
           self._object, name=name, return_value=return_value)
     return expectation
 
-  def _update_class_for_iter(self, obj, name):
-    """Fixes MRO for overridden __iter__ on new-style objects.
+  def _update_class_for_builtins( self, obj, name):
+    """Fixes MRO for builtin methods on new-style objects.
 
-    Typically, replacing __iter__ on instances of new-style classes has no
-    effect as the one attached to the class takes precedence.
+    On 2.7+ and 3.2+, replacing builtins on instances of new-style classes
+    has no effect as the one attached to the class takes precedence.
     To work around it, we update the class' method to check if the instance
     in question has one in its own __dict__ and call that instead.
-
-    Yay for consistency :/
     """
+    if name not in NEW_MRO_BUILTINS:
+      return
     original = getattr(obj.__class__, name)
     def updated(self, *kargs, **kwargs):
       if (hasattr(self, '__dict__') and type(self.__dict__) is dict and
           name in self.__dict__):
-        return self.__dict__[name](self, *kargs, **kwargs)
+        return self.__dict__[name](*kargs, **kwargs)
       else:
         return original(self, *kargs, **kwargs)
     setattr(obj.__class__, name, updated)
@@ -696,8 +699,8 @@ class Mock(object):
     override = _setattr(obj, name, types.MethodType(method_instance, obj))
     expectation._local_override = override
     if (override and not _isclass(obj) and not isinstance(obj, Mock) and
-        hasattr(obj.__class__, name) and name == '__iter__'):
-      self._update_class_for_iter(obj, name)
+        hasattr(obj.__class__, name)):
+      self._update_class_for_builtins(obj, name)
 
   def _update_attribute(self, expectation, name, return_value=None):
     obj = self._object
