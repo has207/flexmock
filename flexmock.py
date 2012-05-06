@@ -43,9 +43,6 @@ DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
 RE_TYPE = re.compile('')
 
-# TODO(herman): figure out all the methods that should be listed here
-NEW_MRO_BUILTINS = ['__iter__', '__enter__', '__exit__']
-
 
 class FlexmockError(Exception):
   pass
@@ -660,15 +657,15 @@ class Mock(object):
           self._object, name=name, return_value=return_value)
     return expectation
 
-  def _update_class_for_builtins( self, obj, name):
+  def _update_class_for_magic_builtins( self, obj, name):
     """Fixes MRO for builtin methods on new-style objects.
 
-    On 2.7+ and 3.2+, replacing builtins on instances of new-style classes
-    has no effect as the one attached to the class takes precedence.
+    On 2.7+ and 3.2+, replacing magic builtins on instances of new-style
+    classes has no effect as the one attached to the class takes precedence.
     To work around it, we update the class' method to check if the instance
     in question has one in its own __dict__ and call that instead.
     """
-    if name not in NEW_MRO_BUILTINS:
+    if not (name.startswith('__') and name.endswith('__') and len(name) > 4):
       return
     original = getattr(obj.__class__, name)
     def updated(self, *kargs, **kwargs):
@@ -700,7 +697,7 @@ class Mock(object):
     expectation._local_override = override
     if (override and not _isclass(obj) and not isinstance(obj, Mock) and
         hasattr(obj.__class__, name)):
-      self._update_class_for_builtins(obj, name)
+      self._update_class_for_magic_builtins(obj, name)
 
   def _update_attribute(self, expectation, name, return_value=None):
     obj = self._object
