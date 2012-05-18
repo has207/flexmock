@@ -94,9 +94,14 @@ class ReturnValue(object):
 class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
   flexmock_objects = {}
-  teardown_updated = []
   ordered = []
   last = None
+
+  @classmethod
+  def reset(cls):
+    cls.ordered = []
+    cls.last = None
+    cls.flexmock_objects = {}
 
   @classmethod
   def get_flexmock_expectation(cls, obj, name=None, args=None):
@@ -1000,8 +1005,6 @@ def flexmock_teardown():
   saved = {}
   instances = []
   classes = []
-  FlexmockContainer.ordered = []
-  FlexmockContainer.last = None
   for mock_object, expectations in FlexmockContainer.flexmock_objects.items():
     saved[mock_object] = expectations[:]
     for expectation in expectations:
@@ -1024,8 +1027,7 @@ def flexmock_teardown():
             delattr(obj, attr)
         except AttributeError:
           pass
-  for mock_object in saved:
-    del FlexmockContainer.flexmock_objects[mock_object]
+  FlexmockContainer.reset()
 
   # make sure this is done last to keep exceptions here from breaking
   # any of the previous steps that cleanup all the changes
