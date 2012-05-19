@@ -1456,6 +1456,12 @@ class RegularClass(object):
     flexmock(foo).should_receive('bar').with_args(a=1,b=2,c=3).once
     foo.bar(1, 2, c=3)
 
+  def test_use_replace_with_for_callable_shortcut_kwargs(self):
+    class Foo(object):
+      def bar(self): return 'bar'
+    foo = Foo()
+    flexmock(foo, bar=lambda: 'baz')
+    assertEqual('baz', foo.bar())
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):

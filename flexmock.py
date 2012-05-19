@@ -963,7 +963,10 @@ def _create_partial_mock(obj_or_class, **kwargs):
     mock = Mock()
     mock._object = obj_or_class
   for name, return_value in kwargs.items():
-    mock.should_receive(name).and_return(return_value)
+    if hasattr(return_value, '__call__'):
+      mock.should_receive(name).replace_with(return_value)
+    else:
+      mock.should_receive(name).and_return(return_value)
   if not matches:
     FlexmockContainer.add_expectation(mock, Expectation(obj_or_class))
   if (_attach_flexmock_methods(mock, Mock, obj_or_class) and
