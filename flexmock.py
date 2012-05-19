@@ -44,6 +44,16 @@ DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
 RE_TYPE = re.compile('')
 
 
+try:
+  any([])
+except NameError:
+  # Python 2.4 sucks
+  def any(iterable):
+    for x in iterable:
+      if x: return True
+    return False
+
+
 class FlexmockError(Exception):
   pass
 
@@ -91,6 +101,12 @@ class ReturnValue(object):
         return '(%s)' % ', '.join([_arg_to_str(x) for x in self.value])
 
 
+class ArgSpec(object):
+  """Silly hack for inpsect.getargspec return a tuple on python <2.6"""
+  def __init__(self, spec):
+    self.args, self.varargs, self.keywords, self.defaults = spec
+
+
 class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
   flexmock_objects = {}
@@ -114,7 +130,7 @@ class FlexmockContainer(object):
       args['kargs'] = (args['kargs'],)
     if name and obj in cls.flexmock_objects:
       for e in reversed(cls.flexmock_objects[obj]):
-        if e.name == name and _match_args(args, e.args):
+        if e.name == name and e.match_args(args):
           if e._ordered:
             cls._verify_call_order(e, args)
           return e
@@ -122,15 +138,15 @@ class FlexmockContainer(object):
   @classmethod
   def _verify_call_order(cls, expectation, args):
     if not cls.ordered:
-      next = cls.last
+      next_method = cls.last
     else:
-      next = cls.ordered.pop(0)
-      cls.last = next
-    if expectation is not next:
+      next_method = cls.ordered.pop(0)
+      cls.last = next_method
+    if expectation is not next_method:
       raise CallOrderError(
           '%s called before %s' %
           (_format_args(expectation.name, args),
-           _format_args(next.name, next.args)))
+           _format_args(next_method.name, next_method.args)))
 
   @classmethod
   def add_expectation(cls, obj, expectation):
@@ -212,6 +228,41 @@ class Expectation(object):
       pass
     return name
 
+  def _verify_signature_match(self, allowed, *kargs, **kwargs):
+    is_method = inspect.ismethod(getattr(self._mock, self.name))
+    args_len = len(allowed.args)
+    if is_method:
+      args_len -= 1
+    minimum = args_len - (allowed.defaults and len(allowed.defaults) or 0)
+    maximum = None
+    if allowed.varargs is None and allowed.keywords is None:
+      maximum = args_len
+    total_positional = len(
+        kargs + tuple(a for a in kwargs if a in allowed.args))
+    if (allowed.defaults and total_positional == minimum and
+        any(a for a in kwargs if a in allowed.args)):
+      minimum += sum(1 for a in kwargs if a in allowed.args)
+    if total_positional < minimum:
+      raise FlexmockError(
+          '%s requires at least %s arguments, expectation provided %s' %
+          (self.name, minimum, total_positional))
+    if maximum is not None and total_positional > maximum:
+      raise FlexmockError(
+          '%s requires at most %s arguments, expectation provided %s' %
+          (self.name, maximum, total_positional))
+    if args_len == len(kargs) and any(a for a in kwargs if a in allowed.args):
+      raise FlexmockError(
+          '%s already given as positional arguments to %s' %
+          ([a for a in kwargs if a in allowed.args], self.name))
+    if not allowed.keywords and any(a for a in kwargs if a not in allowed.args):
+      raise FlexmockError(
+          '%s is not a valid keyword argument to %s' %
+          ([a for a in kwargs if a not in allowed.args][0], self.name))
+
+  def _normalize_named_args(self, allowed, *kargs, **kwargs):
+    # TODO(herman): make this actually do something
+    return {'kargs': kargs, 'kwargs': kwargs}
+
   def __raise(self, exception, message):
     """Safe internal raise implementation.
 
@@ -222,6 +273,23 @@ class Expectation(object):
     """
     self.reset()
     raise exception(message)
+
+  def match_args(self, given_args):
+    """Check if the set of given arguments matches this expectation."""
+    expected_args = self.args
+    if (given_args == expected_args or expected_args is None):
+      return True
+    if (len(given_args['kargs']) != len(expected_args['kargs']) or
+        len(given_args['kwargs']) != len(expected_args['kwargs']) or
+        given_args['kwargs'].keys() != expected_args['kwargs'].keys()):
+      return False
+    for i, arg in enumerate(given_args['kargs']):
+      if not _arguments_match(arg, expected_args['kargs'][i]):
+        return False
+    for k, v in given_args['kwargs'].items():
+      if not _arguments_match(v, expected_args['kwargs'][k]):
+        return False
+    return True
 
   def mock(self):
     """Return the mock associated with this expectation.
@@ -242,7 +310,22 @@ class Expectation(object):
     """
     if not self._callable:
       self.__raise(FlexmockError, "can't use with_args() with attribute stubs")
-    self.args = {'kargs': kargs, 'kwargs': kwargs}
+    original = self.__dict__.get('original')
+    allowed = None
+    if original:
+      try:
+        self.argspec = allowed = ArgSpec(inspect.getargspec(original))
+      except TypeError:
+        # built-in function: fall back to stupid processing and hope the
+        # builtins don't change signature
+        pass
+    if allowed:
+      # do this outside try block as TypeError is way too general and catches
+      # unrelated errors in the verify signature code
+      self._verify_signature_match(allowed, *kargs, **kwargs)
+      self.args = self._normalize_named_args(allowed, *kargs, **kwargs)
+    else:
+      self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
 
   def and_return(self, *values):
@@ -900,22 +983,6 @@ def _get_code(func):
   else:
     code = '__code__'
   return getattr(func, code)
-
-
-def _match_args(given_args, expected_args):
-  if (given_args == expected_args or expected_args is None):
-    return True
-  if (len(given_args['kargs']) != len(expected_args['kargs']) or
-      len(given_args['kwargs']) != len(expected_args['kwargs']) or
-      given_args['kwargs'].keys() != expected_args['kwargs'].keys()):
-    return False
-  for i, arg in enumerate(given_args['kargs']):
-    if not _arguments_match(arg, expected_args['kargs'][i]):
-      return False
-  for k, v in given_args['kwargs'].items():
-    if not _arguments_match(v, expected_args['kwargs'][k]):
-      return False
-  return True
 
 
 def _arguments_match(arg, expected_arg):

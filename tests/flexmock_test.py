@@ -36,10 +36,10 @@ def assertRaises(exception, method, *kargs, **kwargs):
   try:
     method(*kargs, **kwargs)
   except exception:
-    assert True
     return
   except:
-    pass
+    instance = sys.exc_info()[1]
+    print('%s' % instance)
   raise Exception('%s not raised' % exception.__name__)
 
 
@@ -549,7 +549,7 @@ class RegularClass(object):
     class Group(object):
       def method1(self, arg1, arg2='b'):
         return '%s:%s' % (arg1, arg2)
-      def method2(self): pass
+      def method2(self, a): pass
     group = Group()
     flexmock(group).should_call('method1').at_least.once
     assertRaises(MethodCallError, self._tear_down)
@@ -562,7 +562,7 @@ class RegularClass(object):
   def test_flexmock_doesnt_error_on_properly_ordered_expectations(self):
     class Foo(object):
       def foo(self): pass
-      def method1(self): pass
+      def method1(self, a): pass
       def bar(self): pass
       def baz(self): pass
     flexmock(Foo).should_receive('foo')
@@ -579,7 +579,7 @@ class RegularClass(object):
   def test_flexmock_errors_on_improperly_ordered_expectations(self):
     class Foo(object):
       def foo(self): pass
-      def method1(self): pass
+      def method1(self, a): pass
       def bar(self): pass
       def baz(self): pass
     flexmock(Foo)
@@ -625,7 +625,7 @@ class RegularClass(object):
 
   def test_flexmock_should_match_types_on_multiple_arguments(self):
     class Foo:
-      def method1(self): pass
+      def method1(self, a, b): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(str, int).and_return('ok')
     assertEqual('ok', foo.method1('some string', 12))
@@ -637,7 +637,7 @@ class RegularClass(object):
 
   def test_flexmock_should_match_types_on_multiple_arguments_generic(self):
     class Foo:
-      def method1(self): pass
+      def method1(self, a, b, c): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(
         object, object, object).and_return('ok')
@@ -652,7 +652,7 @@ class RegularClass(object):
 
   def test_flexmock_should_match_types_on_multiple_arguments_classes(self):
     class Foo:
-      def method1(self): pass
+      def method1(self, a, b): pass
     class Bar: pass
     foo = Foo()
     bar = Bar()
@@ -666,7 +666,7 @@ class RegularClass(object):
 
   def test_flexmock_should_match_keyword_arguments(self):
     class Foo:
-      def method1(self): pass
+      def method1(self, a, **kwargs): pass
     foo = Foo()
     flexmock(foo).should_receive('method1').with_args(1, arg3=3, arg2=2).twice
     foo.method1(1, arg2=2, arg3=3)
@@ -1134,7 +1134,7 @@ class RegularClass(object):
 
   def test_arg_matching_works_with_regexp(self):
     class Foo:
-      def foo(arg1, arg2): pass
+      def foo(self, arg1, arg2): pass
     foo = Foo()
     flexmock(foo).should_receive('foo').with_args(
         re.compile('^arg1.*asdf$'), arg2=re.compile('f')).and_return('mocked')
@@ -1142,7 +1142,7 @@ class RegularClass(object):
 
   def test_arg_matching_with_regexp_fails_when_regexp_doesnt_match_karg(self):
     class Foo:
-      def foo(arg1, arg2): pass
+      def foo(self, arg1, arg2): pass
     foo = Foo()
     flexmock(foo).should_receive('foo').with_args(
         re.compile('^arg1.*asdf$'), arg2=re.compile('a')).and_return('mocked')
@@ -1150,7 +1150,7 @@ class RegularClass(object):
 
   def test_arg_matching_with_regexp_fails_when_regexp_doesnt_match_kwarg(self):
     class Foo:
-      def foo(arg1, arg2): pass
+      def foo(self, arg1, arg2): pass
     foo = Foo()
     flexmock(foo).should_receive('foo').with_args(
         re.compile('^arg1.*asdf$'), arg2=re.compile('a')).and_return('mocked')
@@ -1408,6 +1408,53 @@ class RegularClass(object):
     foo = flexmock()
     foo.should_receive('__iter__').and_yield(1, 2, 3)
     assertEqual([1, 2, 3], [i for i in foo])
+
+  def test_with_doesnt_set_max_when_using_varargs(self):
+    class Foo(object):
+      def bar(self, *kargs): pass
+    flexmock(Foo).should_receive('bar').with_args(1, 2, 3)
+
+  def test_with_doesnt_set_max_when_using_kwargs(self):
+    class Foo(object):
+      def bar(self, **kwargs): pass
+    flexmock(Foo).should_receive('bar').with_args(1, 2, 3)
+
+  def test_with_blows_up_on_too_few_args(self):
+    class Foo(object):
+      def bar(self, a, b, c=1): pass
+    e = flexmock(Foo).should_receive('bar')
+    assertRaises(FlexmockError, e.with_args, 1)
+
+  def test_with_blows_up_on_too_few_args_with_kwargs(self):
+    class Foo(object):
+      def bar(self, a, b, c=1): pass
+    e = flexmock(Foo).should_receive('bar')
+    assertRaises(FlexmockError, e.with_args, 1, c=2)
+
+  def test_with_blows_up_on_too_many_args(self):
+    class Foo(object):
+      def bar(self, a, b, c=1): pass
+    e = flexmock(Foo).should_receive('bar')
+    assertRaises(FlexmockError, e.with_args, 1, 2, 3, 4)
+
+  def test_with_blows_up_when_on_kwarg_overlapping_positional(self):
+    class Foo(object):
+      def bar(self, a, b, c=1, **kwargs): pass
+    e = flexmock(Foo).should_receive('bar')
+    assertRaises(FlexmockError, e.with_args, 1, 2, 3, c=2)
+
+  def test_with_blows_up_when_on_invalid_kwarg(self):
+    class Foo(object):
+      def bar(self, a, b, c=1): pass
+    e = flexmock(Foo).should_receive('bar')
+    assertRaises(FlexmockError, e.with_args, 1, 2, d=2)
+
+  #def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
+  #  class Foo(object):
+  #    def bar(self, a, b, c): pass
+  #  foo = Foo()
+  #  flexmock(foo).should_receive('bar').with_args(1,2,3).once
+  #  foo.bar(a=1, b=2, c=3)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
