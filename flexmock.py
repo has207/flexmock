@@ -170,6 +170,7 @@ class Expectation(object):
     if original is not None:
       self.original = original
     self.args = None
+    self.argspec = None
     value = ReturnValue(return_value)
     self.return_values = return_values = []
     self._replace_with = None
@@ -228,7 +229,8 @@ class Expectation(object):
       pass
     return name
 
-  def _verify_signature_match(self, allowed, *kargs, **kwargs):
+  def _verify_signature_match(self, *kargs, **kwargs):
+    allowed = self.argspec
     is_method = inspect.ismethod(getattr(self._mock, self.name))
     args_len = len(allowed.args)
     if is_method:
@@ -259,9 +261,37 @@ class Expectation(object):
           '%s is not a valid keyword argument to %s' %
           ([a for a in kwargs if a not in allowed.args][0], self.name))
 
-  def _normalize_named_args(self, allowed, *kargs, **kwargs):
-    # TODO(herman): make this actually do something
-    return {'kargs': kargs, 'kwargs': kwargs}
+  def _update_original(self, name, obj):
+    if hasattr(obj, '__dict__') and name in obj.__dict__:
+      self.original = obj.__dict__[name]
+    else:
+      self.original = getattr(obj, name)
+    self._update_argspec()
+
+  def _update_argspec(self):
+    original = self.__dict__.get('original')
+    if original:
+      try:
+        self.argspec = ArgSpec(inspect.getargspec(original))
+      except TypeError:
+        # built-in function: fall back to stupid processing and hope the
+        # builtins don't change signature
+        pass
+
+  def _normalize_named_args(self, *kargs, **kwargs):
+    argspec = self.argspec
+    default = {'kargs': kargs, 'kwargs': kwargs}
+    if not argspec:
+      return default
+    ret = {'kargs': (), 'kwargs': kwargs}
+    if inspect.ismethod(getattr(self._mock, self.name)):
+      args = argspec.args[1:]
+    else:
+      args = argspec.args
+    for i, arg in enumerate(kargs):
+      if len(args) <= i: return default
+      ret['kwargs'][args[i]] = arg
+    return ret
 
   def __raise(self, exception, message):
     """Safe internal raise implementation.
@@ -277,6 +307,8 @@ class Expectation(object):
   def match_args(self, given_args):
     """Check if the set of given arguments matches this expectation."""
     expected_args = self.args
+    given_args = self._normalize_named_args(
+        *given_args['kargs'], **given_args['kwargs'])
     if (given_args == expected_args or expected_args is None):
       return True
     if (len(given_args['kargs']) != len(expected_args['kargs']) or
@@ -310,20 +342,12 @@ class Expectation(object):
     """
     if not self._callable:
       self.__raise(FlexmockError, "can't use with_args() with attribute stubs")
-    original = self.__dict__.get('original')
-    allowed = None
-    if original:
-      try:
-        self.argspec = allowed = ArgSpec(inspect.getargspec(original))
-      except TypeError:
-        # built-in function: fall back to stupid processing and hope the
-        # builtins don't change signature
-        pass
-    if allowed:
+    self._update_argspec()
+    if self.argspec:
       # do this outside try block as TypeError is way too general and catches
       # unrelated errors in the verify signature code
-      self._verify_signature_match(allowed, *kargs, **kwargs)
-      self.args = self._normalize_named_args(allowed, *kargs, **kwargs)
+      self._verify_signature_match(*kargs, **kwargs)
+      self.args = self._normalize_named_args(*kargs, **kwargs)
     else:
       self.args = {'kargs': kargs, 'kwargs': kwargs}
     return self
@@ -774,10 +798,7 @@ class Mock(object):
     method_instance = self._create_mock_method(name)
     obj = self._object
     if _hasattr(obj, name) and not hasattr(expectation, 'original'):
-      if hasattr(obj, '__dict__') and name in obj.__dict__:
-        expectation.original = obj.__dict__[name]
-      else:
-        expectation.original = getattr(obj, name)
+      expectation._update_original(name, obj)
       method_type = type(_getattr(expectation, 'original'))
       if method_type is classmethod or method_type is staticmethod:
         expectation.original_function = getattr(obj, name)
@@ -791,10 +812,7 @@ class Mock(object):
     obj = self._object
     expectation._callable = False
     if _hasattr(obj, name) and not hasattr(expectation, 'original'):
-      if hasattr(obj, '__dict__') and name in obj.__dict__:
-        expectation.original = obj.__dict__[name]
-      else:
-        expectation.original = getattr(obj, name)
+      expectation._update_original(name, obj)
     override = _setattr(obj, name, return_value)
     expectation._local_override = override
 

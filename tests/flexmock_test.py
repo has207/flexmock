@@ -565,33 +565,26 @@ class RegularClass(object):
       def method1(self, a): pass
       def bar(self): pass
       def baz(self): pass
-    flexmock(Foo).should_receive('foo')
-    flexmock(Foo).should_receive('method1').with_args('a').ordered
-    flexmock(Foo).should_receive('bar')
-    flexmock(Foo).should_receive('method1').with_args('b').ordered
-    flexmock(Foo).should_receive('baz')
-    Foo.bar()
-    Foo.method1('a')
-    Foo.method1('b')
-    Foo.baz()
-    Foo.foo()
+    foo = Foo()
+    flexmock(foo).should_receive('foo')
+    flexmock(foo).should_receive('method1').with_args('a').ordered
+    flexmock(foo).should_receive('bar')
+    flexmock(foo).should_receive('method1').with_args('b').ordered
+    flexmock(foo).should_receive('baz')
+    foo.bar()
+    foo.method1('a')
+    foo.method1('b')
+    foo.baz()
+    foo.foo()
 
   def test_flexmock_errors_on_improperly_ordered_expectations(self):
     class Foo(object):
-      def foo(self): pass
       def method1(self, a): pass
-      def bar(self): pass
-      def baz(self): pass
-    flexmock(Foo)
-    Foo.should_receive('foo')
-    Foo.should_receive('method1').with_args('a').ordered
-    Foo.should_receive('bar')
-    Foo.should_receive('method1').with_args('b').ordered
-    Foo.should_receive('baz')
-    Foo.bar()
-    Foo.bar()
-    Foo.foo()
-    assertRaises(CallOrderError, Foo.method1, 'b')
+    foo = Foo()
+    flexmock(foo)
+    foo.should_receive('method1').with_args('a').ordered
+    foo.should_receive('method1').with_args('b').ordered
+    assertRaises(CallOrderError, foo.method1, 'b')
 
   def test_flexmock_should_accept_multiple_return_values(self):
     class Foo:
@@ -1437,24 +1430,38 @@ class RegularClass(object):
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, 3, 4)
 
-  def test_with_blows_up_when_on_kwarg_overlapping_positional(self):
+  def test_with_blows_up_on_kwarg_overlapping_positional(self):
     class Foo(object):
       def bar(self, a, b, c=1, **kwargs): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, 3, c=2)
 
-  def test_with_blows_up_when_on_invalid_kwarg(self):
+  def test_with_blows_up_on_invalid_kwarg(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, d=2)
 
-  #def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
-  #  class Foo(object):
-  #    def bar(self, a, b, c): pass
-  #  foo = Foo()
-  #  flexmock(foo).should_receive('bar').with_args(1,2,3).once
-  #  foo.bar(a=1, b=2, c=3)
+  def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
+    class Foo(object):
+      def bar(self, a, b, c): pass
+    foo = Foo()
+    flexmock(foo).should_receive('bar').with_args(1,2,3).once
+    foo.bar(a=1, b=2, c=3)
+
+  def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
+    class Foo(object):
+      def bar(self, a, b, c): pass
+    foo = Foo()
+    flexmock(foo).should_receive('bar').with_args(1,2,3).once
+    foo.bar(a=1, b=2, c=3)
+
+  def test_calling_with_positional_args_matches_mock_with_kwargs(self):
+    class Foo(object):
+      def bar(self, a, b, c): pass
+    foo = Foo()
+    flexmock(foo).should_receive('bar').with_args(a=1,b=2,c=3).once
+    foo.bar(1, 2, c=3)
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
