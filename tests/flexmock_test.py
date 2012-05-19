@@ -1449,13 +1449,6 @@ class RegularClass(object):
     flexmock(foo).should_receive('bar').with_args(1,2,3).once
     foo.bar(a=1, b=2, c=3)
 
-  def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
-    class Foo(object):
-      def bar(self, a, b, c): pass
-    foo = Foo()
-    flexmock(foo).should_receive('bar').with_args(1,2,3).once
-    foo.bar(a=1, b=2, c=3)
-
   def test_calling_with_positional_args_matches_mock_with_kwargs(self):
     class Foo(object):
       def bar(self, a, b, c): pass
