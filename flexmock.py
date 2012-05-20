@@ -309,7 +309,7 @@ class Expectation(object):
     expected_args = self.args
     given_args = self._normalize_named_args(
         *given_args['kargs'], **given_args['kwargs'])
-    if (given_args == expected_args or expected_args is None):
+    if (expected_args == given_args or expected_args is None):
       return True
     if (len(given_args['kargs']) != len(expected_args['kargs']) or
         len(given_args['kwargs']) != len(expected_args['kwargs']) or
@@ -1007,7 +1007,7 @@ def _get_code(func):
 
 
 def _arguments_match(arg, expected_arg):
-  if arg == expected_arg:
+  if expected_arg == arg:
     return True
   elif _isclass(expected_arg) and isinstance(arg, expected_arg):
     return True
