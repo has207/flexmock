@@ -560,8 +560,8 @@ class Expectation(object):
       - self, i.e. can be chained with other Expectation methods
     """
     if not self._callable:
-      self.__raise(
-          FlexmockError, "can't use replace_with() with attribute stubs")
+      self.__raise(FlexmockError,
+          "can't use replace_with() with attribute/property stubs")
     replace_with = _getattr(self, '_replace_with')
     original = self.__dict__.get('original')
     if replace_with:
@@ -725,8 +725,7 @@ class Mock(object):
     version. However, we can still keep track of how many times it's called and
     with what arguments, and apply expectations accordingly.
 
-    should_call is meaningless/not allowed for partial class mocks and non-callable
-    attributes.
+    should_call is meaningless/not allowed for non-callable attributes.
 
     Args:
       - name: string name of the method
@@ -734,10 +733,6 @@ class Mock(object):
     Returns:
       - Expectation object
     """
-    if _isclass(self._object):
-      method_type = type(self._object.__dict__[name])
-      if method_type is not classmethod and method_type is not staticmethod:
-        raise FlexmockError('should_call cannot be called on a class mock')
     expectation = self.should_receive(name)
     return expectation.replace_with(expectation.__dict__.get('original'))
 
@@ -898,7 +893,7 @@ class Mock(object):
           return False
       return True
 
-    def pass_thru(expectation, *kargs, **kwargs):
+    def pass_thru(expectation, runtime_self, *kargs, **kwargs):
       return_values = None
       try:
         original = _getattr(expectation, 'original')
@@ -908,6 +903,8 @@ class Mock(object):
               type(original) is staticmethod):
             original = _getattr(expectation, 'original_function')
             return_values = original(*kargs, **kwargs)
+          else:
+            return_values = original(runtime_self, *kargs, **kwargs)
         else:
           return_values = original(*kargs, **kwargs)
       except:
@@ -932,7 +929,7 @@ class Mock(object):
         _pass_thru = _getattr(expectation, '_pass_thru')
         _replace_with = _getattr(expectation, '_replace_with')
         if _pass_thru:
-          return pass_thru(expectation, *kargs, **kwargs)
+          return pass_thru(expectation, runtime_self, *kargs, **kwargs)
         elif _replace_with:
           return _replace_with(*kargs, **kwargs)
         return_values = _getattr(expectation, 'return_values')

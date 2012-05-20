@@ -462,11 +462,16 @@ class RegularClass(object):
     assertEqual('instance', user.method())
     assertEqual('class', user2.method())
 
-  def test_flexmock_should_blow_up_on_should_call_for_class_mock(self):
+  def test_should_call_on_class_mock(self):
     class User:
-      def foo(self):
-        return 'class'
-    assertRaises(FlexmockError, flexmock(User).should_call, 'foo')
+      def foo(self): return 'class'
+    user1 = User()
+    user2 = User()
+    flexmock(User).should_call('foo').once
+    assertRaises(MethodCallError, self._tear_down)
+    flexmock(User).should_call('foo').twice
+    assertEqual('class', user1.foo())
+    assertEqual('class', user2.foo())
 
   def test_flexmock_should_not_blow_up_on_should_call_for_class_methods(self):
     class User:
