@@ -123,7 +123,7 @@ class FlexmockContainer(object):
 
   @classmethod
   def get_flexmock_expectation(cls, obj, name=None, args=None):
-    """Gets attached to the object under mock and is called in that context."""
+    """Retrieves an existing matching expectation."""
     if args == None:
       args = {'kargs': (), 'kwargs': {}}
     if not isinstance(args, dict):
@@ -801,8 +801,9 @@ class Mock(object):
       else:
         return original(self, *kargs, **kwargs)
     setattr(obj.__class__, name, updated)
-    self._create_placeholder_mock_for_proper_teardown(
-        obj.__class__, name, original)
+    if _get_code(updated) != _get_code(original):
+      self._create_placeholder_mock_for_proper_teardown(
+          obj.__class__, name, original)
 
   def _create_placeholder_mock_for_proper_teardown(self, obj, name, original):
     """Ensures that the given function is replaced on teardown."""

@@ -722,11 +722,20 @@ class RegularClass(object):
         yield None
     old = Foo.__iter__
     foo = Foo()
+    foo2 = Foo()
+    foo3 = Foo()
     flexmock(foo, __iter__=iter([1, 2, 3]))
+    flexmock(foo2, __iter__=iter([3, 4, 5]))
     assertEqual([1, 2, 3], [x for x in foo])
+    assertEqual([3, 4, 5], [x for x in foo2])
+    assertEqual([None], [x for x in foo3])
     assertEqual(False, foo.__iter__ == old)
+    assertEqual(False, foo2.__iter__ == old)
+    assertEqual(False, foo3.__iter__ == old)
     self._tear_down()
     assertEqual([None], [x for x in foo])
+    assertEqual([None], [x for x in foo2])
+    assertEqual([None], [x for x in foo3])
     assertEqual(True, Foo.__iter__ == old, '%s != %s' % (Foo.__iter__, old))
 
   def test_flexmock_should_mock_private_methods_with_leading_underscores(self):
