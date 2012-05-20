@@ -582,6 +582,15 @@ class Expectation(object):
     Raises:
       MethodCallError Exception
     """
+    failed, message = self._verify_number_of_calls(final)
+    if failed and not self._verified:
+      self._verified = True
+      self.__raise(
+          MethodCallError,
+          '%s expected to be called %s times, called %s times' %
+          (_format_args(self.name, self.args), message, self.times_called))
+
+  def _verify_number_of_calls(self, final):
     failed = False
     message = ''
     expected_calls = _getattr(self, 'expected_calls')
@@ -605,19 +614,7 @@ class Expectation(object):
         message += 'at most %s' % expected_calls[AT_MOST]
         if times_called > expected_calls[AT_MOST]:
           failed = True
-    if not failed:
-      return
-    else:
-      if self._verified:
-        return
-      else:
-        self._verified = True
-      name = _getattr(self, 'name')
-      args = _getattr(self, 'args')
-      self.__raise(
-          MethodCallError,
-          '%s expected to be called %s times, called %s times' %
-          (_format_args(name, args), message, times_called))
+    return failed, message
 
   def reset(self):
     """Returns the methods overriden by this expectation to their originals."""
