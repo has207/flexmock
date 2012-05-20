@@ -1463,6 +1463,41 @@ class RegularClass(object):
     flexmock(foo, bar=lambda: 'baz')
     assertEqual('baz', foo.bar())
 
+  def test_mock_property_with_attribute_on_instance(self):
+    class Foo(object):
+      @property
+      def bar(self): return 'bar'
+    foo = Foo()
+    foo2 = Foo()
+    foo3 = Foo()
+    flexmock(foo, bar='baz')
+    flexmock(foo2, bar='baz2')
+    assertEqual('baz', foo.bar)
+    assertEqual('baz2', foo2.bar)
+    assertEqual('bar', foo3.bar)
+    self._tear_down()
+    assertEqual(False, hasattr(Foo, '_flexmock__bar'),
+                'Property bar not cleaned up')
+    assertEqual('bar', foo.bar)
+    assertEqual('bar', foo2.bar)
+    assertEqual('bar', foo3.bar)
+
+  def test_mock_property_with_attribute_on_class(self):
+    class Foo(object):
+      @property
+      def bar(self): return 'bar'
+    foo = Foo()
+    foo2 = Foo()
+    flexmock(Foo, bar='baz')
+    assertEqual('baz', foo.bar)
+    assertEqual('baz', foo2.bar)
+    self._tear_down()
+    assertEqual(False, hasattr(Foo, '_flexmock__bar'),
+                'Property bar not cleaned up')
+    assertEqual('bar', foo.bar)
+    assertEqual('bar', foo2.bar)
+
+
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
     pass

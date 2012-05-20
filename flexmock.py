@@ -110,6 +110,7 @@ class ArgSpec(object):
 class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
   flexmock_objects = {}
+  properties = {}
   ordered = []
   last = None
 
@@ -118,6 +119,7 @@ class FlexmockContainer(object):
     cls.ordered = []
     cls.last = None
     cls.flexmock_objects = {}
+    cls.properties = {}
 
   @classmethod
   def get_flexmock_expectation(cls, obj, name=None, args=None):
@@ -154,6 +156,19 @@ class FlexmockContainer(object):
       cls.flexmock_objects[obj].append(expectation)
     else:
       cls.flexmock_objects[obj] = [expectation]
+
+  @classmethod
+  def add_teardown_property(cls, obj, name):
+    if obj in cls.properties:
+      cls.properties[obj].append(name)
+    else:
+      cls.properties[obj] = [name]
+
+  @classmethod
+  def teardown_properties(cls):
+    for obj, names in cls.properties.items():
+      for name in names:
+        delattr(obj, name)
 
 
 class Expectation(object):
@@ -748,8 +763,7 @@ class Mock(object):
     expectation = self._save_expectation(name, return_value)
     FlexmockContainer.add_expectation(self, expectation)
     if _isproperty(obj, name):
-      # TODO(herman): this needs to call _update_property once it's implemented
-      self._update_attribute(expectation, name, return_value)
+      self._update_property(expectation, name, return_value)
     elif isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
       self._update_method(expectation, name)
     else:
@@ -787,11 +801,14 @@ class Mock(object):
       else:
         return original(self, *kargs, **kwargs)
     setattr(obj.__class__, name, updated)
-    # create placeholder Mock and expectation to make sure this hack
-    # is torn down properly
+    self._create_placeholder_mock_for_proper_teardown(
+        obj.__class__, name, original)
+
+  def _create_placeholder_mock_for_proper_teardown(self, obj, name, original):
+    """Ensures that the given function is replaced on teardown."""
     mock = Mock()
-    mock._object = obj.__class__
-    expectation = Expectation(obj.__class__, name=name, original=original)
+    mock._object = obj
+    expectation = Expectation(obj, name=name, original=original)
     FlexmockContainer.add_expectation(mock, expectation)
 
   def _update_method(self, expectation, name):
@@ -815,6 +832,27 @@ class Mock(object):
       expectation._update_original(name, obj)
     override = _setattr(obj, name, return_value)
     expectation._local_override = override
+
+  def _update_property(self, expectation, name, return_value=None):
+    new_name = '_flexmock__%s' % name
+    obj = self._object
+    if not _isclass(obj):
+      obj = obj.__class__
+    expectation._callable = False
+    original = getattr(obj, name)
+    @property
+    def updated(self):
+      if (hasattr(self, '__dict__') and type(self.__dict__) is dict and
+          name in self.__dict__):
+        return self.__dict__[name]
+      else:
+        return getattr(self, new_name)
+    setattr(obj, name, updated)
+    if not hasattr(obj, new_name):
+      # don't try to double update
+      FlexmockContainer.add_teardown_property(obj, new_name)
+      setattr(obj, new_name, original)
+      self._create_placeholder_mock_for_proper_teardown(obj, name, original)
 
   def _create_mock_method(self, name):
     def _handle_exception_matching(expectation):
@@ -1115,6 +1153,7 @@ def flexmock_teardown():
             delattr(obj, attr)
         except AttributeError:
           pass
+  FlexmockContainer.teardown_properties()
   FlexmockContainer.reset()
 
   # make sure this is done last to keep exceptions here from breaking
