@@ -339,10 +339,7 @@ class Expectation(object):
     return True
 
   def mock(self):
-    """Return the mock associated with this expectation.
-
-    This method may be called without parentheses.
-    """
+    """Return the mock associated with this expectation."""
     return self._mock
 
   def with_args(self, *kargs, **kwargs):
@@ -410,12 +407,11 @@ class Expectation(object):
   def times(self, number):
     """Number of times this expectation's method is expected to be called.
 
-    There are also 3 aliases for the times() method that can be called without
-    parentheses:
+    There are also 3 aliases for the times() method:
 
-      - once -> times(1)
-      - twice -> times(2)
-      - never -> times(0)
+      - once() -> times(1)
+      - twice() -> times(2)
+      - never() -> times(0)
 
     Args:
       - number: int
@@ -434,8 +430,6 @@ class Expectation(object):
     """Modifies the return value to be treated as a list of return values.
 
     Each value in the list is returned on successive invocations of the method.
-
-    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
@@ -461,8 +455,6 @@ class Expectation(object):
     When given, an exception will only be raised if the method is called less
     than times() specified. Does nothing if times() is not given.
 
-    This method may be called without parentheses.
-
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
@@ -483,8 +475,6 @@ class Expectation(object):
     When given, an exception will only be raised if the method is called more
     than times() specified. Does nothing if times() is not given.
 
-    This method may be called without parentheses.
-
     Returns:
       - self, i.e. can be chained with other Expectation methods
     """
@@ -504,8 +494,6 @@ class Expectation(object):
 
     An exception will be raised if methods are called out of order, determined
     by order of should_receive calls in the test.
-
-    This method may be called without parentheses.
 
     Returns:
       - self, i.e. can be chained with other Expectation methods
