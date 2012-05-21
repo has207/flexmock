@@ -1416,41 +1416,46 @@ class RegularClass(object):
     foo.should_receive('__iter__').and_yield(1, 2, 3)
     assertEqual([1, 2, 3], [i for i in foo])
 
-  def test_with_doesnt_set_max_when_using_varargs(self):
+  def test_with_args_for_single_named_arg_with_optional_args(self):
+    class Foo(object):
+      def bar(self, one, two='optional'): pass
+    flexmock(Foo).should_receive('bar').with_args(one=1)
+
+  def test_with_args_doesnt_set_max_when_using_varargs(self):
     class Foo(object):
       def bar(self, *kargs): pass
     flexmock(Foo).should_receive('bar').with_args(1, 2, 3)
 
-  def test_with_doesnt_set_max_when_using_kwargs(self):
+  def test_with_args_doesnt_set_max_when_using_kwargs(self):
     class Foo(object):
       def bar(self, **kwargs): pass
     flexmock(Foo).should_receive('bar').with_args(1, 2, 3)
 
-  def test_with_blows_up_on_too_few_args(self):
+  def test_with_args_blows_up_on_too_few_args(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1)
 
-  def test_with_blows_up_on_too_few_args_with_kwargs(self):
+  def test_with_args_blows_up_on_too_few_args_with_kwargs(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, c=2)
 
-  def test_with_blows_up_on_too_many_args(self):
+  def test_with_args_blows_up_on_too_many_args(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, 3, 4)
 
-  def test_with_blows_up_on_kwarg_overlapping_positional(self):
+  def test_with_args_blows_up_on_kwarg_overlapping_positional(self):
     class Foo(object):
       def bar(self, a, b, c=1, **kwargs): pass
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, 3, c=2)
 
-  def test_with_blows_up_on_invalid_kwarg(self):
+  def test_with_args_blows_up_on_invalid_kwarg(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')

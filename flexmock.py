@@ -258,9 +258,11 @@ class Expectation(object):
       maximum = args_len
     total_positional = len(
         kargs + tuple(a for a in kwargs if a in allowed.args))
-    if (allowed.defaults and total_positional == minimum and
-        any(a for a in kwargs if a in allowed.args)):
-      minimum += sum(1 for a in kwargs if a in allowed.args)
+    named_optionals = [a for a in kwargs
+        if allowed.defaults
+        if a in allowed.args[len(allowed.args) - len(allowed.defaults):]]
+    if allowed.defaults and total_positional == minimum and named_optionals:
+      minimum += len(named_optionals)
     if total_positional < minimum:
       raise FlexmockError(
           '%s requires at least %s arguments, expectation provided %s' %
