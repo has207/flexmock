@@ -879,7 +879,7 @@ class RegularClass(object):
       mod = sys.modules['flexmock_test']
     else:
       mod = sys.modules['__main__']
-    flexmock(mod).should_receive('module_level_function')
+    flexmock(mod).should_receive('module_level_function').with_args(1, 2)
     assertEqual(None,  module_level_function(1, 2))
     self._tear_down()
     assertEqual('1, 2', module_level_function(1, 2))

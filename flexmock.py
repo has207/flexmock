@@ -246,7 +246,9 @@ class Expectation(object):
 
   def _verify_signature_match(self, *kargs, **kwargs):
     allowed = self.argspec
-    is_method = inspect.ismethod(getattr(self._mock, self.name))
+    # TODO(herman): fix it properly so that module mocks aren't set as methods
+    is_method = (inspect.ismethod(getattr(self._mock, self.name)) and
+                 type(self._mock) != types.ModuleType)
     args_len = len(allowed.args)
     if is_method:
       args_len -= 1
