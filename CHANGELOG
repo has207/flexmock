@@ -1,3 +1,18 @@
+Release 0.9.4
+- add support for stubbing return values on getter properties
+- add custom matcher object support to with_args
+- add support for striter function signature checks
+- add support for non-callable attributes
+- add support chained attributes (thanks Bryce Covert!)
+- add iter support to Mock objects
+- add PyPy support
+- add Jython support
+- fix should_call to work with class mocks
+- fix and_return to return None by default
+- fix MRO issues on builtin methods on 2.7+/3.2+
+- imporove defaults: partial mocks created using the func=return_value
+  style now default to replace_with instead of should_receive for callables
+
 Release 0.9.3
 - add python 3.3 test target
 - add proper handling of ordered() expectation across different methods
