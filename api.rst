@@ -1,4 +1,4 @@
-Flexmock API
+flexmock API
 ============
 
 .. module:: flexmock

@@ -1,18 +1,18 @@
 Mock Library Comparison
 =======================
 
-(Flexmock for Mox, Mock or Mocker users.)
+(flexmock for Mox or Mock users.)
 ---------------------------------------------------------------
 
 This document shows a side-by-side comparison of how to accomplish some
-basic tasks with Flexmock as well as other popular Python mocking libraries.
+basic tasks with flexmock as well as other popular Python mocking libraries.
 
 Simple fake object (attributes only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    # Flexmock
+    # flexmock
     mock = flexmock(some_attribute="value", some_other_attribute="value2")
     assertEquals("value", mock.some_attribute)
     assertEquals("value2", mock.some_other_attribute)
@@ -37,7 +37,7 @@ Simple fake object (with methods)
 
 ::
 
-    # Flexmock
+    # flexmock
     mock = flexmock(some_method=lambda: "calculated value")
     assertEquals("calculated value", mock.some_method())
 
@@ -58,9 +58,9 @@ Simple mock
 
 ::
 
-    # Flexmock
+    # flexmock
     mock = flexmock()
-    mock.should_receive("some_method").and_return("value").once
+    mock.should_receive("some_method").and_return("value").once()
     assertEquals("value", mock.some_method())
 
     # Mox
@@ -82,7 +82,7 @@ Creating partial mocks
 
 ::
 
-    # Flexmock
+    # flexmock
     flexmock(SomeObject).should_receive("some_method").and_return('value')
     assertEquals("value", mock.some_method())
 
@@ -104,10 +104,10 @@ Ensure calls are made in specific order
 
 ::
 
-    # Flexmock
+    # flexmock
     mock = flexmock(SomeObject)
-    mock.should_receive('method1').once.ordered.and_return('first thing')
-    mock.should_receive('method2').once.ordered.and_return('second thing')
+    mock.should_receive('method1').once().ordered().and_return('first thing')
+    mock.should_receive('method2').once().ordered().and_return('second thing')
     # exercise the code
 
     # Mox
@@ -131,7 +131,7 @@ Raising exceptions
 
 ::
 
-    # Flexmock
+    # flexmock
     mock = flexmock()
     mock.should_receive("some_method").and_raise(SomeException("message"))
     assertRaises(SomeException, mock.some_method)
@@ -154,8 +154,8 @@ Override new instances of a class
 
 ::
 
-    # Flexmock
-    flexmock(some_module.SomeClass, new_instances=some_other_object)
+    # flexmock
+    flexmock(some_module.SomeClass).new_instances(some_other_object)
     assertEqual(some_other_object, some_module.SomeClass())
 
     # Mox
@@ -176,8 +176,8 @@ Verify a method was called multiple times
 
 ::
 
-    # Flexmock # (verifies that the method gets called at least twice)
-    flexmock(some_object).should_receive('some_method').at_least.twice
+    # flexmock (verifies that the method gets called at least twice)
+    flexmock(some_object).should_receive('some_method').at_least().twice()
     # exercise the code
     
     # Mox
@@ -200,12 +200,13 @@ Mock chained methods
 
 ::
 
-    # Flexmock
+    # flexmock
     # (intermediate method calls are automatically assigned to temporary fake objects
     # and can be called with any arguments)
-    flexmock(some_object).should_receive(
-        'method1.method2.method3'
-    ).with_args(arg1, arg2).and_return('some value')
+    (flexmock(some_object)
+        .should_receive('method1.method2.method3')
+        .with_args(arg1, arg2)
+        .and_return('some value'))
     assertEqual('some_value', some_object.method1().method2().method3(arg1, arg2))
 
     # Mox
@@ -232,7 +233,7 @@ Mock context manager
 
 ::
 
-    # Flexmock
+    # flexmock
     my_mock = flexmock()
     with my_mock:
         pass
@@ -258,10 +259,12 @@ for more specific flexmock instructions on mocking builtins.
 
 ::
 
-    # Flexmock
-    flexmock(__builtins__).should_receive('open').once.with_args('file_name').and_return(
-        flexmock(read=lambda: 'some data')
-    )                                                        
+    # flexmock
+    (flexmock(__builtins__)
+        .should_receive('open')
+        .once()
+        .with_args('file_name')
+        .and_return(flexmock(read=lambda: 'some data')))
     with open('file_name') as f:
         assertEqual('some data', f.read())                    
 

@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flexmock - Mocking Library &mdash; Flexmock v0.9.1 documentation</title>
+    <title>flexmock - Testing Library &mdash; Flexmock 0.9.4 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.9.1',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flexmock v0.9.1 documentation" href="#" />
+    <link rel="top" title="Flexmock 0.9.4 documentation" href="#" />
     <link rel="next" title="Start Here" href="start.html" /> 
   </head>
   <body>
@@ -38,7 +41,7 @@
         <li class="right" >
           <a href="start.html" title="Start Here"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Flexmock v0.9.1 documentation</a> &raquo;</li> 
+        <li><a href="#">Flexmock 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -47,43 +50,43 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="flexmock-mocking-library">
-<h1>Flexmock - Mocking Library<a class="headerlink" href="#flexmock-mocking-library" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="flexmock-testing-library">
+<h1>flexmock - Testing Library<a class="headerlink" href="#flexmock-testing-library" title="Permalink to this headline">¶</a></h1>
 <blockquote>
 <div><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="http://github.com/has207">Herman Sheremetyev</a></td>
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="http://github.com/has207">Herman Sheremetyev</a></td>
 </tr>
-<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.9.1</td>
+<tr class="field-even field"><th class="field-name">Version:</th><td class="field-body">0.9.4</td>
 </tr>
-<tr class="field"><th class="field-name">Homepage:</th><td class="field-body"><a class="reference external" href="http://has207.github.com/flexmock">Flexmock Homepage</a></td>
+<tr class="field-odd field"><th class="field-name">Homepage:</th><td class="field-body"><a class="reference external" href="http://has207.github.com/flexmock">flexmock Homepage</a></td>
 </tr>
-<tr class="field"><th class="field-name">Contribute:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock">Flexmock on Github</a></td>
+<tr class="field-even field"><th class="field-name">Contribute:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock">flexmock on Github</a></td>
 </tr>
-<tr class="field"><th class="field-name">Download:</th><td class="field-body"><a class="reference external" href="http://pypi.python.org/pypi/flexmock">http://pypi.python.org/pypi/flexmock</a></td>
+<tr class="field-odd field"><th class="field-name">Download:</th><td class="field-body"><a class="reference external" href="http://pypi.python.org/pypi/flexmock">http://pypi.python.org/pypi/flexmock</a></td>
 </tr>
-<tr class="field"><th class="field-name">License:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/blob/master/LICENSE">FreeBSD-style License</a></td>
+<tr class="field-even field"><th class="field-name">License:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/blob/master/LICENSE">FreeBSD-style License</a></td>
 </tr>
-<tr class="field"><th class="field-name">Issue tracker:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/issues">Issue Tracker</a></td>
+<tr class="field-odd field"><th class="field-name">Issue tracker:</th><td class="field-body"><a class="reference external" href="http://github.com/has207/flexmock/issues">Issue Tracker</a></td>
 </tr>
-<tr class="field"><th class="field-name">Twitter:</th><td class="field-body"><a class="reference external" href="http://twitter.com/#!/pyflexmock">Follow pyflexmock</a></td>
+<tr class="field-even field"><th class="field-name">Twitter:</th><td class="field-body"><a class="reference external" href="http://twitter.com/#!/pyflexmock">Follow pyflexmock</a></td>
 </tr>
 </tbody>
 </table>
 </div></blockquote>
-<p>Flexmock is a testing library for Python.</p>
+<p>flexmock is a testing library for Python.</p>
 <p>Its API is inspired by a Ruby library of the same name.
-However, it is not a goal of Python Flexmock to be a clone of the Ruby version.
+However, it is not a goal of Python flexmock to be a clone of the Ruby version.
 Instead, the focus is on providing full support for testing Python programs
 and making the creation of fake objects as unobtrusive as possible.</p>
-<p>As a result, Python Flexmock removes a number of redandancies in
-the Ruby Flexmock API, alters some defaults, and introduces a number of Python-only features.</p>
-<p>Flexmock&#8217;s design focuses on simplicity and intuitivenes. This means that the API
+<p>As a result, Python flexmock removes a number of redundancies in
+the Ruby flexmock API, alters some defaults, and introduces a number of Python-only features.</p>
+<p>flexmock&#8217;s design focuses on simplicity and intuitivenes. This means that the API
 is as lean as possible, though a few convenient short-hand methods are provided to aid
 brevity and readability.</p>
-<p>Flexmock declarations are structured to read more like English sentences than API calls,
+<p>flexmock declarations are structured to read more like English sentences than API calls,
 and it is possible to chain them together in any order to achieve high degree of
 expressiveness in a single line of code.</p>
 <div class="section" id="installation">
@@ -98,12 +101,28 @@ expressiveness in a single line of code.</p>
 <h2>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h2>
 <p>Tested to work with:</p>
 <ul class="simple">
-<li>python 2.4.4</li>
+<li>python 2.4</li>
 <li>python 2.5</li>
 <li>python 2.6</li>
 <li>python 2.7</li>
-<li>python 3.1.2</li>
-<li>python 3.2.1rc2</li>
+<li>python 3.1</li>
+<li>python 3.2</li>
+<li>python 3.3</li>
+<li>pypy</li>
+<li>jython</li>
+</ul>
+<p>Automatically integrates with all major test runners, including:</p>
+<ul class="simple">
+<li>unittest</li>
+<li>unittest2</li>
+<li>nose</li>
+<li>py.test</li>
+<li>django</li>
+<li>twisted / trial</li>
+<li>doctest</li>
+<li>zope.testrunner</li>
+<li>subunit</li>
+<li>testtools</li>
 </ul>
 </div>
 <div class="section" id="start-here">
@@ -113,11 +132,12 @@ expressiveness in a single line of code.</p>
 <li class="toctree-l1"><a class="reference internal" href="start.html">Start Here</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="start.html#creating-fake-objects">Creating fake objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="start.html#replacing-parts-of-existing-objects-and-classes-stubs">Replacing parts of existing objects and classes (stubs)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="start.html#creating-and-checking-expectations-mocks">Creating and checking expectations (mocks)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="start.html#basic">Basic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="start.html#creating-and-checking-expectations">Creating and checking expectations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="start.html#mocks">Mocks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="start.html#spies">Spies</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="start.html#summary">Summary</a></li>
 </ul>
 </li>
 </ul>
@@ -129,29 +149,14 @@ expressiveness in a single line of code.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">Usage Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#definitions">Definitions</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user-guide.html#compatibility">Compatibility</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user-guide.html#test-runner-integration">Test runner integration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#unittest">unittest</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#nose">nose</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#py-test">py.test</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#doctest">doctest</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#unittest2">unittest2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#django">django</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#twisted-trial">twisted / trial</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#zope-testrunner">zope.testrunner</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#subunit">subunit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#testtools">testtools</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user-guide.html#other-test-runners">Other test runners</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#overview">Overview</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html#example-usage">Example Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user-guide.html#import-flexmock">Import Flexmock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#import-flexmock">Import flexmock</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#make-a-fake-object">Make a fake object</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#partially-mock-or-stub-an-existing-object">Partially mock or stub an existing object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#convenient-shorthand-for-partial-stubs">Convenient shorthand for partial stubs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#stub-out-a-method-for-all-instances-of-a-class">Stub out a method for all instances of a class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#create-automatically-checked-expectations">Create automatically checked expectations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user-guide.html#raise-exceptions">Raise exceptions</a></li>
@@ -176,7 +181,7 @@ expressiveness in a single line of code.</p>
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Flexmock API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">flexmock API</a></li>
 </ul>
 </div>
 </div>
@@ -185,7 +190,7 @@ expressiveness in a single line of code.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="compare.html">Mock Library Comparison</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="compare.html#flexmock-for-mox-mock-or-mocker-users">(Flexmock for Mox, Mock or Mocker users.)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="compare.html#flexmock-for-mox-or-mock-users">(flexmock for Mox or Mock users.)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="compare.html#simple-fake-object-attributes-only">Simple fake object (attributes only)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="compare.html#simple-fake-object-with-methods">Simple fake object (with methods)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="compare.html#simple-mock">Simple mock</a></li>
@@ -214,7 +219,7 @@ expressiveness in a single line of code.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Flexmock - Mocking Library</a><ul>
+<li><a class="reference internal" href="#">flexmock - Testing Library</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#compatibility">Compatibility</a></li>
 <li><a class="reference internal" href="#start-here">Start Here</a><ul>
@@ -244,7 +249,7 @@ expressiveness in a single line of code.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -270,12 +275,12 @@ expressiveness in a single line of code.</p>
         <li class="right" >
           <a href="start.html" title="Start Here"
              >next</a> |</li>
-        <li><a href="#">Flexmock v0.9.1 documentation</a> &raquo;</li> 
+        <li><a href="#">Flexmock 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Herman Sheremetyev.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
