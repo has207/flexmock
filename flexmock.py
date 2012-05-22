@@ -748,7 +748,9 @@ class Mock(object):
     FlexmockContainer.add_expectation(self, expectation)
     if _isproperty(obj, name):
       self._update_property(expectation, name, return_value)
-    elif isinstance(obj, Mock) or hasattr(getattr(obj, name), '__call__'):
+    elif (isinstance(obj, Mock) or
+          hasattr(getattr(obj, name), '__call__') or
+          _isclass(getattr(obj, name))):
       self._update_method(expectation, name)
     else:
       self._update_attribute(expectation, name, return_value)

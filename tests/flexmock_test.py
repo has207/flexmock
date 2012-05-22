@@ -32,6 +32,14 @@ def module_level_function(some, args):
 module_level_attribute = 'test'
 
 
+class OldStyleClass:
+  pass
+
+
+class NewStyleClass(object):
+  pass
+
+
 def assertRaises(exception, method, *kargs, **kwargs):
   try:
     method(*kargs, **kwargs)
@@ -883,6 +891,22 @@ class RegularClass(object):
     assertEqual(None,  module_level_function(1, 2))
     self._tear_down()
     assertEqual('1, 2', module_level_function(1, 2))
+
+  def test_flexmock_should_support_mocking_old_style_classes_as_functions(self):
+    if 'flexmock_test' in sys.modules:
+      mod = sys.modules['flexmock_test']
+    else:
+      mod = sys.modules['__main__']
+    flexmock(mod).should_receive('OldStyleClass').and_return('yay')
+    assertEqual('yay', OldStyleClass())
+
+  def test_flexmock_should_support_mocking_new_style_classes_as_functions(self):
+    if 'flexmock_test' in sys.modules:
+      mod = sys.modules['flexmock_test']
+    else:
+      mod = sys.modules['__main__']
+    flexmock(mod).should_receive('NewStyleClass').and_return('yay')
+    assertEqual('yay', NewStyleClass())
 
   def test_flexmock_should_properly_restore_class_methods(self):
     class User:
