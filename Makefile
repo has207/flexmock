@@ -43,8 +43,10 @@ html: clean
 	rm -rf modules/
 	mv _static static
 	mv _modules modules
+	mv _sources sources
 	sed -i '' -e 's/\_static/static/'  {,modules/}*.html
 	sed -i '' -e 's/\_modules/modules/'  {,modules/}*.html
+	sed -i '' -e 's/\_sources/sources/'  {,modules/}*.html
 	rm -f flexmock.pyc
 
 dirhtml:
