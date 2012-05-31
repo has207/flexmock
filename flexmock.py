@@ -245,6 +245,8 @@ class Expectation(object):
     return name
 
   def _verify_signature_match(self, *kargs, **kwargs):
+    if isinstance(self._mock, Mock):
+      return  # no sense in enforcing this for fake objects
     allowed = self.argspec
     # TODO(herman): fix it properly so that module mocks aren't set as methods
     is_method = (inspect.ismethod(getattr(self._mock, self.name)) and

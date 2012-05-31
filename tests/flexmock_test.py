@@ -1485,6 +1485,11 @@ class RegularClass(object):
     e = flexmock(Foo).should_receive('bar')
     assertRaises(FlexmockError, e.with_args, 1, 2, d=2)
 
+  def test_with_args_ignores_invalid_args_on_flexmock_instances(self):
+    foo = flexmock(bar=lambda x: x)
+    e = foo.should_receive('bar').with_args('stuff')
+    foo.bar('stuff')
+
   def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
     class Foo(object):
       def bar(self, a, b, c): pass
