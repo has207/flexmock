@@ -1443,7 +1443,8 @@ class RegularClass(object):
   def test_with_args_for_single_named_arg_with_optional_args(self):
     class Foo(object):
       def bar(self, one, two='optional'): pass
-    flexmock(Foo).should_receive('bar').with_args(one=1)
+    e = flexmock(Foo).should_receive('bar')
+    e.with_args(one=1)
 
   def test_with_args_doesnt_set_max_when_using_varargs(self):
     class Foo(object):
@@ -1459,35 +1460,58 @@ class RegularClass(object):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
-    assertRaises(FlexmockError, e.with_args, 1)
+    assertRaises(MethodSignatureError, e.with_args, 1)
 
   def test_with_args_blows_up_on_too_few_args_with_kwargs(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
-    assertRaises(FlexmockError, e.with_args, 1, c=2)
+    assertRaises(MethodSignatureError, e.with_args, 1, c=2)
 
   def test_with_args_blows_up_on_too_many_args(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
-    assertRaises(FlexmockError, e.with_args, 1, 2, 3, 4)
+    assertRaises(MethodSignatureError, e.with_args, 1, 2, 3, 4)
 
   def test_with_args_blows_up_on_kwarg_overlapping_positional(self):
     class Foo(object):
       def bar(self, a, b, c=1, **kwargs): pass
     e = flexmock(Foo).should_receive('bar')
-    assertRaises(FlexmockError, e.with_args, 1, 2, 3, c=2)
+    assertRaises(MethodSignatureError, e.with_args, 1, 2, 3, c=2)
 
   def test_with_args_blows_up_on_invalid_kwarg(self):
     class Foo(object):
       def bar(self, a, b, c=1): pass
     e = flexmock(Foo).should_receive('bar')
-    assertRaises(FlexmockError, e.with_args, 1, 2, d=2)
+    assertRaises(MethodSignatureError, e.with_args, 1, 2, d=2)
 
   def test_with_args_ignores_invalid_args_on_flexmock_instances(self):
     foo = flexmock(bar=lambda x: x)
     e = foo.should_receive('bar').with_args('stuff')
+    foo.bar('stuff')
+
+  def test_with_args_does_not_compensate_for_self_on_static_instance_methods(self):
+    class Foo(object):
+      @staticmethod
+      def bar(x): pass
+    foo = Foo()
+    e = flexmock(Foo).should_receive('bar').with_args('stuff')
+    foo.bar('stuff')
+
+  def test_with_args_does_not_compensate_for_self_on_static_class_methods(self):
+    class Foo(object):
+      @staticmethod
+      def bar(x): pass
+    e = flexmock(Foo).should_receive('bar').with_args('stuff')
+    Foo.bar('stuff')
+
+  def test_with_args_does_compensate_for_cls_on_class_methods(self):
+    class Foo(object):
+      @classmethod
+      def bar(cls, x): pass
+    foo = Foo()
+    e = flexmock(foo).should_receive('bar').with_args('stuff')
     foo.bar('stuff')
 
   def test_calling_with_keyword_args_matches_mock_with_positional_args(self):

@@ -266,19 +266,19 @@ class Expectation(object):
     if allowed.defaults and total_positional == minimum and named_optionals:
       minimum += len(named_optionals)
     if total_positional < minimum:
-      raise FlexmockError(
+      raise MethodSignatureError(
           '%s requires at least %s arguments, expectation provided %s' %
           (self.name, minimum, total_positional))
     if maximum is not None and total_positional > maximum:
-      raise FlexmockError(
+      raise MethodSignatureError(
           '%s requires at most %s arguments, expectation provided %s' %
           (self.name, maximum, total_positional))
     if args_len == len(kargs) and any(a for a in kwargs if a in allowed.args):
-      raise FlexmockError(
+      raise MethodSignatureError(
           '%s already given as positional arguments to %s' %
           ([a for a in kwargs if a in allowed.args], self.name))
     if not allowed.keywords and any(a for a in kwargs if a not in allowed.args):
-      raise FlexmockError(
+      raise MethodSignatureError(
           '%s is not a valid keyword argument to %s' %
           ([a for a in kwargs if a not in allowed.args][0], self.name))
 
@@ -806,8 +806,15 @@ class Mock(object):
     if _hasattr(obj, name) and not hasattr(expectation, 'original'):
       expectation._update_original(name, obj)
       method_type = type(_getattr(expectation, 'original'))
-      if method_type is classmethod or method_type is staticmethod:
+      try:
+        # TODO(herman): this is awful, fix this properly.
+        # When a class/static method is mocked out on an *instance*
+        # we need to fetch the type from the class
+        method_type = type(_getattr(obj.__class__, name))
+      except: pass
+      if method_type in (classmethod, staticmethod):
         expectation.original_function = getattr(obj, name)
+        expectation.original_type = method_type
     override = _setattr(obj, name, types.MethodType(method_instance, obj))
     expectation._local_override = override
     if (override and not _isclass(obj) and not isinstance(obj, Mock) and
@@ -892,8 +899,7 @@ class Mock(object):
         original = _getattr(expectation, 'original')
         _mock = _getattr(expectation, '_mock')
         if _isclass(_mock):
-          if (type(original) is classmethod or
-              type(original) is staticmethod):
+          if type(original) in (classmethod, staticmethod):
             original = _getattr(expectation, 'original_function')
             return_values = original(*kargs, **kwargs)
           else:
