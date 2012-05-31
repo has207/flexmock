@@ -1,3 +1,6 @@
+Release 0.9.5
+- bugfix: stop enforcing argument signatures on flexmock objects
+
 Release 0.9.4
 - add support for stubbing return values on getter properties
 - add custom matcher object support to with_args

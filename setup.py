@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='flexmock',
-      version='0.9.4',
+      version='0.9.5',
       py_modules=['flexmock'],
       author='Herman Sheremetyev',
       author_email='herman@swebpage.com',
