@@ -42,6 +42,7 @@ UPDATED_ATTRS = ['should_receive', 'should_call', 'new_instances']
 DEFAULT_CLASS_ATTRIBUTES = [attr for attr in dir(type)
                             if attr not in dir(type('', (object,), {}))]
 RE_TYPE = re.compile('')
+SPECIAL_METHODS = (classmethod, staticmethod)
 
 
 try:
@@ -95,7 +96,9 @@ class ReturnValue(object):
     if self.raises:
       return '%s(%s)' % (self.raises, _arg_to_str(self.value))
     else:
-      if len(self.value) == 1:
+      if not isinstance(self.value, tuple):
+        return '%s' % _arg_to_str(self.value)
+      elif len(self.value) == 1:
         return '%s' % _arg_to_str(self.value[0])
       else:
         return '(%s)' % ', '.join([_arg_to_str(x) for x in self.value])
@@ -185,6 +188,7 @@ class Expectation(object):
     if original is not None:
       self.original = original
     self.args = None
+    self.method_type = types.MethodType
     self.argspec = None
     value = ReturnValue(return_value)
     self.return_values = return_values = []
@@ -250,6 +254,7 @@ class Expectation(object):
     allowed = self.argspec
     # TODO(herman): fix it properly so that module mocks aren't set as methods
     is_method = (inspect.ismethod(getattr(self._mock, self.name)) and
+                 self.method_type is not staticmethod and
                  type(self._mock) != types.ModuleType)
     args_len = len(allowed.args)
     if is_method:
@@ -334,7 +339,8 @@ class Expectation(object):
       return True
     if (len(given_args['kargs']) != len(expected_args['kargs']) or
         len(given_args['kwargs']) != len(expected_args['kwargs']) or
-        given_args['kwargs'].keys() != expected_args['kwargs'].keys()):
+        (sorted(given_args['kwargs'].keys()) !=
+         sorted(expected_args['kwargs'].keys()))):
       return False
     for i, arg in enumerate(given_args['kargs']):
       if not _arguments_match(arg, expected_args['kargs'][i]):
@@ -812,9 +818,9 @@ class Mock(object):
         # we need to fetch the type from the class
         method_type = type(_getattr(obj.__class__, name))
       except: pass
-      if method_type in (classmethod, staticmethod):
+      if method_type in SPECIAL_METHODS:
         expectation.original_function = getattr(obj, name)
-        expectation.original_type = method_type
+      expectation.method_type = method_type
     override = _setattr(obj, name, types.MethodType(method_instance, obj))
     expectation._local_override = override
     if (override and not _isclass(obj) and not isinstance(obj, Mock) and
@@ -899,7 +905,7 @@ class Mock(object):
         original = _getattr(expectation, 'original')
         _mock = _getattr(expectation, '_mock')
         if _isclass(_mock):
-          if type(original) in (classmethod, staticmethod):
+          if type(original) in SPECIAL_METHODS:
             original = _getattr(expectation, 'original_function')
             return_values = original(*kargs, **kwargs)
           else:

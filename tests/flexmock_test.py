@@ -1496,14 +1496,14 @@ class RegularClass(object):
       @staticmethod
       def bar(x): pass
     foo = Foo()
-    e = flexmock(Foo).should_receive('bar').with_args('stuff')
+    flexmock(foo).should_receive('bar').with_args('stuff')
     foo.bar('stuff')
 
   def test_with_args_does_not_compensate_for_self_on_static_class_methods(self):
     class Foo(object):
       @staticmethod
       def bar(x): pass
-    e = flexmock(Foo).should_receive('bar').with_args('stuff')
+    flexmock(Foo).should_receive('bar').with_args('stuff')
     Foo.bar('stuff')
 
   def test_with_args_does_compensate_for_cls_on_class_methods(self):
