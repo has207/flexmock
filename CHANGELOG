@@ -1,3 +1,8 @@
+Release 0.9.6
+- fix staticmethod mocking on instances
+- fix comparison of kwargs ordering issues
+- fix ReturnValue.__str__
+
 Release 0.9.5
 - bugfix: stop enforcing argument signatures on flexmock objects
 
