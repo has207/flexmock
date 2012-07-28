@@ -28,11 +28,9 @@ __all__ = ['flexmock']
 
 
 import inspect
-import os
 import re
 import sys
 import types
-import warnings
 
 
 AT_LEAST = 'at least'

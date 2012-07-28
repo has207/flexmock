@@ -5,7 +5,6 @@ from flexmock import AT_MOST
 from flexmock import UPDATED_ATTRS
 from flexmock import Mock
 from flexmock import MockBuiltinError
-from flexmock import Expectation
 from flexmock import FlexmockContainer
 from flexmock import FlexmockError
 from flexmock import MethodSignatureError
@@ -21,7 +20,6 @@ from flexmock import _format_args
 from flexmock import _isproperty
 import re
 import sys
-import unicodedata
 import unittest
 
 
@@ -1488,7 +1486,7 @@ class RegularClass(object):
 
   def test_with_args_ignores_invalid_args_on_flexmock_instances(self):
     foo = flexmock(bar=lambda x: x)
-    e = foo.should_receive('bar').with_args('stuff')
+    foo.should_receive('bar').with_args('stuff')
     foo.bar('stuff')
 
   def test_with_args_does_not_compensate_for_self_on_static_instance_methods(self):
@@ -1511,7 +1509,7 @@ class RegularClass(object):
       @classmethod
       def bar(cls, x): pass
     foo = Foo()
-    e = flexmock(foo).should_receive('bar').with_args('stuff')
+    flexmock(foo).should_receive('bar').with_args('stuff')
     foo.bar('stuff')
 
   def test_calling_with_keyword_args_matches_mock_with_positional_args(self):
