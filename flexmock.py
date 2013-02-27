@@ -1344,3 +1344,12 @@ def _hook_into_testtools():
   except:
     pass
 _hook_into_testtools()
+
+
+def _hook_into_teamcity_unittest():
+  try:
+    from tcunittest import TeamcityTestResult
+    _patch_test_result(TeamcityTestResult)
+  except:
+    pass
+_hook_into_teamcity_unittest()
