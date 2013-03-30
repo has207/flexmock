@@ -1,3 +1,6 @@
+Release 0.9.7
+- small update to add support for TeamCity / PyCharm test runner.
+
 Release 0.9.6
 - fix staticmethod mocking on instances
 - fix comparison of kwargs ordering issues
