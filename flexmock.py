@@ -884,8 +884,6 @@ class Mock(object):
         raise
 
     def match_return_values(expected, received):
-      if not received:
-        return True
       if not isinstance(expected, tuple):
         expected = (expected,)
       if not isinstance(received, tuple):

@@ -933,6 +933,22 @@ class RegularClass(object):
     assertEqual(None, foo.baz())
     assertEqual(None, foo.bax())
 
+  def test_spy_should_not_match_falsy_stuff(self):
+    class Foo:
+      def foo(self): return None
+      def bar(self): return False
+      def baz(self): return []
+      def quux(self): return ''
+    foo = Foo()
+    flexmock(foo).should_call('foo').and_return('bar').once
+    flexmock(foo).should_call('bar').and_return('bar').once
+    flexmock(foo).should_call('baz').and_return('bar').once
+    flexmock(foo).should_call('quux').and_return('bar').once
+    assertRaises(FlexmockError, foo.foo)
+    assertRaises(FlexmockError, foo.bar)
+    assertRaises(FlexmockError, foo.baz)
+    assertRaises(FlexmockError, foo.quux)
+
   def test_new_instances_should_blow_up_on_should_receive(self):
     class User(object): pass
     mock = flexmock(User).new_instances(None).mock
