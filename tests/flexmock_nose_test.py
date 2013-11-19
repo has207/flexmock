@@ -1,8 +1,8 @@
 from flexmock import MethodCallError
-from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock_test import assertRaises
 from nose import with_setup
+import flexmock
 import flexmock_test
 import unittest
 
@@ -40,4 +40,3 @@ class TestUnittestClass(flexmock_test.TestFlexmockUnittest):
     a = flexmock(a=2)
     a.should_receive('a').once
     assertRaises(MethodCallError, flexmock_teardown)
-

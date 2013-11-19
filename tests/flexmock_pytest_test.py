@@ -1,7 +1,7 @@
 from flexmock import MethodCallError
 from flexmock import flexmock_teardown
-from flexmock import flexmock
 from flexmock_test import assertRaises
+import flexmock
 import flexmock_test
 import unittest
 

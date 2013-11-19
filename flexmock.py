@@ -1351,3 +1351,23 @@ def _hook_into_teamcity_unittest():
   except:
     pass
 _hook_into_teamcity_unittest()
+
+# Dark magic to make the flexmock module itself callable.
+# So that you can say:
+#   import flexmock
+# instead of:
+#   from flexmock import flexmock
+class _CallableModule(types.ModuleType):
+  def __init__(self):
+    super(_CallableModule, self).__init__('flexmock')
+    self._realmod = sys.modules['flexmock']
+    sys.modules['flexmock'] = self
+    self.__doc__ = flexmock.__doc__
+  def __dir__(self):
+    return dir(self._realmod)
+  def __call__(self, *args, **kw):
+    return self._realmod.flexmock(*args, **kw)
+  def __getattr__(self, attr):
+    return getattr(self._realmod, attr)
+
+_CallableModule()

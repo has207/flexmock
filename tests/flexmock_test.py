@@ -14,10 +14,10 @@ from flexmock import StateError
 from flexmock import MethodCallError
 from flexmock import CallOrderError
 from flexmock import ReturnValue
-from flexmock import flexmock
 from flexmock import flexmock_teardown
 from flexmock import _format_args
 from flexmock import _isproperty
+import flexmock
 import re
 import sys
 import unittest
