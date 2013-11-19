@@ -1,4 +1,4 @@
-from flexmock import flexmock
+import flexmock
 import sys
 import unittest
 
