@@ -441,7 +441,7 @@ class RegularClass(object):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').and_return('value_bar').never
     assertRaises(MethodCallError, mock.method_foo)
-  
+
   def test_flexmock_get_flexmock_expectation_should_work_with_args(self):
     mock = flexmock(name='temp')
     mock.should_receive('method_foo').with_args('value_bar')
@@ -1001,7 +1001,7 @@ class RegularClass(object):
     obj.should_call('method')
     obj.method()
     assertEqual(obj.n, 1)
-  
+
   def test_should_call_works_for_same_method_with_different_args(self):
     class Foo:
       def method(self, arg):
@@ -1220,6 +1220,27 @@ class RegularClass(object):
     foo.should_receive('bar').with_args('a').ordered()
     foo.should_receive('bar').with_args('b').ordered()
     assertRaises(CallOrderError, foo.bar, 'b')
+
+  def test_flexmock_ordered_works_with_same_args(self):
+    foo = flexmock()
+    foo.should_receive('bar').ordered().and_return(1)
+    foo.should_receive('bar').ordered().and_return(2)
+    a = foo.bar()
+    assertEqual(a, 1)
+    b = foo.bar()
+    assertEqual(b, 2)
+
+  def test_flexmock_ordered_works_with_same_args_after_default_stub(self):
+    foo = flexmock()
+    foo.should_receive('bar').and_return(9)
+    foo.should_receive('bar').ordered().and_return(1)
+    foo.should_receive('bar').ordered().and_return(2)
+    a = foo.bar()
+    assertEqual(a, 1)
+    b = foo.bar()
+    assertEqual(b, 2)
+    c = foo.bar()
+    assertEqual(c, 9)
 
   def test_state_machine(self):
     class Radio:
