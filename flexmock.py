@@ -132,11 +132,14 @@ class FlexmockContainer(object):
     if not isinstance(args['kargs'], tuple):
       args['kargs'] = (args['kargs'],)
     if name and obj in cls.flexmock_objects:
+      found = None
       for e in reversed(cls.flexmock_objects[obj]):
         if e.name == name and e.match_args(args):
-          if e._ordered:
-            cls._verify_call_order(e, args)
-          return e
+          if e in cls.ordered or not e._ordered and not found:
+            found = e
+      if found and found._ordered:
+        cls._verify_call_order(found, args)
+      return found
 
   @classmethod
   def _verify_call_order(cls, expectation, args):
