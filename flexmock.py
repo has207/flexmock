@@ -1206,7 +1206,7 @@ def _hook_into_pytest():
     saved = runner.call_runtest_hook
     def call_runtest_hook(item, when, **kwargs):
       ret = saved(item, when, **kwargs)
-      if when != 'call' or ret.excinfo is None:
+      if when != 'call' and ret.excinfo is None:
         return ret
       teardown = runner.CallInfo(flexmock_teardown, when=when)
       teardown.result = None
