@@ -1210,6 +1210,8 @@ def _hook_into_pytest():
         return ret
       teardown = runner.CallInfo(flexmock_teardown, when=when)
       teardown.result = None
+      if ret.excinfo is not None and teardown.excinfo is None:
+          teardown.excinfo = ret.excinfo
       return teardown
     runner.call_runtest_hook = call_runtest_hook
 

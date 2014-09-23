@@ -33,3 +33,11 @@ class TestUnittestClass(flexmock_test.TestFlexmockUnittest):
     a = flexmock(a=2)
     a.should_receive('a').once
     assertRaises(MethodCallError, flexmock_teardown)
+
+
+class TestFailureOnException(object):
+
+  @pytest.mark.xfail(raises=RuntimeError)
+  def test_exception(self):
+    raise RuntimeError("TEST ERROR")
+
