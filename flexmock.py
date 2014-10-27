@@ -209,6 +209,7 @@ class Expectation(object):
     self._verified = False
     self._callable = True
     self._local_override = False
+    self._message = ''
 
   def __str__(self):
     return '%s -> (%s)' % (_format_args(self.name, self.args),
@@ -272,21 +273,21 @@ class Expectation(object):
     if allowed.defaults and total_positional == minimum and named_optionals:
       minimum += len(named_optionals)
     if total_positional < minimum:
-      raise MethodSignatureError(
+      raise MethodSignatureError(_add_message(self,
           '%s requires at least %s arguments, expectation provided %s' %
-          (self.name, minimum, total_positional))
+          (self.name, minimum, total_positional)))
     if maximum is not None and total_positional > maximum:
-      raise MethodSignatureError(
+      raise MethodSignatureError(_add_message(self,
           '%s requires at most %s arguments, expectation provided %s' %
-          (self.name, maximum, total_positional))
+          (self.name, maximum, total_positional)))
     if args_len == len(kargs) and any(a for a in kwargs if a in allowed.args):
-      raise MethodSignatureError(
+      raise MethodSignatureError(_add_message(self,
           '%s already given as positional arguments to %s' %
-          ([a for a in kwargs if a in allowed.args], self.name))
+          ([a for a in kwargs if a in allowed.args], self.name)))
     if not allowed.keywords and any(a for a in kwargs if a not in allowed.args):
-      raise MethodSignatureError(
+      raise MethodSignatureError(_add_message(self,
           '%s is not a valid keyword argument to %s' %
-          ([a for a in kwargs if a not in allowed.args][0], self.name))
+          ([a for a in kwargs if a not in allowed.args][0], self.name)))
 
   def _update_original(self, name, obj):
     if hasattr(obj, '__dict__') and name in obj.__dict__:
@@ -329,7 +330,7 @@ class Expectation(object):
     difficult to diagnose.
     """
     self.reset()
-    raise exception(message)
+    raise exception(_add_message(self, message))
 
   def match_args(self, given_args):
     """Check if the set of given arguments matches this expectation."""
@@ -697,6 +698,7 @@ class Mock(object):
       - Expectation object which can be used to modify the expectations
         on the fake attribute
     """
+    message = _get_message()
     if name in UPDATED_ATTRS:
       raise FlexmockError('unable to replace flexmock methods')
     chained_methods = None
@@ -712,9 +714,11 @@ class Mock(object):
       else:
         return_value = Mock()
       self._create_expectation(obj, name, return_value)
-      return return_value.should_receive(chained_methods)
+      expectation = return_value.should_receive(chained_methods)
     else:
-      return self._create_expectation(obj, name)
+      expectation = self._create_expectation(obj, name)
+    expectation._message = message
+    return expectation
 
   def should_call(self, name):
     """Creates a spy.
@@ -732,6 +736,7 @@ class Mock(object):
       - Expectation object
     """
     expectation = self.should_receive(name)
+    expectation._message = _get_message()
     return expectation.replace_with(expectation.__dict__.get('original'))
 
   def new_instances(self, *kargs):
@@ -871,18 +876,18 @@ class Mock(object):
         expected_message = '%s' % expected_instance
         if _isclass(expected):
           if expected is not raised and expected not in raised.__bases__:
-            raise (ExceptionClassError('expected %s, raised %s' %
-                   (expected, raised)))
+            raise (ExceptionClassError(_add_message(self,
+                   'expected %s, raised %s' % (expected, raised))))
           if args['kargs'] and type(RE_TYPE) is type(args['kargs'][0]):
             if not args['kargs'][0].search(message):
-              raise (ExceptionMessageError('expected /%s/, raised "%s"' %
-                     (args['kargs'][0].pattern, message)))
+              raise (ExceptionMessageError(_add_message(self,
+                     'expected /%s/, raised "%s"' % (args['kargs'][0].pattern, message))))
           elif expected_message and expected_message != message:
-            raise (ExceptionMessageError('expected "%s", raised "%s"' %
-                   (expected_message, message)))
+            raise (ExceptionMessageError(_add_message(self,
+                   'expected "%s", raised "%s"' % (expected_message, message))))
         elif expected is not raised:
-          raise (ExceptionClassError('expected "%s", raised "%s"' %
-                 (expected, raised)))
+          raise (ExceptionClassError(_add_message(self,
+                 'expected "%s", raised "%s"' % (expected, raised))))
       else:
         raise
 
@@ -916,8 +921,8 @@ class Mock(object):
       expected_values = _getattr(expectation, 'return_values')
       if (expected_values and
           not match_return_values(expected_values[0].value, return_values)):
-        raise (MethodSignatureError('expected to return %s, returned %s' %
-               (expected_values[0].value, return_values)))
+        raise (MethodSignatureError(_add_message(self,
+               'expected to return %s, returned %s' % (expected_values[0].value, return_values))))
       return return_values
 
     def mock_method(runtime_self, *kargs, **kwargs):
@@ -926,8 +931,8 @@ class Mock(object):
           self, name, arguments)
       if expectation:
         if not expectation.runnable():
-          raise StateError('%s expected to be called when %s is True' %
-                             (name, expectation._get_runnable()))
+          raise StateError(_add_message(self,
+                           '%s expected to be called when %s is True' % (name, expectation._get_runnable())))
         expectation.times_called += 1
         expectation.verify(final=False)
         _pass_thru = _getattr(expectation, '_pass_thru')
@@ -958,9 +963,10 @@ class Mock(object):
         for _, expectations in FlexmockContainer.flexmock_objects.items():
           for expectation in expectations:
             _getattr(expectation, 'reset')()
-        raise MethodSignatureError(_format_args(name, arguments))
+        raise MethodSignatureError(_add_message(self, _format_args(name, arguments)))
 
     return mock_method
+
 
 
 def _arg_to_str(arg):
@@ -992,6 +998,26 @@ def _format_args(name, arguments):
   else:
     args = '%s%s' % (kargs, kwargs)
   return '%s(%s)' % (name, args)
+
+
+def _get_message():
+  _, filename, linenum, funcname, _, _ = inspect.stack()[2]
+  with open(filename) as _file:
+    source_lines = _file.read().splitlines()
+    lines = [source_lines[linenum - 1]]
+    while lines[-1].endswith('\\'):
+        lines.append(source_lines[linenum + len(lines) - 1])
+    if lines[0].strip().startswith('.'):
+      lines = [source_lines[linenum - 2]] + lines
+    text = '\n'.join(lines)
+  return '{filename}:{linenum}\n{text}'.format(**locals())
+
+
+def _add_message(mock, text):
+    try:
+      return '%s\n\nViolated Expectation: %s' % (text, mock._message)
+    except AttributeError:
+      return text
 
 
 def _create_partial_mock(obj_or_class, **kwargs):
