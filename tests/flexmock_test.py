@@ -151,6 +151,27 @@ class RegularClass(object):
     mock.method_foo()
     expectation.verify()
 
+  def test_flexmock_method_call_error_message(self):
+    obj = flexmock()
+    flexmock(obj).should_receive('method_foo').times(1)
+    try:
+      self._tear_down()
+    except MethodCallError as e:
+      assert "flexmock(obj).should_receive('method_foo').times(1)" in e.message
+
+  def test_flexmock_method_call_error_message_multiline(self):
+    obj = flexmock()
+    flexmock(obj) \
+      .should_receive('method_foo') \
+      .times(1)
+    try:
+      self._tear_down()
+    except MethodCallError as e:
+      assert "flexmock(obj) \\" in e.message
+      assert ".should_receive('method_foo') \\" in e.message
+      assert ".times(1)" in e.message
+
+
   def test_flexmock_should_check_raised_exceptions(self):
     mock = flexmock(name='temp')
     class FakeException(Exception):
@@ -160,6 +181,7 @@ class RegularClass(object):
     assertEqual(1,
                 FlexmockContainer.get_flexmock_expectation(
                     mock, 'method_foo').times_called)
+
 
   def test_flexmock_should_check_raised_exceptions_instance_with_args(self):
     mock = flexmock(name='temp')
@@ -478,6 +500,15 @@ class RegularClass(object):
     flexmock(User).should_call('foo').twice()
     assertEqual('class', user1.foo())
     assertEqual('class', user2.foo())
+
+  def test_should_call_on_class_mock(self):
+    obj = flexmock()
+    flexmock(obj).should_call('foo').once()
+    try:
+      self._tear_down()
+    except MethodCallError as e:
+      assert "flexmock(obj).should_call('foo').once()" in e.message
+
 
   def test_flexmock_should_not_blow_up_on_should_call_for_class_methods(self):
     class User:
