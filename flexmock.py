@@ -635,7 +635,8 @@ class Expectation(object):
     if not isinstance(_mock, Mock):
       original = self.__dict__.get('original')
       if original:
-        name = _getattr(self, 'name')
+        # name may be unicode but pypy demands dict keys to be str
+        name = str(_getattr(self, 'name')) 
         if (hasattr(_mock, '__dict__') and
             name in _mock.__dict__ and
             self._local_override):
@@ -1065,6 +1066,7 @@ def _getattr(obj, name):
 
 def _setattr(obj, name, value):
   """Ensure we use local __dict__ where possible."""
+  name = str(name)  # name may be unicode but pypy demands dict keys to be str
   local_override = False
   if hasattr(obj, '__dict__') and type(obj.__dict__) is dict:
     if name not in obj.__dict__:

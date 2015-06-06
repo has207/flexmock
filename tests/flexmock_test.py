@@ -83,6 +83,15 @@ class RegularClass(object):
     assertEqual('value_bar', mock.method_foo())
     assertEqual('value_baz', mock.method_bar())
 
+  def test_type_flexmock_with_unicode_string_in_should_receive(self):
+    class Foo(object):
+      def bar(self): return 'bar'
+
+    flexmock(Foo).should_receive(u'bar').and_return('mocked_bar')
+
+    foo = Foo()
+    assertEqual('mocked_bar', foo.bar())
+
   def test_flexmock_should_accept_shortcuts_for_creating_mock_object(self):
     mock = flexmock(attr1='value 1', attr2=lambda: 'returning 2')
     assertEqual('value 1', mock.attr1)
