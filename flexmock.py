@@ -300,7 +300,10 @@ class Expectation(object):
     if original:
       try:
         self.argspec = ArgSpec(inspect.getargspec(original))
-      except TypeError:
+      except (TypeError, ValueError): # ValueError is raised by inspect when
+                                      # calling getargspec on functions with
+                                      # keyword-only arguments or annotations
+                                      # in Python 3.4
         # built-in function: fall back to stupid processing and hope the
         # builtins don't change signature
         pass
