@@ -1373,7 +1373,7 @@ class RegularClass(object):
     class String(str): pass
     s = String('abc')
     flexmock(s)
-    s.should_call('startswith').with_args('asdf').ordered()
+    s.should_call('startswith').with_args('asdf', 0, 4).ordered()
     s.should_call('endswith').ordered()
     assertRaises(CallOrderError, s.endswith, 'c')
 
