@@ -1629,6 +1629,28 @@ if sys.version_info >= (2, 6):
     pass
 
 
+if sys.version_info >= (3, 0):
+  import py3_only_features
+
+  class TestPy3Features(unittest.TestCase):
+    def test_mock_kwargs_only_func_mock_all(self):
+      flexmock(py3_only_features).should_receive(
+          'kwargs_only_func').with_args(1, bar=2, baz=3).and_return(123)
+      self.assertEqual(py3_only_features.kwargs_only_func(1, bar=2, baz=3),
+                       123)
+
+    def test_mock_kwargs_only_func_mock_required(self):
+      flexmock(py3_only_features).should_receive(
+          'kwargs_only_func').with_args(1, bar=2).and_return(123)
+      self.assertEqual(py3_only_features.kwargs_only_func(1, bar=2), 123)
+
+    def test_mock_kwargs_only_func_fails_if_required_not_provided(self):
+      self.assertRaises(
+          MethodSignatureError,
+          flexmock(py3_only_features).should_receive(
+              'kwargs_only_func').with_args,
+          1)
+
 
 if __name__ == '__main__':
   unittest.main()

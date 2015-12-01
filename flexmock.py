@@ -102,11 +102,13 @@ class ReturnValue(object):
         return '(%s)' % ', '.join([_arg_to_str(x) for x in self.value])
 
 
-class ArgSpec(object):
+class FullArgSpec(object):
   """Silly hack for inpsect.getargspec return a tuple on python <2.6"""
   def __init__(self, spec):
-    self.args, self.varargs, self.keywords, self.defaults = spec
-
+    if len(spec) == 4:  # python2 => getargspec was used
+      spec += ([], None, {})
+    (self.args, self.varargs, self.keywords, self.defaults, self.kwonlyargs,
+     self.kwonlydefaults, self.annotations) = spec
 
 class FlexmockContainer(object):
   """Holds global hash of object/expectation mappings."""
@@ -283,10 +285,21 @@ class Expectation(object):
       raise MethodSignatureError(
           '%s already given as positional arguments to %s' %
           ([a for a in kwargs if a in allowed.args], self.name))
-    if not allowed.keywords and any(a for a in kwargs if a not in allowed.args):
+    if (not allowed.keywords and
+        any(a for a in kwargs if a not in allowed.args + allowed.kwonlyargs)):
       raise MethodSignatureError(
           '%s is not a valid keyword argument to %s' %
-          ([a for a in kwargs if a not in allowed.args][0], self.name))
+          ([a for a in kwargs
+            if a not in (allowed.args + allowed.kwonlyargs)][0], self.name))
+    # check that kwonlyargs that don't have default value specified are provided
+    required_kwonlyargs = [a for a in allowed.kwonlyargs
+                           if a not in (allowed.kwonlydefaults or {})]
+    missing_kwonlyargs = [a for a in required_kwonlyargs if a not in kwargs]
+    if missing_kwonlyargs:
+      raise MethodSignatureError(
+          '%s requires keyword-only argument(s) "%s"' %
+          (self.name, '", "'.join(missing_kwonlyargs)))
+
 
   def _update_original(self, name, obj):
     if hasattr(obj, '__dict__') and name in obj.__dict__:
@@ -299,7 +312,10 @@ class Expectation(object):
     original = self.__dict__.get('original')
     if original:
       try:
-        self.argspec = ArgSpec(inspect.getargspec(original))
+        if sys.version_info < (3, 0):
+          self.argspec = FullArgSpec(inspect.getargspec(original))
+        else:
+          self.argspec = FullArgSpec(inspect.getfullargspec(original))
       except TypeError:
         # built-in function: fall back to stupid processing and hope the
         # builtins don't change signature
@@ -636,7 +652,7 @@ class Expectation(object):
       original = self.__dict__.get('original')
       if original:
         # name may be unicode but pypy demands dict keys to be str
-        name = str(_getattr(self, 'name')) 
+        name = str(_getattr(self, 'name'))
         if (hasattr(_mock, '__dict__') and
             name in _mock.__dict__ and
             self._local_override):

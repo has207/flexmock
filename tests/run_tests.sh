@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYTHON_VERSIONS=${PYTHON_VERSIONS:-"2.4 2.5 2.6 2.7 3.1 3.2 3.3"}
+PYTHON_VERSIONS=${PYTHON_VERSIONS:-"2.4 2.5 2.6 2.7 3.1 3.2 3.3 3.4 3.5"}
 PYTHON_IMPLEMENTATIONS=${PYTHON_IMPLEMENTATIONS:-"cpython pypy jython"}
 RUNNERS=${RUNNERS:-"unittest nose pytest twisted"}
 SCRIPT=$(cd ${0%/*} && echo $PWD/${0##*/})
