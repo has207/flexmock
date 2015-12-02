@@ -1,4 +1,5 @@
 .gitignore
+docs/_build
 build/
 dist/
 *.pyc
