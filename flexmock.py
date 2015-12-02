@@ -327,7 +327,7 @@ class Expectation(object):
     if not argspec:
       return default
     ret = {'kargs': (), 'kwargs': kwargs}
-    if inspect.ismethod(getattr(self._mock, self.name)):
+    if inspect.ismethod(self.original):
       args = argspec.args[1:]
     else:
       args = argspec.args

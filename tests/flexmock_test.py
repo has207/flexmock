@@ -899,6 +899,15 @@ class RegularClass(object):
     self._tear_down()
     assertEqual('1, 2', module_level_function(1, 2))
 
+  def test_module_level_function_with_kwargs(self):
+    if 'flexmock_test' in sys.modules:
+      mod = sys.modules['flexmock_test']
+    else:
+      mod = sys.modules['__main__']
+    flexmock(mod).should_receive('module_level_function').with_args(
+        1, args="expected")
+    assertRaises(FlexmockError, module_level_function, 1, args="not expected")
+
   def test_flexmock_should_support_mocking_old_style_classes_as_functions(self):
     if 'flexmock_test' in sys.modules:
       mod = sys.modules['flexmock_test']
