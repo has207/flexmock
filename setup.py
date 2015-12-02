@@ -5,6 +5,6 @@ setup(name='flexmock',
       py_modules=['flexmock'],
       author='Slavek Kabrda, Herman Sheremetyev',
       author_email='slavek@redhat.com',
-      url='http://has207.github.com/flexmock/',
+      url='http://flexmock.readthedocs.org',
       license='FreeBSD style license',
 )

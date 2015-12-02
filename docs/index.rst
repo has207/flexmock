@@ -12,7 +12,7 @@
  :Twitter: `Follow pyflexmock <http://twitter.com/#!/pyflexmock>`_
 
  .. _flexmock on Github: http://github.com/has207/flexmock
- .. _flexmock Homepage: http://has207.github.com/flexmock
+ .. _flexmock Homepage: http://flexmock.readthedocs.org
  .. _FreeBSD-style License: http://github.com/has207/flexmock/blob/master/LICENSE
 
 flexmock is a testing library for Python.

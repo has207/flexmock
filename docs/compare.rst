@@ -254,8 +254,8 @@ Mocking the builtin open used as a context manager
 
 The following examples work in an interactive Python session but may not work
 quite the same way in a script, or with Python 3.0+. See examples in the
-`User Guide <http://has207.github.com/flexmock/user-guide.html#mocking-builtin-functions>`_
-for more specific flexmock instructions on mocking builtins.
+:ref:`builtin_functions` section for more specific flexmock instructions
+on mocking builtins.
 
 ::
 

@@ -607,6 +607,8 @@ There is also shorthand for this, similar to the shorthand for should_receive/an
 
 :NOTE: Whenever the return value provided to the key=value shorthand is a callable (such as lambda), flexmock expands it to should_receive().replace_with() rather than should_receive().and_return().
 
+.. _builtin_functions:
+
 Builtin functions
 -----------------
 

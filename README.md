@@ -14,7 +14,7 @@ In addition, flexmock integrates seamlessly with all major test runners to reduc
 
 More details, including full API and user documentation, available here:
 
-http://has207.github.com/flexmock
+http://flexmock.readthedocs.org
 
 To report bugs or file feature requests:
 
