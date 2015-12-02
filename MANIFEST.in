@@ -2,5 +2,7 @@ include *.py
 include CHANGELOG
 include LICENSE
 include README.md
-include Makefile
 recursive-include tests *py *sh
+include docs/conf.py
+include docs/Makefile
+recursive-include docs *.rst
