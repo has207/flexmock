@@ -22,6 +22,8 @@ import re
 import sys
 import unittest
 
+import flexmock_testable_functions
+
 
 def module_level_function(some, args):
   return "%s, %s" % (some, args)
@@ -1612,6 +1614,14 @@ class RegularClass(object):
                 'Property bar not cleaned up')
     assertEqual('bar', foo.bar)
     assertEqual('bar', foo2.bar)
+
+  def test_mock_module_method(self):
+    mock = flexmock(flexmock_testable_functions)
+    mock.should_receive('module_func_with_named_args').with_args(
+        1, b=10)
+    assertRaises(MethodSignatureError,
+                 flexmock_testable_functions.module_func_with_named_args,
+                 1, b='fail')
 
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
