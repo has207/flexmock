@@ -56,6 +56,16 @@ def assertEqual(expected, received, msg=''):
     raise AssertionError('%s != %s : %s' % (expected, received, msg))
 
 
+def assertIn(member, container):
+    if member not in container:
+        raise AssertionError('%s not found in %s' % (member, container))
+
+
+def assertNotIn(member, container):
+    if member in container:
+        raise AssertionError('%s found in %s' % (member, container))
+
+
 class RegularClass(object):
 
   def _tear_down(self):
@@ -1622,6 +1632,27 @@ class RegularClass(object):
     assertEqual('bar', foo.bar)
     assertEqual('bar', foo2.bar)
 
+  def test_can_assign_name_to_mock(self):
+    assertIn('name=foo', repr(flexmock('foo')))
+
+  def test_does_not_show_name_when_not_set(self):
+    assertNotIn('name=', repr(flexmock()))
+    assertNotIn('name=', repr(flexmock(NewStyleClass)))
+    assertNotIn('name=', repr(flexmock(OldStyleClass)))
+
+  def test_repr_includes_type_when_mocking_new_style_class(self):
+    assertIn('spec=NewStyleClass', repr(flexmock(NewStyleClass)))
+
+  def test_repr_includes_type_when_mocking_old_style_class(self):
+    assertIn('spec=OldStyleClass', repr(flexmock(OldStyleClass)))
+
+  def test_repr_includes_name_and_type(self):
+    class Foo(object): pass
+    assertIn('spec=Foo', repr(flexmock(Foo, 'bar')))
+    assertIn('name=bar', repr(flexmock(Foo, 'bar')))
+    class Bar: pass
+    assertIn('spec=Bar', repr(flexmock(Bar, 'bar')))
+    assertIn('name=bar', repr(flexmock(Bar, 'bar')))
 
 class TestFlexmockUnittest(RegularClass, unittest.TestCase):
   def tearDown(self):
