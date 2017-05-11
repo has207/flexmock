@@ -5,6 +5,7 @@ from flexmock import AT_MOST
 from flexmock import UPDATED_ATTRS
 from flexmock import Mock
 from flexmock import MockBuiltinError
+from flexmock import MockSlotsError
 from flexmock import FlexmockContainer
 from flexmock import FlexmockError
 from flexmock import MethodSignatureError
@@ -1040,6 +1041,16 @@ class RegularClass(object):
     flexmock(foo).should_call('method').with_args('bar').once()
     foo.method('foo')
     assertRaises(MethodCallError, self._tear_down)
+
+  def test_should_give_reasonable_error_for_classes_with_slots(self):
+    class SlottedClass(object):
+      __slots__ = ['only_this_attr_allowed']
+    assertRaises(MockSlotsError, flexmock, SlottedClass)
+
+  def test_should_give_reasonable_error_for_instances_of_classes_with_slots(self):
+    class SlottedClass(object):
+      __slots__ = ['only_this_attr_allowed']
+    assertRaises(MockSlotsError, flexmock, SlottedClass())
 
   def test_should_give_reasonable_error_for_builtins(self):
     assertRaises(MockBuiltinError, flexmock, object)
